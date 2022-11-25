@@ -1,0 +1,22 @@
+From 3c503535ad1ff153b4ab48f578b55ef57596cb6e Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Fri, 25 Nov 2022 19:48:49 +0100
+Subject: [PATCH] Make NUMPY INCLUDES a cached variable
+
+So it is settable from EXTRA_OECMAKE
+---
+ CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b123be2..fe34334 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -79,6 +79,7 @@ INCLUDE(${CMAKE_SOURCE_DIR}/cmake/set_default_flags.cmake)
+ # numpy v1.7's documentation.
+ add_definitions(-DNPY_NO_DEPRECATED_API=NPY_1_7_API_VERSION)
+ 
++set(NUMPY_INCLUDE_DIRS "" CACHE PATH "Additional NUMPY include path")
+ #
+ # Set header file locations
+ include_directories(SYSTEM ${Boost_INCLUDE_DIR}
