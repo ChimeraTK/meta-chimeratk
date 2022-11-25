@@ -6,8 +6,15 @@ Dependencies
 ============
 
   URI: git://github.com/openembedded/oe-core.git
-  branch: master
+  branch: zeus
   revision: HEAD
+
+  URI: git://github.com/openembedded/meta-openembedded.git
+  branch: zeus
+  revision: HEAD
+
+  More specifially, it just needs meta-oe for libxml++
+
 
 Patches
 =======
