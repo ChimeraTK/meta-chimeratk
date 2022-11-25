@@ -1,0 +1,63 @@
+From 79993dfd3d13cc2e20067a24783ecb7b48be21ee Mon Sep 17 00:00:00 2001
+From: OpenEmbedded <oe.patch@oe>
+Date: Fri, 25 Nov 2022 16:27:30 +0000
+Subject: [PATCH] %% original patch: include-directory.patch
+
+---
+ CMakeLists.txt                          | 2 +-
+ cmake/add_dependency.cmake              | 1 -
+ cmake/enable_code_coverage_report.cmake | 2 +-
+ cmake/set_default_flags.cmake           | 2 +-
+ 4 files changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2d6a1ebd..2d7de57b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -34,7 +34,7 @@ FIND_PACKAGE(PkgConfig REQUIRED)
+ set(LIBXML++_VERSION "libxml++-2.6")
+ PKG_CHECK_MODULES(LibXML++ REQUIRED ${LIBXML++_VERSION})
+ PKG_CHECK_MODULES(glib REQUIRED glib-2.0)
+-include_directories(SYSTEM ${glib_INCLUDE_DIRS} ${LibXML++_INCLUDE_DIRS})
++include_directories(${glib_INCLUDE_DIRS} ${LibXML++_INCLUDE_DIRS})
+ 
+ # The PCIe backend can only be built on Linux, so we define a variable here that
+ # we can then use in other places.
+diff --git a/cmake/add_dependency.cmake b/cmake/add_dependency.cmake
+index 539efe02..5b9f6c9a 100644
+--- a/cmake/add_dependency.cmake
++++ b/cmake/add_dependency.cmake
+@@ -33,7 +33,6 @@ FUNCTION(add_dependency dependency_project_name required_version)
+     SET(components ${components} ${arg})
+   endforeach()
+   FIND_PACKAGE(${dependency_project_name} ${required_version} COMPONENTS ${components})
+-  include_directories(SYSTEM ${${dependency_project_name}_INCLUDE_DIRS} ${${dependency_project_name}_INCLUDE_DIR})
+   link_directories(${${dependency_project_name}_LIBRARY_DIRS})
+   link_directories(${${dependency_project_name}_LIBRARY_DIR})
+   #set the cxx flags used in the child project
+diff --git a/cmake/enable_code_coverage_report.cmake b/cmake/enable_code_coverage_report.cmake
+index c64bf846..6072cd2f 100644
+--- a/cmake/enable_code_coverage_report.cmake
++++ b/cmake/enable_code_coverage_report.cmake
+@@ -33,7 +33,7 @@ option(ENABLE_COVERAGE_REPORT "Create coverage target to generate code coverage
+ 
+ string(TOUPPER "${CMAKE_BUILD_TYPE}" build_type_uppercase)
+ IF(build_type_uppercase STREQUAL "DEBUG" AND ENABLE_COVERAGE_REPORT)
+-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} --coverage")
++    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG} --coverage")
+     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} --coverage")
+     configure_file(cmake/make_coverage.sh.in
+         ${PROJECT_BINARY_DIR}/make_coverage.sh @ONLY)
+diff --git a/cmake/set_default_flags.cmake b/cmake/set_default_flags.cmake
+index 068cafa8..2cdb49c4 100644
+--- a/cmake/set_default_flags.cmake
++++ b/cmake/set_default_flags.cmake
+@@ -27,7 +27,7 @@ set(CMAKE_CONFIGURATION_TYPES "Debug;Release;RelWithDebInfo;asan;tsan")
+ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${${PROJECT_NAME}_CXX_FLAGS} -Wall -Wextra -Wshadow -pedantic -Wuninitialized")
+ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+ set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -O3 -g")
+-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
++set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
+ set(CMAKE_CXX_FLAGS_TSAN "${CMAKE_CXX_FLAGS} -g -O1 -fsanitize=thread")
+ set(CMAKE_CXX_FLAGS_ASAN "${CMAKE_CXX_FLAGS} -g -O0 -fsanitize=address -fsanitize=undefined -fsanitize=leak")
+ 
