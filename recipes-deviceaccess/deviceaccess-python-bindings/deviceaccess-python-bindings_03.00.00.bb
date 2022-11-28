@@ -3,7 +3,6 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=e6a600fd5e1d9cbde2d983680233ad02"
 
 SRC_URI = "git://github.com/ChimeraTK/DeviceAccess-PythonBindings.git;protocol=https;branch=master \
            file://0002-original-patch-drop-cmake-version.patch.patch \
-           file://0001-Make-NUMPY-INCLUDES-a-cached-variable.patch \
            "
 
 PV = "1.0+git${SRCPV}"
