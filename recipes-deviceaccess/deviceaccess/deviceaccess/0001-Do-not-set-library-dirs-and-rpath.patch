@@ -1,0 +1,36 @@
+From 9d73d7e0c45a5b5a7c2b16640a938eea851e6576 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Wed, 30 Nov 2022 20:41:47 +0100
+Subject: [PATCH] Do not set library dirs and rpath
+
+This confuses downstream projects massively. There needs to be a fix
+upstream but this might need to be part of a larger rewrite of our CMake
+files
+---
+ CMakeLists.txt | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 152dc8ec..e931e3f0 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -97,13 +97,13 @@ install( TARGETS ${PROJECT_NAME}
+ # Generate configuration files for dependencies
+ set(${PROJECT_NAME}_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include ${Boost_INCLUDE_DIRS} ${ChimeraTK-cppext_INCLUDE_DIRS}")
+ set(${PROJECT_NAME}_LIBRARIES "${Boost_LIBRARIES} ${ChimeraTK-cppext_LIBRARIES} ${RT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT}")
+-set(${PROJECT_NAME}_LIBRARY_DIRS "${CMAKE_INSTALL_PREFIX}/lib ${Boost_LIBRARY_DIRS} ${ChimeraTK-cppext_LIBRARY_DIRS}")
++#set(${PROJECT_NAME}_LIBRARY_DIRS "${CMAKE_INSTALL_PREFIX}/lib ${Boost_LIBRARY_DIRS} ${ChimeraTK-cppext_LIBRARY_DIRS}")
+ # already set: ${PROJECT_NAME}_CXX_FLAGS
+-if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+-  set(${PROJECT_NAME}_LINKER_FLAGS "-Wl,-rpath,${CMAKE_INSTALL_PREFIX}/lib")
+-else()
+-  set(${PROJECT_NAME}_LINKER_FLAGS "-Wl,-rpath=${CMAKE_INSTALL_PREFIX}/lib,--enable-new-dtags")
+-endif()
++#if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
++#  set(${PROJECT_NAME}_LINKER_FLAGS "-Wl,-rpath,${CMAKE_INSTALL_PREFIX}/lib")
++#else()
++#  set(${PROJECT_NAME}_LINKER_FLAGS "-Wl,-rpath=${CMAKE_INSTALL_PREFIX}/lib,--enable-new-dtags")
++#endif()
+ set(${PROJECT_NAME}_MEXFLAGS "-I${CMAKE_INSTALL_PREFIX}/include -L${CMAKE_INSTALL_PREFIX}/lib -l${PROJECT_NAME}")
+ 
+ list(APPEND ${PROJECT_NAME}_PUBLIC_DEPENDENCIES "Boost COMPONENTS system thread chrono filesystem")
