@@ -1,0 +1,22 @@
+From 9ac4eb4922d117ff6aed61ef26bbb8fa35574487 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Wed, 30 Nov 2022 19:27:15 +0100
+Subject: [PATCH] Do not hard-core libatomic paths into cmake config
+
+---
+ CMakeLists.txt | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c01dcc4..c30dd31 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -17,6 +17,8 @@ find_package(GccAtomic REQUIRED)
+ # we ignore if it is missing.
+ IF(NOT GCCLIBATOMIC_FOUND)
+   set(GCCLIBATOMIC_LIBRARY "")
++ELSE()
++  set(GCCLIBATOMIC_LIBRARY "atomic")
+ ENDIF()
+ 
+ # Moderate version of the compiler flags
