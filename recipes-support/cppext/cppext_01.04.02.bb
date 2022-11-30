@@ -3,7 +3,9 @@ LIC_FILES_CHKSUM = "file://COPYING.LESSER;md5=3000208d539ec061b899bce1d9ce9404 \
                     file://COPYING;md5=1ebbd3e34237af26da5dc08a4e440464"
 
 SRC_URI = "git://github.com/ChimeraTK/cppext.git;branch=master;protocol=https \
-           file://drop-cmake-version.patch"
+           file://drop-cmake-version.patch \
+           file://0001-Do-not-hard-core-libatomic-paths-into-cmake-config.patch \
+           "
 
 # Modify these as desired
 PV = "1.0+git${SRCPV}"
