@@ -8,6 +8,7 @@ SRC_URI = "git://github.com/ChimeraTK/DeviceAccess.git;protocol=https;branch=mas
            file://0003-original-patch-bump-xmlpp-requirement.patch.patch \
            file://drop-glib-2.0.patch \
            file://0001-Do-not-set-library-dirs-and-rpath.patch \
+           file://0001-Fix-ambiguity-for-read-write-on-32bit-platforms.patch \
            "
 
 # Modify these as desired

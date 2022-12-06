@@ -1,0 +1,41 @@
+From 2e016b0a9fb786125a9f8a617c1950cbec7abfd2 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Tue, 6 Dec 2022 10:10:04 +0100
+Subject: [PATCH] Fix ambiguity for read/write on 32bit platforms
+
+size_t might be 32bit there, we can fall back to the old deprecated
+functions as well as the new uint64_t ones. Make clear we use the new
+ones by explicitly casting the size_t variables to uint64_t
+---
+ tests/executables_src/testDummyBackend.cpp | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/tests/executables_src/testDummyBackend.cpp b/tests/executables_src/testDummyBackend.cpp
+index 581d4ca0..ec5171c2 100644
+--- a/tests/executables_src/testDummyBackend.cpp
++++ b/tests/executables_src/testDummyBackend.cpp
+@@ -139,9 +139,9 @@ BOOST_AUTO_TEST_CASE(testReadWriteSingleWordRegister) {
+   BOOST_CHECK(dataContent == 47);
+ 
+   // the size as index is invalid, allowed range is 0..size-1 included.
+-  BOOST_CHECK_THROW(dummyBackend->read(bar, dummyBackend->_barContents[bar].size() * sizeof(int32_t), &dataContent, 4),
++  BOOST_CHECK_THROW(dummyBackend->read(bar, static_cast<uint64_t>(dummyBackend->_barContents[bar].size() * sizeof(int32_t)), &dataContent, 4),
+       ChimeraTK::logic_error);
+-  BOOST_CHECK_THROW(dummyBackend->write(bar, dummyBackend->_barContents[bar].size() * sizeof(int32_t), &dataContent, 4),
++  BOOST_CHECK_THROW(dummyBackend->write(bar, static_cast<uint64_t>(dummyBackend->_barContents[bar].size() * sizeof(int32_t)), &dataContent, 4),
+       ChimeraTK::logic_error);
+ }
+ 
+@@ -182,10 +182,10 @@ BOOST_AUTO_TEST_CASE(testReadWriteMultiWordRegister) {
+   // tests for exceptions
+   // 1. base address too large
+   BOOST_CHECK_THROW(
+-      dummyBackend->read(bar, dummyBackend->_barContents[bar].size() * sizeof(int32_t), &(dataContent[0]), sizeInBytes),
++      dummyBackend->read(bar, static_cast<uint64_t>(dummyBackend->_barContents[bar].size() * sizeof(int32_t)), &(dataContent[0]), sizeInBytes),
+       ChimeraTK::logic_error);
+   BOOST_CHECK_THROW(dummyBackend->write(
+-                        bar, dummyBackend->_barContents[bar].size() * sizeof(int32_t), &(dataContent[0]), sizeInBytes),
++                        bar, static_cast<uint64_t>(dummyBackend->_barContents[bar].size() * sizeof(int32_t)), &(dataContent[0]), sizeInBytes),
+       ChimeraTK::logic_error);
+   // 2. size too large (works because the target register is not at offfset 0)
+   // resize the data vector for this test
