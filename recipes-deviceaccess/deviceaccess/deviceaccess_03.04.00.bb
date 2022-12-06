@@ -6,6 +6,7 @@ SRC_URI = "git://github.com/ChimeraTK/DeviceAccess.git;protocol=https;branch=mas
            file://0001-original-patch-include-directory.patch.patch \
           file://0002-original-patch-drop-cmake-version.patch.patch \
            file://0001-Do-not-set-library-dirs-and-rpath.patch \
+           file://0001-Fix-ambiguity-for-read-write-on-32bit-platforms.patch \
            "
 
 # Modify these as desired
