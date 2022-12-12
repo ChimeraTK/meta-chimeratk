@@ -8,12 +8,11 @@ SRC_URI = "git://github.com/ChimeraTK/DeviceAccess.git;protocol=https;branch=mas
            file://0003-original-patch-bump-xmlpp-requirement.patch.patch \
            file://drop-glib-2.0.patch \
            file://0001-Do-not-set-library-dirs-and-rpath.patch \
-           file://0001-Fix-ambiguity-for-read-write-on-32bit-platforms.patch \
            "
 
 # Modify these as desired
 PV = "1.0+git${SRCPV}"
-SRCREV = "64b0c75502fdd51c642f089aef7919d3b1561c5a"
+SRCREV = "27bbd3f235cb230612ecb67436577192240ccfea"
 
 S = "${WORKDIR}/git"
 
