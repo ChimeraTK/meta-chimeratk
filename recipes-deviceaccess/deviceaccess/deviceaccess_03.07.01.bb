@@ -12,7 +12,7 @@ SRC_URI = "git://github.com/ChimeraTK/DeviceAccess.git;protocol=https;branch=mas
 
 # Modify these as desired
 PV = "1.0+git${SRCPV}"
-SRCREV = "27bbd3f235cb230612ecb67436577192240ccfea"
+SRCREV = "c07b7af0a77f867a13633db0fbc1a7c4df100ae6"
 
 S = "${WORKDIR}/git"
 
