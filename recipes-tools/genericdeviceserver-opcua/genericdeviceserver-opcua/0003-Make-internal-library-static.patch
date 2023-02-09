@@ -1,0 +1,22 @@
+From 6ea0f82d2a63ef0542ad1c28737704a21d6be0ae Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Thu, 9 Feb 2023 12:55:39 +0100
+Subject: [PATCH] Make internal library static
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f2f374e..22e37aa 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -51,7 +51,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
+ # library for code shared between server executable and tests
+ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+ 
+-add_library(${PROJECT_BASE_NAME} SHARED ${library_sources} )
++add_library(${PROJECT_BASE_NAME} STATIC ${library_sources} )
+ 
+ # main server executable
+ add_executable(${PROJECT_NAME} ${server_sources})
