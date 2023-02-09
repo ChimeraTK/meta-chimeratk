@@ -1,0 +1,49 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9184b943..106ed274 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1289,7 +1289,7 @@ if(UA_ENABLE_DISCOVERY_MULTICAST)
+     target_compile_definitions(open62541 PRIVATE -DMDNSD_DYNAMIC_LINKING_EXPORT)
+ endif()
+ # Generate properly versioned shared library links on Linux
+-SET_TARGET_PROPERTIES(open62541 PROPERTIES SOVERSION "${OPEN62541_VER_MAJOR}" VERSION "${OPEN62541_VER_MAJOR}.${OPEN62541_VER_MINOR}.${OPEN62541_VER_PATCH}")
++SET_TARGET_PROPERTIES(open62541 PROPERTIES SOVERSION "${OPEN62541_VER_MAJOR}.${OPEN62541_VER_MINOR}${PROJECT_BUILD_VERSION}" VERSION "${OPEN62541_VER_MAJOR}.${OPEN62541_VER_MINOR}${PROJECT_BUILD_VERSION}.${OPEN62541_VER_PATCH}-${PROJECT_REVISION}")
+ 
+ ##################################
+ #     Architectures changes      #
+@@ -1361,7 +1361,7 @@ include(linting_target)
+ # specify install location with `-DCMAKE_INSTALL_PREFIX=xyz`
+ # Enable shared library with `-DBUILD_SHARED_LIBS=ON`
+ 
+-set(cmake_configfile_install ${CMAKE_INSTALL_LIBDIR}/cmake/open62541)
++set(cmake_configfile_install share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules)
+ set(open62541_install_tools_dir share/open62541/tools)
+ set(open62541_install_nodeset_dir share/open62541/tools/ua-nodeset)
+ 
+@@ -1433,7 +1433,7 @@ endif()
+ 
+ include(CMakePackageConfigHelpers)
+ configure_package_config_file("${CMAKE_CURRENT_SOURCE_DIR}/tools/cmake/open62541Config.cmake.in"
+-                              "${CMAKE_CURRENT_BINARY_DIR}/open62541Config.cmake"
++                              "${CMAKE_CURRENT_BINARY_DIR}/Findopen62541.cmake"
+                               INSTALL_DESTINATION "${cmake_configfile_install}"
+                               PATH_VARS open62541_install_tools_dir
+                                         open62541_install_nodeset_dir
+@@ -1460,7 +1460,7 @@ export(
+ 
+ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/tools/cmake/macros_public.cmake" "${CMAKE_CURRENT_BINARY_DIR}/open62541Macros.cmake" COPYONLY)
+ 
+-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/open62541Config.cmake"
++install(FILES "${CMAKE_CURRENT_BINARY_DIR}/Findopen62541.cmake"
+               "${CMAKE_CURRENT_BINARY_DIR}/open62541ConfigVersion.cmake"
+               "${CMAKE_CURRENT_BINARY_DIR}/open62541Macros.cmake"
+         DESTINATION "${cmake_configfile_install}")
+@@ -1472,7 +1472,7 @@ endif()
+ 
+ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+     install(FILES "${PROJECT_BINARY_DIR}/src_generated/open62541.pc"
+-            DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
++            DESTINATION share/pkgconfig)
+ endif()
+ 
+ set(UA_install_tools_dirs "tools/certs"
