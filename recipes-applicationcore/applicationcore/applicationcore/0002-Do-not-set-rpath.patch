@@ -1,0 +1,22 @@
+From f0c8ace54b8e1096214d3bc23bf9deade854caaa Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Thu, 9 Feb 2023 11:47:14 +0100
+Subject: [PATCH] Do not set rpath
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6d3ced1..4b0ca4e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -78,7 +78,7 @@ target_link_libraries(${PROJECT_NAME} ${ChimeraTK-ControlSystemAdapter_LIBRARIES
+                                       ${HDF5_LIBRARIES})
+ 
+ # do not remove runtime path of the library when installing
+-set_property(TARGET ${PROJECT_NAME} PROPERTY INSTALL_RPATH_USE_LINK_PATH TRUE)
++#set_property(TARGET ${PROJECT_NAME} PROPERTY INSTALL_RPATH_USE_LINK_PATH TRUE)
+ 
+ # add a target to generate API documentation with Doxygen
+ include(cmake/enable_doxygen_documentation.cmake)
