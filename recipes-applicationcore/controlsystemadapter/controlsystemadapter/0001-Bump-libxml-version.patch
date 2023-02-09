@@ -1,0 +1,45 @@
+From 2c09688a0c20d384eb9a1c3d97503c97fea1ff88 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Thu, 9 Feb 2023 09:18:09 +0100
+Subject: [PATCH] Bump libxml++ version
+
+---
+ CMakeLists.txt               | 2 +-
+ src/PersistentDataStorage.cc | 4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 769c3c5..1f8dd80 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -44,7 +44,7 @@ add_dependency(ChimeraTK-DeviceAccess 03.02 REQUIRED)
+ 
+ # libXML++ is used for parsing/writing XML files
+ FIND_PACKAGE(PkgConfig REQUIRED)
+-set(LIBXML++_VERSION "libxml++-2.6")
++set(LIBXML++_VERSION "libxml++-5.0")
+ PKG_CHECK_MODULES(LibXML++ REQUIRED ${LIBXML++_VERSION})
+ PKG_CHECK_MODULES(glib REQUIRED glib-2.0)
+ include_directories(SYSTEM ${glib_INCLUDE_DIRS} ${LibXML++_INCLUDE_DIRS})
+diff --git a/src/PersistentDataStorage.cc b/src/PersistentDataStorage.cc
+index 4c05e29..cb28ccf 100644
+--- a/src/PersistentDataStorage.cc
++++ b/src/PersistentDataStorage.cc
+@@ -64,7 +64,7 @@ namespace ChimeraTK {
+         if(!_variableRegisteredFromApp[i]) continue; // exclude variables no longer present in the application
+ 
+         // create XML element for the variable and set name attribute
+-        xmlpp::Element* variable = rootElement->add_child("variable");
++        xmlpp::Element* variable = rootElement->add_child_element("variable");
+         variable->set_attribute("name", static_cast<std::string>(_variableNames[i]));
+ 
+         // generate value XML tags and set type name as a string
+@@ -104,7 +104,7 @@ namespace ChimeraTK {
+     }
+     // add one child element per element of the value
+     for(size_t idx = 0; idx < pValue->size(); ++idx) {
+-      xmlpp::Element* valueElement = parent->add_child("val");
++      xmlpp::Element* valueElement = parent->add_child_element("val");
+       valueElement->set_attribute("i", userTypeToUserType<std::string>(idx));
+       valueElement->set_attribute("v", userTypeToUserType<std::string>((*pValue)[idx]));
+     }
