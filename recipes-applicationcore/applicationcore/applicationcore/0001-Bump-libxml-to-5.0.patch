@@ -1,0 +1,125 @@
+From e9a737a9a4129f1b6c0355897bb05b58c4d59388 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Thu, 9 Feb 2023 11:47:01 +0100
+Subject: [PATCH] Bump libxml++ to 5.0
+
+---
+ CMakeLists.txt                           |  4 ++--
+ src/XMLGeneratorVisitor.cc               | 28 ++++++++++++------------
+ tests/executables_src/testApplication.cc |  4 ++--
+ 3 files changed, 18 insertions(+), 18 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4ac027b..6d3ced1 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -22,10 +22,10 @@ add_dependency(ChimeraTK-DeviceAccess 03.03 REQUIRED)
+ 
+ # Find the XML parser library libxml++
+ FIND_PACKAGE(PkgConfig REQUIRED)
+-set(LIBXML++_VERSION "libxml++-2.6")
++set(LIBXML++_VERSION "libxml++-5.0")
+ PKG_CHECK_MODULES(LibXML++ REQUIRED ${LIBXML++_VERSION})
+ PKG_CHECK_MODULES(glib REQUIRED glib-2.0)
+-include_directories(SYSTEM ${glib_INCLUDE_DIRS} ${LibXML++_INCLUDE_DIRS})
++include_directories(${glib_INCLUDE_DIRS} ${LibXML++_INCLUDE_DIRS})
+ 
+ # Find BOOST filesystem
+ # Note: we need to search this after looking for the unit_test_framework, since we must not link against the
+diff --git a/src/XMLGeneratorVisitor.cc b/src/XMLGeneratorVisitor.cc
+index 23c49be..ea9b777 100644
+--- a/src/XMLGeneratorVisitor.cc
++++ b/src/XMLGeneratorVisitor.cc
+@@ -147,7 +147,7 @@ namespace ChimeraTK {
+       std::string xpath = std::string("ac:directory[@name='") + pathComponent + std::string("']");
+       auto list = current->find(xpath, nsMap);
+       if(list.empty()) { // not found: create it
+-        xmlpp::Element* newChild = current->add_child("directory");
++        xmlpp::Element* newChild = current->add_child_element("directory");
+         newChild->set_attribute("name", pathComponent);
+         current = newChild;
+       }
+@@ -159,7 +159,7 @@ namespace ChimeraTK {
+     }
+ 
+     // now add the variable to the directory
+-    xmlpp::Element* variable = current->add_child("variable");
++    xmlpp::Element* variable = current->add_child_element("variable");
+     ChimeraTK::RegisterPath pathName(node.getPublicName());
+     auto pathComponents = pathName.getComponents();
+ 
+@@ -168,8 +168,8 @@ namespace ChimeraTK {
+ 
+     auto dataTypeName = mapTypeToName(net.valueType);
+ 
+-    xmlpp::Element* valueTypeElement = variable->add_child("value_type");
+-    valueTypeElement->set_child_text(dataTypeName);
++    xmlpp::Element* valueTypeElement = variable->add_child_element("value_type");
++    valueTypeElement->add_child_text(dataTypeName);
+ 
+     // add sub-element containing the data flow direction
+     std::string dataFlowName{"application_to_control_system"};
+@@ -182,23 +182,23 @@ namespace ChimeraTK {
+         dataFlowName = "control_system_to_application_with_return";
+       }
+     }
+-    xmlpp::Element* directionElement = variable->add_child("direction");
+-    directionElement->set_child_text(dataFlowName);
++    xmlpp::Element* directionElement = variable->add_child_element("direction");
++    directionElement->add_child_text(dataFlowName);
+ 
+     // add sub-element containing the engineering unit
+-    xmlpp::Element* unitElement = variable->add_child("unit");
+-    unitElement->set_child_text(net.unit);
++    xmlpp::Element* unitElement = variable->add_child_element("unit");
++    unitElement->add_child_text(net.unit);
+ 
+     // add sub-element containing the description
+-    xmlpp::Element* descriptionElement = variable->add_child("description");
+-    descriptionElement->set_child_text(net.description);
++    xmlpp::Element* descriptionElement = variable->add_child_element("description");
++    descriptionElement->add_child_text(net.description);
+ 
+     // add sub-element containing the description
+-    xmlpp::Element* nElementsElement = variable->add_child("numberOfElements");
+-    nElementsElement->set_child_text(std::to_string(net.valueLength));
++    xmlpp::Element* nElementsElement = variable->add_child_element("numberOfElements");
++    nElementsElement->add_child_text(std::to_string(net.valueLength));
+ 
+     // add sub-element describing how this variable is connected
+-    xmlpp::Element* connectedModules = variable->add_child("connections");
++    xmlpp::Element* connectedModules = variable->add_child_element("connections");
+     std::list nodeList(net.consumers.begin(), net.consumers.end());
+     nodeList.push_back(net.feeder);
+ 
+@@ -212,7 +212,7 @@ namespace ChimeraTK {
+     for(const auto& peerNode : nodeList) {
+       if(peerNode.getType() == NodeType::ControlSystem) continue;
+       bool feeding = peerNode == nodeList.back();
+-      xmlpp::Element* peer = connectedModules->add_child("peer");
++      xmlpp::Element* peer = connectedModules->add_child_element("peer");
+ 
+       if(peerNode.getType() == NodeType::Application) {
+         peer->set_attribute("type", "ApplicationModule");
+diff --git a/tests/executables_src/testApplication.cc b/tests/executables_src/testApplication.cc
+index eac2cc3..50edb6a 100644
+--- a/tests/executables_src/testApplication.cc
++++ b/tests/executables_src/testApplication.cc
+@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(testApplicationExceptions) {
+ // Helper function for testXmlGeneration:
+ // Obtain a value from an XML node
+ std::string getValueFromNode(const xmlpp::Node* node, const std::string& subnodeName) {
+-  xmlpp::Node* theChild = nullptr;
++  const xmlpp::Node* theChild = nullptr;
+   for(const auto& child : node->get_children()) {
+     if(child->get_name() == subnodeName) theChild = child;
+   }
+@@ -93,7 +93,7 @@ std::string getValueFromNode(const xmlpp::Node* node, const std::string& subnode
+   }
+   BOOST_REQUIRE_EQUAL(subChildList.size(),
+       1); // child tag contains only text (no further sub-tags)
+-  const xmlpp::TextNode* textNode = dynamic_cast<xmlpp::TextNode*>(subChildList.front());
++  const xmlpp::TextNode* textNode = dynamic_cast<const xmlpp::TextNode*>(subChildList.front());
+   BOOST_REQUIRE(textNode != nullptr);
+   return textNode->get_content();
+ }
