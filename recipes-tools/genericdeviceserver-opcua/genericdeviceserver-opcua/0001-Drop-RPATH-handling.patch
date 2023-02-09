@@ -1,0 +1,31 @@
+From fa0462188bec637ede61eedd3749c77609f9221b Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Thu, 9 Feb 2023 12:55:22 +0100
+Subject: [PATCH] Drop RPATH handling
+
+---
+ CMakeLists.txt | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2086c6c..3506129 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -31,8 +31,6 @@ endif(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "None")
+ 
+ include(cmake/set_default_flags.cmake)
+ 
+-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+-
+ include(${CMAKE_SOURCE_DIR}/cmake/add_dependency.cmake)
+ include(cmake/enable_code_coverage_report.cmake)
+ include(cmake/set_control_system_adapter.cmake)
+@@ -48,8 +46,6 @@ message(${DoocsBackendLib})
+ aux_source_directory(${CMAKE_SOURCE_DIR}/server server_sources)
+ aux_source_directory(${CMAKE_SOURCE_DIR}/src library_sources)
+ 
+-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+-
+ #configure_file(include/version.h.in ${PROJECT_BINARY_DIR}/version.h)
+ include_directories(${CMAKE_SOURCE_DIR}/include)
+ 
