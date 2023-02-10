@@ -12,7 +12,7 @@ S = "${WORKDIR}/git"
 
 DEPENDS = "openssl"
 
-inherit cmake
+inherit cmake python3native
 
 # Specify any options you want to pass to cmake using EXTRA_OECMAKE:
 EXTRA_OECMAKE = "-DUA_ENABLE_AMALGAMATION=Off \
