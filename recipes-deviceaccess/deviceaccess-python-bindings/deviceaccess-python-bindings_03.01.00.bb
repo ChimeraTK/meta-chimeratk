@@ -7,7 +7,7 @@ SRC_URI = "git://github.com/ChimeraTK/DeviceAccess-PythonBindings.git;protocol=h
            "
 
 PV = "1.0+git${SRCPV}"
-SRCREV = "fd73e4882f22e9d91e409119410f883d9696cf49"
+SRCREV = "daea2bf9a7400f9893bc16956e067d558a565d8d"
 
 S = "${WORKDIR}/git"
 
