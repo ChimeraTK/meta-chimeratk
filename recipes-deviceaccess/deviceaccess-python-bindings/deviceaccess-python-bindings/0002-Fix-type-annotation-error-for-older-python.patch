@@ -1,0 +1,22 @@
+From 3d880906617834741dedee54c1564cc484817a31 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Tue, 14 Feb 2023 13:38:49 +0100
+Subject: [PATCH] Fix type annotation error for older python
+
+---
+ deviceaccess.py | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/deviceaccess.py b/deviceaccess.py
+index 1f3e0f5..4057dde 100644
+--- a/deviceaccess.py
++++ b/deviceaccess.py
+@@ -11,6 +11,8 @@ More information on ChimeraTK can be found at the project's
+ `github.io <https://chimeratk.github.io/>`_.
+ """
+ 
++from __future__ import annotations
++
+ from typing import Sequence
+ import _da_python_bindings as pb
+ import numpy as np

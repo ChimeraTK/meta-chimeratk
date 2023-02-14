@@ -1,0 +1,2 @@
+#!/bin/sh
+ctest --test-dir /usr/lib/deviceaccess-python-bindings/installed-tests

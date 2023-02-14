@@ -1,0 +1,34 @@
+From 9c94f30d48868315d4342cb8c630b411c9b602db Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Tue, 14 Feb 2023 13:38:34 +0100
+Subject: [PATCH] ctk ptest paths
+
+---
+ CMakeLists.txt | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1fecf8e..e4fdaa0 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -115,6 +115,9 @@ if(ENABLE_TSAN)
+   SET(TSAN_LIBS "tsan")
+ endif()
+ 
++option(INSTALL_TESTS Off)
++option(TEST_INSTALL_FOLDER "Where to install tests to if INSTAL_TESTS is ON" "lib/${PROJECT_NAME}/installed-tests")
++
+ target_link_libraries(${boost_python_core_module} ${TSAN_LIBS}
+   ${ChimeraTK-DeviceAccess_LIBRARIES}
+   ${PYTHON_LIBRARIES}
+@@ -209,3 +212,10 @@ install(FILES ${PROJECT_BINARY_DIR}/${legacy_python_module}
+   DESTINATION ${install_path})
+ install(TARGETS ${boost_python_core_module}
+   LIBRARY DESTINATION ${install_path})
++
++if (INSTALL_TESTS)
++    INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/tests DESTINATION ${TEST_INSTALL_FOLDER} FILES_MATCHING PATTERN "*.py")
++    INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/tests/deviceInformation DESTINATION ${TEST_INSTALL_FOLDER})
++    INSTALL(TARGETS testmodule DESTINATION ${TEST_INSTALL_FOLDER})
++    INSTALL(FILES ${CMAKE_BINARY_DIR}/CTestTestfile.cmake DESTINATION ${TEST_INSTALL_FOLDER})
++endif()
