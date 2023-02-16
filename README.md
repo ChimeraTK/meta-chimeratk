@@ -13,7 +13,12 @@ Dependencies
   branch: zeus
   revision: HEAD
 
-  More specifially, it just needs meta-oe for libxml++
+  URI: https://github.com/meta-qt5/meta-qt5
+  branch: zeus
+  revision: HEAD
+
+  More specifially, it just needs meta-oe for libxml++ and meta-qt5 only of
+  you intend to build QtHardMon.
 
 
 Patches
