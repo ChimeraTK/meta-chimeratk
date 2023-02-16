@@ -6,14 +6,19 @@ Dependencies
 ============
 
   URI: git://github.com/openembedded/oe-core.git
-  branch: master
+  branch: kirkstone
   revision: HEAD
 
   URI: git://github.com/openembedded/meta-openembedded.git
-  branch: zeus
+  branch: kirkstone
   revision: HEAD
 
-  More specifially, it just needs meta-oe for libxml++
+  URI: https://github.com/meta-qt5/meta-qt5
+  branch: kirkstone
+  revision: HEAD
+
+  More specifially, it just needs meta-oe for libxml++ and meta-qt5 only of
+  you intend to build QtHardMon.
 
 Patches
 =======
