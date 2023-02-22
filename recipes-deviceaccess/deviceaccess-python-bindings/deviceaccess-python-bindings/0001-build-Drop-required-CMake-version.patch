@@ -1,0 +1,19 @@
+From a05659eba65fe68d0544bd3dccdbc63c915f8642 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Wed, 22 Feb 2023 13:09:35 +0100
+Subject: [PATCH] build: Drop required CMake version
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1fecf8e..7e05181 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.16)
++cmake_minimum_required(VERSION 3.15)
+ 
+ project(mtca4uPy)
+ 
