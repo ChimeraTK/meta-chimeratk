@@ -1,0 +1,25 @@
+From b70717f63fc5953c0c60ca837ef4ac232ee5e5c0 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Fri, 17 Feb 2023 18:43:55 +0100
+Subject: [PATCH] Enable 64bit io for pcie backend
+
+The bar offsets start at bit 60 upwards, passing down the offsets
+through off_t requires the 64bit variants to end up in kernel correctly
+---
+ device_backends/pcie/src/PcieBackend.cc | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/device_backends/pcie/src/PcieBackend.cc b/device_backends/pcie/src/PcieBackend.cc
+index 4de3cc53..37d3f197 100644
+--- a/device_backends/pcie/src/PcieBackend.cc
++++ b/device_backends/pcie/src/PcieBackend.cc
+@@ -1,6 +1,9 @@
+ // SPDX-FileCopyrightText: Deutsches Elektronen-Synchrotron DESY, MSK, ChimeraTK Project <chimeratk-support@desy.de>
+ // SPDX-License-Identifier: LGPL-3.0-or-later
+ 
++
++#define _FILE_OFFSET_BITS 64
++
+ #include "PcieBackend.h"
+ 
+ // the io constants and struct for the driver

@@ -1,0 +1,36 @@
+From 1701f2fca4fcf0eb3f6ddc75a966dce1028acede Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Fri, 17 Feb 2023 12:46:29 +0100
+Subject: [PATCH] Install all tests
+
+---
+ CMakeLists.txt       | 2 ++
+ tests/CMakeLists.txt | 5 +++++
+ 2 files changed, 7 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ce861a41..67f375c0 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -124,6 +124,8 @@ include(cmake/enable_code_style_check.cmake)
+ # Keep the testing section at the end. It will include boost test, which will modify the Boost_LIBRARIES variable.
+ # We don't want to link client applications to the boost testing library. This might give trouble.
+ option(BUILD_TESTS "Build test programs" ON)
++option(INSTALL_TESTS "Install test programs and data" OFF)
++option(TEST_INSTALL_FOLDER "Target folder for installed tests" "lib/${PROJECT_NAME}/installed-tests")
+ if(BUILD_TESTS)
+   enable_testing()
+   add_subdirectory("${PROJECT_SOURCE_DIR}/tests")
+diff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt
+index c95d247f..b43ee19b 100644
+--- a/tests/CMakeLists.txt
++++ b/tests/CMakeLists.txt
+@@ -153,3 +153,8 @@ foreach( backendTestLibSrcFile ${backendTestLibSources})
+   add_library(${libName} SHARED ${backendTestLibSrcFile})
+   target_link_libraries(${libName} ${PROJECT_NAME})
+ endforeach()
++
++if (INSTALL_TESTS)
++    install(DIRECTORY ${PROJECT_BINARY_DIR}/tests DESTINATION ${TEST_INSTALL_FOLDER} USE_SOURCE_PERMISSIONS)
++    install(DIRECTORY ${PROJECT_BINARY_DIR}/scripts DESTINATION ${TEST_INSTALL_FOLDER}/tests USE_SOURCE_PERMISSIONS)
++endif()

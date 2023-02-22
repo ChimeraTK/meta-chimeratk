@@ -1,0 +1,43 @@
+From 80cf4cdef7393039caa3c3693cec582ee6aaef41 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Fri, 17 Feb 2023 12:09:46 +0100
+Subject: [PATCH] Use getwuid/geteuid instead of getlogin()
+
+getlogin() sometimes seems to have issues to properly retrieve the
+username
+---
+ util/src/ProcessManagement.cpp | 15 +++++++++++----
+ 1 file changed, 11 insertions(+), 4 deletions(-)
+
+diff --git a/util/src/ProcessManagement.cpp b/util/src/ProcessManagement.cpp
+index d6c13586..2ea675d5 100644
+--- a/util/src/ProcessManagement.cpp
++++ b/util/src/ProcessManagement.cpp
+@@ -8,6 +8,10 @@
+ #include <signal.h>
+ #include <string>
+ #include <unistd.h>
++#include <errno.h>
++#include <iostream>
++#include <cstring>
++#include <pwd.h>
+ 
+ bool processExists(unsigned pid) {
+   return !kill((pid_t)pid, 0);
+@@ -18,9 +22,12 @@ unsigned getOwnPID(void) {
+ }
+ 
+ std::string getUserName(void) {
+-  auto* login = getlogin();
+-  if(login == nullptr) {
+-    return "**unknown*user*name**";
++  errno = 0;
++  auto *pwent = getpwuid(geteuid());
++  auto savedErr = errno;
++  if(savedErr != 0) {
++    std::cout << "Failed to lookup user name, expect issues: " << strerror(savedErr) << std::endl;
++    return std::string{"**unknown*user*name**"};
+   }
+-  return std::string(login);
++  return std::string{pwent->pw_name};
+ }

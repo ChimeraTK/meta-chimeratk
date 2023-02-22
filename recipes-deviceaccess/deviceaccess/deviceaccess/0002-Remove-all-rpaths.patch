@@ -1,0 +1,23 @@
+From 9c3dd527fd2afac804a6d891fa9d40a54daabf1c Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Fri, 17 Feb 2023 12:46:14 +0100
+Subject: [PATCH] Remove all rpaths
+
+---
+ tests/CMakeLists.txt | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt
+index 2faa7267..c95d247f 100644
+--- a/tests/CMakeLists.txt
++++ b/tests/CMakeLists.txt
+@@ -17,6 +17,9 @@ link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+ 
+ aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/executables_src testExecutables)
+ 
++set(CMAKE_SKIP_BUILD_RPATH TRUE)
++set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
++set(CMAKE_INSTALL_RPATH "")
+ 
+ foreach( testExecutableSrcFile ${testExecutables})
+   #NAME_WE means the base name without path and (longest) extension
