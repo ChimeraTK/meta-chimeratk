@@ -1,0 +1,30 @@
+From 770f468b1edb4d11fec683457804b99f7483d3cf Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Tue, 11 Apr 2023 16:35:25 +0200
+Subject: [PATCH] Drop explicit dependency to GLib
+
+---
+ CMakeLists.txt | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5d771aba..282e7fb1 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -39,7 +39,6 @@ add_dependency(exprtk 01.00 REQUIRED)
+ FIND_PACKAGE(PkgConfig REQUIRED)
+ set(LIBXML++_VERSION "libxml++-2.6")
+ PKG_CHECK_MODULES(LibXML++ REQUIRED IMPORTED_TARGET ${LIBXML++_VERSION})
+-PKG_CHECK_MODULES(glib REQUIRED IMPORTED_TARGET glib-2.0)
+ 
+ # The PCIe backend can only be built on Linux, so we define a variable here that
+ # we can then use in other places.
+@@ -103,7 +102,7 @@ target_compile_options(${PROJECT_NAME} PUBLIC ${projectCxxFlags})
+ target_include_directories(${PROJECT_NAME} INTERFACE "$<INSTALL_INTERFACE:include>")
+ set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_FULL_LIBRARY_VERSION} SOVERSION ${${PROJECT_NAME}_SOVERSION})
+ target_link_libraries(${PROJECT_NAME}
+-    PRIVATE ${CMAKE_DL_LIBS} PkgConfig::LibXML++ PkgConfig::glib
++    PRIVATE ${CMAKE_DL_LIBS} PkgConfig::LibXML++
+     # we set this public because of Backend libs using shm_open (e.g. test code)
+     PUBLIC ${RT_LIBRARIES}
+     PUBLIC ${Boost_LIBRARIES} 
