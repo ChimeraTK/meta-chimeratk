@@ -1,0 +1,20 @@
+From a9270b51de05ea5ad6835a9802ce1aad290806dd Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Wed, 12 Apr 2023 15:10:52 +0200
+Subject: [PATCH] Drop CMake version requirement
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d861016..998c127 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,5 +1,5 @@
+ project(ChimeraTK-cppext)
+-cmake_minimum_required(VERSION 3.16)
++cmake_minimum_required(VERSION 3.15)
+ 
+ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
+ 
