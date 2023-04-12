@@ -1,0 +1,34 @@
+From c5d02760b8a5341616774baba0cbf85279ac885b Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Wed, 12 Apr 2023 14:18:32 +0200
+Subject: [PATCH 2/3] Remove explicit glib dependency
+
+%% original patch: 0002-Remove-explicit-glib-dependency.patch
+---
+ CMakeLists.txt | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 416e598..c613595 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -20,7 +20,6 @@ FIND_PACKAGE(ChimeraTK-DeviceAccess 03.09 REQUIRED)
+ FIND_PACKAGE(PkgConfig REQUIRED)
+ set(LIBXML++_VERSION "libxml++-5.0")
+ PKG_CHECK_MODULES(LibXML++ REQUIRED IMPORTED_TARGET ${LIBXML++_VERSION})
+-PKG_CHECK_MODULES(glib REQUIRED IMPORTED_TARGET glib-2.0)
+ 
+ # Find BOOST filesystem
+ # Note: we need to search this before looking for the unit_test_framework, since we must not link against the
+@@ -67,7 +66,7 @@ target_link_libraries(${PROJECT_NAME}
+     # put ControlSystemAdapter public since implicit dep DeviceAccess must be public
+     PUBLIC ChimeraTK::ChimeraTK-ControlSystemAdapter
+     PUBLIC ${Boost_LIBRARIES}
+-    PRIVATE Threads::Threads PkgConfig::LibXML++ PkgConfig::glib ${HDF5_LIBRARIES})
++    PRIVATE Threads::Threads PkgConfig::LibXML++ ${HDF5_LIBRARIES})
+ 
+ # do not remove runtime path of the library when installing
+ set_property(TARGET ${PROJECT_NAME} PROPERTY INSTALL_RPATH_USE_LINK_PATH TRUE)
+-- 
+2.40.0
+
