@@ -1,7 +1,7 @@
-From 2c09688a0c20d384eb9a1c3d97503c97fea1ff88 Mon Sep 17 00:00:00 2001
+From bc1f5fa90fabac457921abcceafa7d0fd7ab80fa Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
-Date: Thu, 9 Feb 2023 09:18:09 +0100
-Subject: [PATCH] Bump libxml++ version
+Date: Wed, 12 Apr 2023 14:02:41 +0200
+Subject: [PATCH] Bump libxml++ version to 5.0
 
 ---
  CMakeLists.txt               | 2 +-
@@ -9,18 +9,18 @@ Subject: [PATCH] Bump libxml++ version
  2 files changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 769c3c5..1f8dd80 100644
+index eaf625d..85df3ee 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -44,7 +44,7 @@ add_dependency(ChimeraTK-DeviceAccess 03.02 REQUIRED)
+@@ -42,7 +42,7 @@ FIND_PACKAGE(ChimeraTK-DeviceAccess 03.09 REQUIRED)
  
  # libXML++ is used for parsing/writing XML files
  FIND_PACKAGE(PkgConfig REQUIRED)
 -set(LIBXML++_VERSION "libxml++-2.6")
 +set(LIBXML++_VERSION "libxml++-5.0")
- PKG_CHECK_MODULES(LibXML++ REQUIRED ${LIBXML++_VERSION})
- PKG_CHECK_MODULES(glib REQUIRED glib-2.0)
- include_directories(SYSTEM ${glib_INCLUDE_DIRS} ${LibXML++_INCLUDE_DIRS})
+ PKG_CHECK_MODULES(LibXML++ REQUIRED IMPORTED_TARGET ${LIBXML++_VERSION})
+ 
+ # libatomic is required on some patforms (and doesn't hurt on the others)
 diff --git a/src/PersistentDataStorage.cc b/src/PersistentDataStorage.cc
 index 4c05e29..cb28ccf 100644
 --- a/src/PersistentDataStorage.cc
