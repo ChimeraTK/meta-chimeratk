@@ -1,0 +1,13 @@
+diff --git a/tools/cmake/open62541Config.cmake.in b/tools/cmake/open62541Config.cmake.in
+index 0c2544ccb..59e7c933b 100644
+--- a/tools/cmake/open62541Config.cmake.in
++++ b/tools/cmake/open62541Config.cmake.in
+@@ -6,7 +6,7 @@ set (open62541_TOOLS_DIR @PACKAGE_open62541_install_tools_dir@ CACHE PATH "Path
+ set (open62541_NODESET_DIR @PACKAGE_open62541_install_nodeset_dir@ CACHE PATH "Path to the directory that contains the OPC UA schema repository")
+ 
+ include(CMakeFindDependencyMacro)
+-find_dependency(PythonInterp REQUIRED)
++#find_dependency(PythonInterp REQUIRED)
+ 
+ include("${CMAKE_CURRENT_LIST_DIR}/open62541Macros.cmake")
+ 
