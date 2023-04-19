@@ -1,0 +1,19 @@
+From 7d47d0576bd1887f2560119d3fd2931afa20a233 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Thu, 13 Apr 2023 09:31:14 +0200
+Subject: [PATCH] Drop CMake requirement
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index eaf625d..4b1768f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.16)
++cmake_minimum_required(VERSION 3.15)
+ 
+ project(ChimeraTK-ControlSystemAdapter)
+ 
