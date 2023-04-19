@@ -11,6 +11,7 @@ SRC_URI = "git://github.com/ChimeraTK/GenericDeviceServer;protocol=https;branch=
            file://0001-Drop-RPATH-handling.patch \
            file://0002-Drop-hard-dependency-on-DOOCS.patch \
            file://0003-Make-internal-library-static.patch \
+           file://0001-Install-XML-Generator.patch \
            "
 
 # Modify these as desired
