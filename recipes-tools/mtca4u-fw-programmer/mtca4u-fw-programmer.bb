@@ -5,7 +5,7 @@ SRC_URI = "git://github.com/ChimeraTK/FirmwareProgrammer.git;protocol=https;bran
 
 # Modify these as desired
 PV = "1.0+git${SRCPV}"
-SRCREV = "5eacc0431659459a00b6aa6d368bcbb233dcd7d0"
+SRCREV = "b34b1081d71fbb945ec8a24e2c4ac15bb363d45f"
 
 S = "${WORKDIR}/git"
 
