@@ -1,0 +1,19 @@
+From bbbb1fb677648cc982b83747d11f25e9f683e795 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Wed, 19 Apr 2023 12:35:21 +0200
+Subject: [PATCH] Drop cmake requirement
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b6abde5..6ca1371 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.16)
++cmake_minimum_required(VERSION 3.15)
+ 
+ ##########################################################################################################
+ ## Project specification

@@ -1,0 +1,27 @@
+From c6b57a2fbe0206ae5d545faac13493340333676b Mon Sep 17 00:00:00 2001
+From: Dietrich Rothe <dietrich.rothe@desy.de>
+Date: Fri, 24 Mar 2023 10:04:10 +0100
+Subject: [PATCH] use lib install dir defined by GNUInstallDirs
+
+this should fix library search problems on Tumbleweed
+---
+ CMakeLists.txt | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 10e20d5..b6abde5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -244,7 +244,11 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY INSTALL_RPATH_USE_LINK_PATH TRUE)
+ ## Install all Libraries
+ ##########################################################################################################
+ 
+-install( TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets RUNTIME DESTINATION bin LIBRARY DESTINATION lib )
++# this defines architecture-dependent ${CMAKE_INSTALL_LIBDIR}
++include(GNUInstallDirs)
++install( TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets
++    RUNTIME DESTINATION bin
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ 
+ ##########################################################################################################
+ ## Custom Commands (z.b. model-compiler, autobuild-dependencies)
