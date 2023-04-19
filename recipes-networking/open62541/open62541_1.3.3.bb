@@ -2,7 +2,11 @@ LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=815ca599c9df247a0c7f619bab123dad \
                     file://LICENSE-CC0;md5=6888abe69dbc6330301f0467e21c0317"
 
-SRC_URI = "gitsm://github.com/open62541/open62541.git;protocol=https;branch=master"
+SRC_URI = "gitsm://github.com/open62541/open62541.git;protocol=https;branch=master \
+           file://FixForZeroSamplingInterval.patch \
+           file://RemovePythonDependency.patch \
+           file://SkipFirstHistoryEntry.patch \
+          "
 
 # Modify these as desired
 PV = "1.0+git${SRCPV}"
