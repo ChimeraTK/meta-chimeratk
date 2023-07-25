@@ -2,12 +2,12 @@ LICENSE = "GPL-3.0-or-later"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=84dcc94da3adb52b53ae4fa38fe49e5d"
 
 SRC_URI = "git://github.com/ChimeraTK/QtHardMon;protocol=https;branch=master \
-           file://modernize-cmake.patch \
-          "
+           file://0001-Drop-CMake-version.patch \
+           "
 
 # Modify these as desired
-PV = "1.0+git${SRCPV}"
-SRCREV = "26e6fbe8211e469d4b336a804e24a8d9dce93107"
+PV = "01.07.00"
+SRCREV = "6341ff4356eb2432a2f493aed3feeb8f83ff5688"
 
 S = "${WORKDIR}/git"
 
