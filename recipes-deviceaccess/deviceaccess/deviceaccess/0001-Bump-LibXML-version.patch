@@ -1,4 +1,4 @@
-From 81fb85dbe2032abea530f7ddf4d43676106e45f7 Mon Sep 17 00:00:00 2001
+From 36869908ebfca6cc7e030409bec361d92fb56cbb Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 11 Apr 2023 16:35:11 +0200
 Subject: [PATCH] Bump LibXML++ version
@@ -8,11 +8,11 @@ Subject: [PATCH] Bump LibXML++ version
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 5d771aba..a17365b3 100644
+index b17eaa00..7dd1efb2 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -37,7 +37,7 @@ FIND_PACKAGE(ChimeraTK-cppext 01.05 REQUIRED)
- add_dependency(exprtk 01.00 REQUIRED)
+@@ -35,7 +35,7 @@ FIND_PACKAGE(ChimeraTK-cppext 01.05 REQUIRED)
+ FIND_PACKAGE(exprtk 01.04 REQUIRED)
  
  FIND_PACKAGE(PkgConfig REQUIRED)
 -set(LIBXML++_VERSION "libxml++-2.6")
