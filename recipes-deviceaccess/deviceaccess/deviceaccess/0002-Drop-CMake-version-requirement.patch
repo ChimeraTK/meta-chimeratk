@@ -1,4 +1,4 @@
-From 3c760e7ed90901c1b8cfb87c31a10135761a867b Mon Sep 17 00:00:00 2001
+From bbbe1ecde7b25e5c36d05aef16c983e1d688b93c Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Wed, 12 Apr 2023 15:15:16 +0200
 Subject: [PATCH] Drop CMake version requirement
@@ -8,7 +8,7 @@ Subject: [PATCH] Drop CMake version requirement
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 282e7fb1..cd135a14 100644
+index 8445fe6b..5d456617 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,4 +1,4 @@

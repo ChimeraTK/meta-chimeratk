@@ -1,0 +1,612 @@
+From 22c8ae3399a7eb2b6e1ece38231a75ad6a42ac1d Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Thu, 13 Jul 2023 14:14:54 +0200
+Subject: [PATCH] Extract mmio from XDMA backend, reuse in UIO
+
+---
+ CMakeLists.txt                                |  5 +
+ .../{xdma => mmio}/include/DeviceFile.h       | 18 ++--
+ device_backends/mmio/include/MmioAccess.h     | 39 ++++++++
+ device_backends/mmio/src/DeviceFile.cc        | 65 +++++++++++++
+ device_backends/mmio/src/MmioAccess.cc        | 94 +++++++++++++++++++
+ device_backends/uio/include/UioAccess.h       |  3 +
+ device_backends/uio/src/UioAccess.cc          | 27 +++---
+ device_backends/xdma/include/CtrlIntf.h       | 18 +---
+ device_backends/xdma/src/CtrlIntf.cc          | 59 +-----------
+ device_backends/xdma/src/DeviceFile.cc        | 49 ----------
+ device_backends/xdma/src/DmaIntf.cc           |  4 +-
+ device_backends/xdma/src/EventFile.cc         |  2 +-
+ 12 files changed, 240 insertions(+), 143 deletions(-)
+ rename device_backends/{xdma => mmio}/include/DeviceFile.h (52%)
+ create mode 100644 device_backends/mmio/include/MmioAccess.h
+ create mode 100644 device_backends/mmio/src/DeviceFile.cc
+ create mode 100644 device_backends/mmio/src/MmioAccess.cc
+ delete mode 100644 device_backends/xdma/src/DeviceFile.cc
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5d456617..714efc1f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -63,6 +63,11 @@ install(DIRECTORY ${PROJECT_BINARY_DIR}/generated_include/ DESTINATION include/C
+ set(subdirs device device_backends exception util fileparsers
+             device_backends/NumericAddressedBackend device_backends/DummyBackend device_backends/LogicalNameMapping
+             device_backends/Subdevice device_backends/SharedDummy device_backends/Rebot)
++
++if(HAVE_XDMA_BACKEND OR HAVE_UIO_BACKEND)
++    set(subdirs ${subdirs} device_backends/mmio)
++endif()
++
+ if(HAVE_PCIE_BACKEND)
+   set(subdirs ${subdirs} device_backends/pcie)
+ endif()
+diff --git a/device_backends/xdma/include/DeviceFile.h b/device_backends/mmio/include/DeviceFile.h
+similarity index 52%
+rename from device_backends/xdma/include/DeviceFile.h
+rename to device_backends/mmio/include/DeviceFile.h
+index d9dd8a56..832af8e5 100644
+--- a/device_backends/xdma/include/DeviceFile.h
++++ b/device_backends/mmio/include/DeviceFile.h
+@@ -11,18 +11,22 @@ namespace ChimeraTK {
+   // Simple RAII wrapper for a device file
+   class DeviceFile : private boost::noncopyable {
+    private:
+-    std::string _strerror(const std::string& msg) const;
+-    const std::string _path;
+-    int _fd;
++    [[nodiscard]] std::string _strerror(const std::string& msg) const;
++    std::string _path{};
++    int _fd{-1};
++    int _savedErrno{0};
++    bool _fdOwner{true};
+ 
+    public:
+     DeviceFile() = delete;
+-    DeviceFile(const std::string& filePath, int flags);
+-    DeviceFile(DeviceFile&& d);
++    DeviceFile(std::string filePath, int flags);
++    DeviceFile(int fd, bool takeFdOwnership = true);
++    DeviceFile(DeviceFile&& d) noexcept;
+     virtual ~DeviceFile();
+ 
+-    operator int() const;
+-    std::string name() const;
++    explicit operator int() const;
++    [[nodiscard]] std::string path() const;
++    [[nodiscard]] int fd() const;
+   };
+ 
+ } // namespace ChimeraTK
+diff --git a/device_backends/mmio/include/MmioAccess.h b/device_backends/mmio/include/MmioAccess.h
+new file mode 100644
+index 00000000..06a44f31
+--- /dev/null
++++ b/device_backends/mmio/include/MmioAccess.h
+@@ -0,0 +1,39 @@
++// SPDX-FileCopyrightText: Deutsches Elektronen-Synchrotron DESY, MSK, ChimeraTK Project <chimeratk-support@desy.de>
++// SPDX-License-Identifier: LGPL-3.0-or-later
++#pragma once
++
++#include "DeviceFile.h"
++
++#include <string>
++
++namespace ChimeraTK {
++
++  // Control (config/status) interface to access the registers of FPGA IPs
++  class MmioAccess {
++   public:
++    MmioAccess() = delete;
++    MmioAccess(const std::string& devicePath, std::size_t mapSize);
++    MmioAccess(int fd, std::size_t mapSize, bool takeFdOwnership = true);
++    ~MmioAccess();
++
++    void read(uintptr_t address, int32_t* __restrict__ buf, size_t nBytes);
++    void write(uintptr_t address, const int32_t* data, size_t nBytes);
++
++   private:
++    DeviceFile _file;
++    void* _mem{nullptr};
++
++    // Size of mmap'ed area in PCI BAR
++    size_t _mmapSize{0};
++
++    // 4 KiB is the minimum size available in Vivado
++    static constexpr size_t _mmapSizeMin = 4UL * 1024UL;
++    static constexpr size_t _mmapSizeMax = 16UL * 1024UL * 1024UL;
++
++    [[nodiscard]] volatile int32_t* _reg_ptr(uintptr_t offs) const;
++    void _check_range(const std::string& access_type, uintptr_t address, size_t nBytes) const;
++    void mapFile(size_t mmapSize);
++
++};
++
++} // namespace ChimeraTK
+diff --git a/device_backends/mmio/src/DeviceFile.cc b/device_backends/mmio/src/DeviceFile.cc
+new file mode 100644
+index 00000000..c01c1a1e
+--- /dev/null
++++ b/device_backends/mmio/src/DeviceFile.cc
+@@ -0,0 +1,65 @@
++// SPDX-FileCopyrightText: Deutsches Elektronen-Synchrotron DESY, MSK, ChimeraTK Project <chimeratk-support@desy.de>
++// SPDX-License-Identifier: LGPL-3.0-or-later
++
++#include "DeviceFile.h"
++
++#include "Exception.h"
++
++#include <climits>
++#include <cstring>
++#include <fcntl.h>
++#include <iostream>
++#include <unistd.h>
++#include <utility>
++
++namespace ChimeraTK {
++
++  DeviceFile::DeviceFile(std::string deviceFilePath, int flags) : _path{std::move(deviceFilePath)} {
++#ifdef _DEBUG
++    std::cout << "MMIO: opening device file " << _path << std::endl;
++#endif
++    _fd = ::open(_path.c_str(), flags);
++    _savedErrno = errno;
++    if(_fd < 0) {
++      throw runtime_error(_strerror("Cannot open device: "));
++    }
++  }
++
++  DeviceFile::DeviceFile(int fd, bool takeFdOwnership) : _fd(fd), _fdOwner(takeFdOwnership) {
++    auto path = "/proc/self/fd/" + std::to_string(fd);
++    char buf[PATH_MAX + 1] = {0};
++    auto result = readlink(path.c_str(), buf, sizeof(buf));
++    _savedErrno = errno;
++    if(result < 0) {
++      throw runtime_error(_strerror("Cannot determine path of fd "));
++    }
++
++    _path = std::string{buf};
++    std::cout << "Path for " << _fd << ": " << _path << std::endl;
++  }
++
++  DeviceFile::DeviceFile(DeviceFile&& d) noexcept : _path(std::move(d._path)), _fd(std::exchange(d._fd, 0)) {}
++
++  DeviceFile::~DeviceFile() {
++    if(_fd > 0) {
++#ifdef _DEBUG
++      std::cout << "MMIO: closing device file " << _path << std::endl;
++#endif
++      ::close(_fd);
++    }
++  }
++
++  std::string DeviceFile::_strerror(const std::string& msg) const {
++    char tmp[255];
++    return msg + _path + ": " + ::strerror_r(_savedErrno, tmp, sizeof(tmp));
++  }
++
++  std::string DeviceFile::path() const {
++    return _path;
++  }
++
++  int DeviceFile::fd() const {
++    return _fd;
++  }
++
++} // namespace ChimeraTK
+diff --git a/device_backends/mmio/src/MmioAccess.cc b/device_backends/mmio/src/MmioAccess.cc
+new file mode 100644
+index 00000000..fda376fb
+--- /dev/null
++++ b/device_backends/mmio/src/MmioAccess.cc
+@@ -0,0 +1,94 @@
++// SPDX-FileCopyrightText: Deutsches Elektronen-Synchrotron DESY, MSK, ChimeraTK Project <chimeratk-support@desy.de>
++// SPDX-License-Identifier: LGPL-3.0-or-later
++
++#include "MmioAccess.h"
++
++#include "Exception.h"
++#include <sys/mman.h>
++
++#include <cstring>
++#include <fcntl.h>
++#include <iostream>
++#include <sstream>
++
++namespace ChimeraTK {
++
++  MmioAccess::MmioAccess(const std::string& devicePath, size_t mmapSize) : _file(devicePath, O_RDWR) {
++    mapFile(mmapSize);
++  }
++
++  void MmioAccess::mapFile(size_t mmapSize) {
++    // Auto-detect mapable size by trying to map the file until it works
++    if(mmapSize == 0) {
++      for(_mmapSize = _mmapSizeMax; _mmapSize >= _mmapSizeMin; _mmapSize /= 2) {
++        _mem = ::mmap(nullptr, _mmapSize, PROT_READ | PROT_WRITE, MAP_SHARED, _file.fd(), 0);
++        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
++        if(_mem != reinterpret_cast<void*>(-1)) {
++          // Successfully mapped the BAR
++#ifdef _DEBUG
++          std::cout << "MMIO: mapped " << _mmapSize << " bytes" << std::endl;
++#endif
++          return;
++        }
++      }
++    }
++    else {
++      _mmapSize = mmapSize;
++      _mem = ::mmap(nullptr, _mmapSize, PROT_READ | PROT_WRITE, MAP_SHARED, _file.fd(), 0);
++      // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
++      if(_mem != reinterpret_cast<void*>(-1)) {
++        // Successfully mapped the BAR
++#ifdef _DEBUG
++        std::cout << "MMIO: mapped " << _mmapSize << " bytes" << std::endl;
++#endif
++        return;
++      }
++    }
++    char mmap_err[100];
++    std::stringstream err_msg;
++    err_msg << "MMIO: couldn't mmap the minimum size of " << _mmapSizeMin
++            << " bytes: " << strerror_r(errno, mmap_err, sizeof(mmap_err));
++    throw ChimeraTK::runtime_error(err_msg.str());
++  }
++
++  MmioAccess::MmioAccess(int fd, std::size_t mmapSize, bool takeFdOwnership) : _file(fd, takeFdOwnership) {
++    mapFile(mmapSize);
++  }
++
++  MmioAccess::~MmioAccess() {
++    ::munmap(_mem, _mmapSize);
++  }
++
++  volatile int32_t* MmioAccess::_reg_ptr(uintptr_t offs) const {
++    return static_cast<volatile int32_t*>(_mem) + offs / 4;
++  }
++
++  void MmioAccess::_check_range(const std::string& access_type, uintptr_t address, size_t nBytes) const {
++    if((address + nBytes) <= _mmapSize) {
++      return;
++    }
++    std::stringstream err_msg;
++    err_msg << "MMIO: attempt to " << access_type << " beyond mapped area: " << nBytes << " bytes at 0x" << std::hex
++            << address << std::dec << " (" << _mmapSize << " bytes mapped)";
++    throw ChimeraTK::runtime_error(err_msg.str());
++  }
++
++  void MmioAccess::read(uintptr_t address, int32_t* __restrict__ buf, size_t nBytes) {
++    _check_range("read", address, nBytes);
++    volatile int32_t* rptr = _reg_ptr(address);
++    while(nBytes >= sizeof(int32_t)) {
++      *buf++ = *rptr++;
++      nBytes -= sizeof(int32_t);
++    }
++  }
++
++  void MmioAccess::write(uintptr_t address, const int32_t* data, size_t nBytes) {
++    _check_range("write", address, nBytes);
++    volatile int32_t* __restrict__ wptr = _reg_ptr(address);
++    while(nBytes >= sizeof(int32_t)) {
++      *wptr++ = *data++;
++      nBytes -= sizeof(int32_t);
++    }
++  }
++
++} // namespace ChimeraTK
+diff --git a/device_backends/uio/include/UioAccess.h b/device_backends/uio/include/UioAccess.h
+index 60ca0ff4..26106eda 100644
+--- a/device_backends/uio/include/UioAccess.h
++++ b/device_backends/uio/include/UioAccess.h
+@@ -2,6 +2,8 @@
+ // SPDX-License-Identifier: LGPL-3.0-or-later
+ #pragma once
+ 
++#include "MmioAccess.h"
++
+ #include <boost/filesystem.hpp>
+ 
+ #include <atomic>
+@@ -11,6 +13,7 @@ namespace ChimeraTK {
+   /// @brief Implements a generic userspace interface for UIO devices.
+   class UioAccess {
+    private:
++    std::unique_ptr<MmioAccess> _mmio;
+     boost::filesystem::path _deviceFilePath;
+     int _deviceFileDescriptor = 0;
+     void* _deviceUserBase = nullptr;
+diff --git a/device_backends/uio/src/UioAccess.cc b/device_backends/uio/src/UioAccess.cc
+index 847d91be..b8f6b1d6 100644
+--- a/device_backends/uio/src/UioAccess.cc
++++ b/device_backends/uio/src/UioAccess.cc
+@@ -9,6 +9,7 @@
+ #include <cerrno>
+ #include <fcntl.h>
+ #include <fstream>
++#include <iostream>
+ #include <limits>
+ #include <poll.h>
+ 
+@@ -16,7 +17,8 @@ namespace ChimeraTK {
+ 
+   UioAccess::UioAccess(const std::string& deviceFilePath) : _deviceFilePath(deviceFilePath.c_str()) {
+     std::string fileName = _deviceFilePath.filename().string();
+-    _deviceKernelBase = (void*)readUint64HexFromFile("/sys/class/uio/" + fileName + "/maps/map0/addr");
++    //NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
++    _deviceKernelBase = reinterpret_cast<void*>(readUint64HexFromFile("/sys/class/uio/" + fileName + "/maps/map0/addr"));
+     _deviceMemSize = readUint64HexFromFile("/sys/class/uio/" + fileName + "/maps/map0/size");
+     _lastInterruptCount = readUint32FromFile("/sys/class/uio/" + fileName + "/event");
+ 
+@@ -32,14 +34,13 @@ namespace ChimeraTK {
+   }
+ 
+   void UioAccess::open() {
+-    UioMMap();
++    _mmio = std::make_unique<MmioAccess>(_deviceFileDescriptor, _deviceMemSize, true);
+     _opened = true;
+   }
+ 
+   void UioAccess::close() {
+     if(!_opened) {
+-      UioUnmap();
+-      ::close(_deviceFileDescriptor);
++      _mmio.reset();
+       _opened = false;
+     }
+   }
+@@ -50,16 +51,14 @@ namespace ChimeraTK {
+     }
+ 
+     // This is a temporary work around, because register nodes of current map use absolute bus addresses.
++    //NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+     address = address % reinterpret_cast<uint64_t>(_deviceKernelBase);
+ 
+     if(address + sizeInBytes > _deviceMemSize) {
+       throw ChimeraTK::logic_error("UIO: Read request exceeds device memory region");
+     }
+ 
+-    void* targetAddress = static_cast<uint8_t*>(_deviceUserBase) + address;
+-
+-    // Is inherently thread-safe
+-    std::memcpy(data, targetAddress, sizeInBytes);
++    _mmio->read(address, data, sizeInBytes);
+   }
+ 
+   void UioAccess::write(uint64_t map, uint64_t address, int32_t const* data, size_t sizeInBytes) {
+@@ -67,16 +66,18 @@ namespace ChimeraTK {
+       throw ChimeraTK::logic_error("UIO: Multiple memory regions are not supported");
+     }
+ 
++    std::cout << "Calling uio-access write " << map << " " << address << ":" << (void*)data << " " << sizeInBytes
++              << std::endl;
++
+     // This is a temporary work around, because register nodes of current map use absolute bus addresses.
++    //NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+     address = address % reinterpret_cast<uint64_t>(_deviceKernelBase);
+ 
+     if(address + sizeInBytes > _deviceMemSize) {
+       throw ChimeraTK::logic_error("UIO: Write request exceeds device memory region");
+     }
+-    void* targetAddress = static_cast<uint8_t*>(_deviceUserBase) + address;
+ 
+-    // Is inherently thread-safe
+-    std::memcpy(targetAddress, data, sizeInBytes);
++    _mmio->write(address, data, sizeInBytes);
+   }
+ 
+   uint32_t UioAccess::waitForInterrupt(int timeoutMs) {
+@@ -85,9 +86,7 @@ namespace ChimeraTK {
+     // Will hold the number of new interrupts
+     uint32_t occurredInterruptCount = 0;
+ 
+-    struct pollfd pfd;
+-    pfd.fd = _deviceFileDescriptor;
+-    pfd.events = POLLIN;
++    struct pollfd pfd = {_deviceFileDescriptor, POLLIN, 0};
+ 
+     int ret = poll(&pfd, 1, timeoutMs);
+ 
+diff --git a/device_backends/xdma/include/CtrlIntf.h b/device_backends/xdma/include/CtrlIntf.h
+index c6914c8d..51906548 100644
+--- a/device_backends/xdma/include/CtrlIntf.h
++++ b/device_backends/xdma/include/CtrlIntf.h
+@@ -2,7 +2,7 @@
+ // SPDX-License-Identifier: LGPL-3.0-or-later
+ #pragma once
+ 
+-#include "DeviceFile.h"
++#include "MmioAccess.h"
+ #include "XdmaIntfAbstract.h"
+ 
+ #include <string>
+@@ -11,22 +11,12 @@ namespace ChimeraTK {
+ 
+   // Control (config/status) interface to access the registers of FPGA IPs
+   class CtrlIntf : public XdmaIntfAbstract {
+-    DeviceFile _file;
+-    void* _mem;
+-
+-    // Size of mmap'ed area in PCI BAR
+-    size_t _mmapSize;
+-    // 4 KiB is the minimum size available in Vivado
+-    static constexpr size_t _mmapSizeMin = 4 * 1024;
+-    static constexpr size_t _mmapSizeMax = 16 * 1024 * 1024;
+-
+-    volatile int32_t* _reg_ptr(uintptr_t offs) const;
+-    void _check_range(const std::string access_type, uintptr_t address, size_t nBytes) const;
++    MmioAccess _mmio;
+ 
+    public:
+     CtrlIntf() = delete;
+-    CtrlIntf(const std::string& devicePath);
+-    virtual ~CtrlIntf();
++    explicit CtrlIntf(const std::string& devicePath);
++    virtual ~CtrlIntf() = default;
+ 
+     void read(uintptr_t address, int32_t* __restrict__ buf, size_t nBytes) override;
+     void write(uintptr_t address, const int32_t* data, size_t nBytes) override;
+diff --git a/device_backends/xdma/src/CtrlIntf.cc b/device_backends/xdma/src/CtrlIntf.cc
+index f18985c2..5b6f61d9 100644
+--- a/device_backends/xdma/src/CtrlIntf.cc
++++ b/device_backends/xdma/src/CtrlIntf.cc
+@@ -3,69 +3,16 @@
+ 
+ #include "CtrlIntf.h"
+ 
+-#include "DeviceFile.h"
+-#include "Exception.h"
+-#include <sys/mman.h>
+-
+-#include <cstring>
+-#include <fcntl.h>
+-#include <iostream>
+-#include <sstream>
+-
+ namespace ChimeraTK {
+ 
+-  CtrlIntf::CtrlIntf(const std::string& devicePath) : _file(devicePath + "/user", O_RDWR) {
+-    for(_mmapSize = _mmapSizeMax; _mmapSize >= _mmapSizeMin; _mmapSize /= 2) {
+-      _mem = ::mmap(NULL, _mmapSize, PROT_READ | PROT_WRITE, MAP_SHARED, _file, 0);
+-      if(_mem != reinterpret_cast<void*>(-1)) {
+-        // Successfully mapped the BAR
+-#ifdef _DEBUG
+-        std::cout << "XDMA: mapped " << _mmapSize << " bytes" << std::endl;
+-#endif
+-        return;
+-      }
+-    }
+-    char mmap_err[100];
+-    std::stringstream err_msg;
+-    err_msg << "XDMA: couldn't mmap the minimum size of " << _mmapSizeMin
+-            << " bytes: " << strerror_r(errno, mmap_err, sizeof(mmap_err));
+-    throw ChimeraTK::runtime_error(err_msg.str());
+-  }
+-
+-  CtrlIntf::~CtrlIntf() {
+-    ::munmap(_mem, _mmapSize);
+-  }
+-
+-  volatile int32_t* CtrlIntf::_reg_ptr(uintptr_t offs) const {
+-    return static_cast<volatile int32_t*>(_mem) + offs / 4;
+-  }
+-
+-  void CtrlIntf::_check_range(const std::string access_type, uintptr_t address, size_t nBytes) const {
+-    if((address + nBytes) <= _mmapSize) {
+-      return;
+-    }
+-    std::stringstream err_msg;
+-    err_msg << "XDMA: attempt to " << access_type << " beyond mapped area: " << nBytes << " bytes at 0x" << std::hex
+-            << address << std::dec << " (" << _mmapSize << " bytes mapped)";
+-    throw ChimeraTK::runtime_error(err_msg.str());
+-  }
++  CtrlIntf::CtrlIntf(const std::string& devicePath) : _mmio(devicePath + "/user", 0) {}
+ 
+   void CtrlIntf::read(uintptr_t address, int32_t* __restrict__ buf, size_t nBytes) {
+-    _check_range("read", address, nBytes);
+-    volatile int32_t* rptr = _reg_ptr(address);
+-    while(nBytes >= sizeof(int32_t)) {
+-      *buf++ = *rptr++;
+-      nBytes -= sizeof(int32_t);
+-    }
++    _mmio.read(address, buf, nBytes);
+   }
+ 
+   void CtrlIntf::write(uintptr_t address, const int32_t* data, size_t nBytes) {
+-    _check_range("write", address, nBytes);
+-    volatile int32_t* __restrict__ wptr = _reg_ptr(address);
+-    while(nBytes >= sizeof(int32_t)) {
+-      *wptr++ = *data++;
+-      nBytes -= sizeof(int32_t);
+-    }
++    _mmio.write(address, data, nBytes);
+   }
+ 
+ } // namespace ChimeraTK
+diff --git a/device_backends/xdma/src/DeviceFile.cc b/device_backends/xdma/src/DeviceFile.cc
+deleted file mode 100644
+index 4bde53f5..00000000
+--- a/device_backends/xdma/src/DeviceFile.cc
++++ /dev/null
+@@ -1,49 +0,0 @@
+-// SPDX-FileCopyrightText: Deutsches Elektronen-Synchrotron DESY, MSK, ChimeraTK Project <chimeratk-support@desy.de>
+-// SPDX-License-Identifier: LGPL-3.0-or-later
+-
+-#include "DeviceFile.h"
+-
+-#include "Exception.h"
+-
+-#include <cstring>
+-#include <fcntl.h>
+-#include <iostream>
+-#include <utility>
+-
+-namespace ChimeraTK {
+-
+-  DeviceFile::DeviceFile(const std::string& deviceFilePath, int flags)
+-  : _path{deviceFilePath}, _fd{::open(_path.c_str(), flags)} {
+-#ifdef _DEBUG
+-    std::cout << "XDMA: opening device file " << _path << std::endl;
+-#endif
+-    if(_fd < 0) {
+-      throw runtime_error(_strerror("Cannot open device: "));
+-    }
+-  }
+-
+-  DeviceFile::DeviceFile(DeviceFile&& d) : _path(std::move(d._path)), _fd(std::exchange(d._fd, 0)) {}
+-
+-  DeviceFile::~DeviceFile() {
+-    if(_fd > 0) {
+-#ifdef _DEBUG
+-      std::cout << "XDMA: closing device file " << _path << std::endl;
+-#endif
+-      ::close(_fd);
+-    }
+-  }
+-
+-  std::string DeviceFile::_strerror(const std::string& msg) const {
+-    char tmp[255];
+-    return msg + _path + ": " + ::strerror_r(errno, tmp, sizeof(tmp));
+-  }
+-
+-  DeviceFile::operator int() const {
+-    return _fd;
+-  }
+-
+-  std::string DeviceFile::name() const {
+-    return _path;
+-  }
+-
+-} // namespace ChimeraTK
+diff --git a/device_backends/xdma/src/DmaIntf.cc b/device_backends/xdma/src/DmaIntf.cc
+index 4af7b70e..fe2c2506 100644
+--- a/device_backends/xdma/src/DmaIntf.cc
++++ b/device_backends/xdma/src/DmaIntf.cc
+@@ -17,7 +17,7 @@ namespace ChimeraTK {
+   DmaIntf::~DmaIntf() {}
+ 
+   void DmaIntf::read(uintptr_t address, int32_t* __restrict__ buf, size_t nbytes) {
+-    ssize_t result = ::pread(_c2h, buf, nbytes, address);
++    ssize_t result = ::pread(_c2h.fd(), buf, nbytes, address);
+     if(result != static_cast<ssize_t>(nbytes)) {
+       throw(ChimeraTK::runtime_error(
+           "DmaIntf read size mismatch: read " + std::to_string(result) + " bytes, expected " + std::to_string(nbytes)));
+@@ -25,7 +25,7 @@ namespace ChimeraTK {
+   }
+ 
+   void DmaIntf::write(uintptr_t address, const int32_t* data, size_t nbytes) {
+-    ssize_t result = ::pwrite(_h2c, data, nbytes, address);
++    ssize_t result = ::pwrite(_h2c.fd(), data, nbytes, address);
+     if(result != static_cast<ssize_t>(nbytes)) {
+       throw(ChimeraTK::runtime_error("DmaIntf write size mismatch: wrote " + std::to_string(result) +
+           " bytes, expected " + std::to_string(nbytes)));
+diff --git a/device_backends/xdma/src/EventFile.cc b/device_backends/xdma/src/EventFile.cc
+index 25585033..78d0f9c4 100644
+--- a/device_backends/xdma/src/EventFile.cc
++++ b/device_backends/xdma/src/EventFile.cc
+@@ -11,7 +11,7 @@ namespace io = boost::asio;
+ 
+ namespace ChimeraTK {
+   EventThread::EventThread(EventFile& owner)
+-  : _owner{owner}, _ctx{}, _sd{_ctx, owner._file}, _thread{&EventThread::start, this} {
++  : _owner{owner}, _ctx{}, _sd{_ctx, owner._file.fd()}, _thread{&EventThread::start, this} {
+ #ifdef _DEBUG
+     std::cout << "XDMA: EventThread " << _owner._file.name() << " ctor\n";
+ #endif
