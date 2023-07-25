@@ -4,12 +4,13 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=1ebbd3e34237af26da5dc08a4e440464 \
 
 SRC_URI = "git://github.com/ChimeraTK/ApplicationCore.git;protocol=https;branch=master \
            file://0001-Bump-libxml-to-5.0.patch \
-           file://0002-Remove-explicit-glib-dependency.patch \
            file://0003-Remote-install-rpath.patch \
+           file://0004-Remove-install-rpath-part-2.patch \
+           file://0004-Drop-glib2-dependency.patch \
            "
 
-PV = "1.0+git${SRCPV}"
-SRCREV = "54673e1aff99a167a5b70a601b985d1dac7fcd75"
+PV = "03.03.03"
+SRCREV = "118a6b7282d03d8776a2506aab5b37a9d1726d36"
 
 S = "${WORKDIR}/git"
 
