@@ -1,4 +1,4 @@
-From c97eb64472a5d6fdc1e83ac9318940899afce3a1 Mon Sep 17 00:00:00 2001
+From 6bc455c7e495e10dc6b1aff00c0ba1692c9a2315 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Wed, 12 Apr 2023 14:35:32 +0200
 Subject: [PATCH] Remote install rpath
@@ -8,12 +8,12 @@ Subject: [PATCH] Remote install rpath
  1 file changed, 3 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index ff094db..4f1ead1 100644
+index bef958e..da5cc1d 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -68,9 +68,6 @@ target_link_libraries(${PROJECT_NAME}
-     PUBLIC ${Boost_LIBRARIES}
-     PRIVATE Threads::Threads PkgConfig::LibXML++ ${HDF5_LIBRARIES})
+@@ -72,9 +72,6 @@ target_link_libraries(${PROJECT_NAME}
+   PUBLIC ${Boost_LIBRARIES}
+   PRIVATE Threads::Threads PkgConfig::LibXML++ PkgConfig::glib ${HDF5_LIBRARIES})
  
 -# do not remove runtime path of the library when installing
 -set_property(TARGET ${PROJECT_NAME} PROPERTY INSTALL_RPATH_USE_LINK_PATH TRUE)

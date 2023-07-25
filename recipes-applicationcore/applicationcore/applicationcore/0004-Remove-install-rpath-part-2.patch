@@ -1,0 +1,18 @@
+From f7d851cffde2051ae550583d60f9e2e7eafb73fd Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Tue, 25 Jul 2023 15:01:04 +0200
+Subject: [PATCH] Remove install rpath, part 2
+
+---
+ cmake/set_default_flags.cmake | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/cmake/set_default_flags.cmake b/cmake/set_default_flags.cmake
+index ac0ca3f..bae58ef 100644
+--- a/cmake/set_default_flags.cmake
++++ b/cmake/set_default_flags.cmake
+@@ -41,4 +41,3 @@ set(CMAKE_C_FLAGS_ASAN "${CMAKE_C_FLAGS} -g -O0 -fsanitize=address -fsanitize=un
+ 
+ # Make sure any non-standard library path are added in library or executable targets.
+ # Since this in done only at install time, behavior of unit tests is not affected.
+-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
