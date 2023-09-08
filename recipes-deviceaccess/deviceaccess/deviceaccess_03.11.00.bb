@@ -19,4 +19,4 @@ DEPENDS = "glib-2.0 libxml++ boost cppext exprtk exprtk"
 inherit cmake pkgconfig
 
 # Specify any options you want to pass to cmake using EXTRA_OECMAKE:
-EXTRA_OECMAKE = ""
+EXTRA_OECMAKE = "-DBUILD_TESTS=OFF"
