@@ -6,6 +6,8 @@ SRC_URI = "git://github.com/ChimeraTK/DeviceAccess.git;protocol=https;branch=mas
            file://0002-Drop-explicit-dependency-to-GLib.patch \
            file://0002-Drop-CMake-version-requirement.patch \
            file://0003-Extract-mmio-from-XDMA-backend-reuse-in-UIO.patch \
+           file://0004-Drop-debug-message.patch \
+           file://0005-Temporarily-disable-bar-check.patch \
            "
 
 # Modify these as desired

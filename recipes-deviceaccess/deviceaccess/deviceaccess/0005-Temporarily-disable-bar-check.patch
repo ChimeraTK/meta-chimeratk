@@ -1,0 +1,22 @@
+From 1c2f2d158728b873fe52b261b3088f059c709a78 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Fri, 15 Sep 2023 12:48:09 +0200
+Subject: [PATCH] Temporarily disable bar check
+
+---
+ device_backends/uio/src/UioBackend.cc | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/device_backends/uio/src/UioBackend.cc b/device_backends/uio/src/UioBackend.cc
+index ae4a74f4..21257c93 100644
+--- a/device_backends/uio/src/UioBackend.cc
++++ b/device_backends/uio/src/UioBackend.cc
+@@ -54,8 +54,6 @@ namespace ChimeraTK {
+   }
+ 
+   bool UioBackend::barIndexValid(uint64_t bar) {
+-    if(bar != 0) return false;
+-
+     return true;
+   }
+ 

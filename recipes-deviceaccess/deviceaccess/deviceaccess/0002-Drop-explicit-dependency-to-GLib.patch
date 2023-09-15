@@ -1,4 +1,4 @@
-From c598875cfd1a9dbdc904123147cac730702797e6 Mon Sep 17 00:00:00 2001
+From c656382f350b39e221805867556723f25a9f5d9d Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 11 Apr 2023 16:35:25 +0200
 Subject: [PATCH] Drop explicit dependency to GLib

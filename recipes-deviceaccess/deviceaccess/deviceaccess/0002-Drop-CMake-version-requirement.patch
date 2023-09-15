@@ -1,4 +1,4 @@
-From bbbe1ecde7b25e5c36d05aef16c983e1d688b93c Mon Sep 17 00:00:00 2001
+From 9fdac2dcd9bbda5ecf003b6286e19865ad83ea32 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Wed, 12 Apr 2023 15:15:16 +0200
 Subject: [PATCH] Drop CMake version requirement
