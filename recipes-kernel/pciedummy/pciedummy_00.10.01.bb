@@ -14,4 +14,4 @@ S = "${WORKDIR}/git"
 # The inherit of module.bbclass will automatically name module packages with
 # "kernel-module-" prefix as required by the oe-core build environment.
 
-RPROVIDES_${PN} += "kernel-module-pciedummy"
+RPROVIDES:${PN} += "kernel-module-pciedummy"

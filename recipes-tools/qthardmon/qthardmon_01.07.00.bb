@@ -12,7 +12,7 @@ SRCREV = "6341ff4356eb2432a2f493aed3feeb8f83ff5688"
 S = "${WORKDIR}/git"
 
 DEPENDS = "boost qtbase deviceaccess"
-RDEPENDS_${PN} += "xauth ttf-bitstream-vera liberation-fonts"
+RDEPENDS:${PN} += "xauth ttf-bitstream-vera liberation-fonts"
 
 inherit cmake cmake_qt5
 

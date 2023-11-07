@@ -16,7 +16,7 @@ SRCREV = "1a1355ffe98b4ec9cca5bf40d6de1db7c455eed2"
 
 S = "${WORKDIR}/git"
 
-DEPENDS = "glib-2.0 libxml++ boost cppext exprtk exprtk"
+DEPENDS = "glib-2.0 libxml++ boost cppext exprtk"
 
 inherit cmake pkgconfig
 
