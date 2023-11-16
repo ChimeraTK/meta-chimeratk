@@ -1,0 +1,30 @@
+From 79b6be64ed866856fa45bcc692785f6909705de7 Mon Sep 17 00:00:00 2001
+From: Patrick Huesmann <patrick.huesmann@desy.de>
+Date: Thu, 16 Nov 2023 12:17:51 +0100
+Subject: [PATCH] Don't export absolute paths for libraries
+
+---
+ cmake/create_cmake_config_files.cmake | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/cmake/create_cmake_config_files.cmake b/cmake/create_cmake_config_files.cmake
+index 9be96d82..2d2d3b50 100644
+--- a/cmake/create_cmake_config_files.cmake
++++ b/cmake/create_cmake_config_files.cmake
+@@ -101,8 +101,12 @@ function(resolveImportedLib lib linkLibs linkFlags libDirs incDirs cxxFlags)
+                 appendToList(linkLibs1 "-l${PROJECT_NAME}")
+             else()
+                 get_property(lib_loc TARGET ${lib} PROPERTY LOCATION)
++                # When building with BitBake, don't export absolute paths to libraries.
++                # Dependencies of the currently built package live in its "private" recipe-sysroot in tmp/work/<arch>/<package>/...
++                # The recipe-sysroot of the depending package lives in a different directory and maybe even on a different machine
++                get_filename_component(lib_filename ${lib_loc} NAME)
+                 #message("imported target ${lib} is actual library. location=${lib_loc}")
+-                appendToList(linkLibs1 "${lib_loc}")
++                appendToList(linkLibs1 "${lib_filename}")
+             endif()
+         endif()
+         get_target_property(_linkLibs ${lib} INTERFACE_LINK_LIBRARIES)
+-- 
+2.42.0
+

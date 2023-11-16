@@ -8,7 +8,8 @@ SRC_URI = "git://github.com/ChimeraTK/DeviceAccess.git;protocol=https;branch=mas
            file://0003-Extract-mmio-from-XDMA-backend-reuse-in-UIO.patch \
            file://0004-Drop-debug-message.patch \
            file://0005-Temporarily-disable-bar-check.patch \
-           "
+           file://0000-Don-t-export-absolute-paths-for-libraries.patch \
+"
 
 # Modify these as desired
 PV = "03.11.00"
