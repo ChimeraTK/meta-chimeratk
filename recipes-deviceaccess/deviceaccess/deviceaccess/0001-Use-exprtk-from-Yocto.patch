@@ -1,0 +1,30 @@
+From d702499c06bd710dfefd26a1de3ad5853616b8fb Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Wed, 22 Nov 2023 15:57:33 +0100
+Subject: [PATCH] Use exprtk from Yocto
+
+---
+ CMakeLists.txt | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 96f7412c..7fb17f52 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -32,7 +32,6 @@ endif(SUPPRESS_AUTO_DOC_BUILD)
+ 
+ FIND_PACKAGE(Boost COMPONENTS thread system chrono filesystem REQUIRED)
+ FIND_PACKAGE(ChimeraTK-cppext 01.05 REQUIRED)
+-FIND_PACKAGE(exprtk 01.04 REQUIRED)
+ 
+ FIND_PACKAGE(PkgConfig REQUIRED)
+ set(LIBXML++_VERSION "libxml++-5.0")
+@@ -107,7 +106,7 @@ target_compile_options(${PROJECT_NAME} PUBLIC ${projectCxxFlags})
+ target_include_directories(${PROJECT_NAME} INTERFACE "$<INSTALL_INTERFACE:include>")
+ set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_FULL_LIBRARY_VERSION} SOVERSION ${${PROJECT_NAME}_SOVERSION})
+ target_link_libraries(${PROJECT_NAME}
+-    PRIVATE ${CMAKE_DL_LIBS} PkgConfig::LibXML++ ChimeraTK::exprtk
++    PRIVATE ${CMAKE_DL_LIBS} PkgConfig::LibXML++
+     # we set this public because of Backend libs using shm_open (e.g. test code)
+     PUBLIC ${RT_LIBRARIES}
+     PUBLIC ${Boost_LIBRARIES}
