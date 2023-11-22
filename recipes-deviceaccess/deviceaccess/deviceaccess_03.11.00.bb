@@ -6,6 +6,7 @@ SRC_URI = "git://github.com/ChimeraTK/DeviceAccess.git;protocol=https;branch=mas
            file://0001-Bump-LibXML-version.patch \
            file://0002-Drop-explicit-dependency-to-GLib.patch \
            file://0003-Extract-mmio-from-XDMA-backend-reuse-in-UIO.patch \
+           file://0001-Use-exprtk-from-Yocto.patch \
            "
 
 # Modify these as desired
