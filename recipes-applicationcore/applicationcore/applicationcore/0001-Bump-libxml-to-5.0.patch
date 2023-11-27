@@ -1,8 +1,7 @@
-From 41620e239dc3338b95bf905d3f39de758f7a3263 Mon Sep 17 00:00:00 2001
+From f6ce5913553e049c7ffc0850ef1406f4b4ff89c4 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Wed, 12 Apr 2023 14:18:20 +0200
 Subject: [PATCH] Bump libxml++ to 5.0
-
 
 ---
  CMakeLists.txt                           |  2 +-
@@ -11,7 +10,7 @@ Subject: [PATCH] Bump libxml++ to 5.0
  3 files changed, 17 insertions(+), 17 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index bef958e..9b2ce66 100644
+index 65e2217..9a0ef96 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -18,7 +18,7 @@ FIND_PACKAGE(ChimeraTK-DeviceAccess 03.11 REQUIRED)
@@ -24,10 +23,10 @@ index bef958e..9b2ce66 100644
  PKG_CHECK_MODULES(glib REQUIRED IMPORTED_TARGET glib-2.0)
  
 diff --git a/src/XMLGeneratorVisitor.cc b/src/XMLGeneratorVisitor.cc
-index 23c49be..ea9b777 100644
+index 9df6fbe..756804a 100644
 --- a/src/XMLGeneratorVisitor.cc
 +++ b/src/XMLGeneratorVisitor.cc
-@@ -147,7 +147,7 @@ namespace ChimeraTK {
+@@ -152,7 +152,7 @@ namespace ChimeraTK {
        std::string xpath = std::string("ac:directory[@name='") + pathComponent + std::string("']");
        auto list = current->find(xpath, nsMap);
        if(list.empty()) { // not found: create it
@@ -36,7 +35,7 @@ index 23c49be..ea9b777 100644
          newChild->set_attribute("name", pathComponent);
          current = newChild;
        }
-@@ -159,7 +159,7 @@ namespace ChimeraTK {
+@@ -164,7 +164,7 @@ namespace ChimeraTK {
      }
  
      // now add the variable to the directory
@@ -45,7 +44,7 @@ index 23c49be..ea9b777 100644
      ChimeraTK::RegisterPath pathName(node.getPublicName());
      auto pathComponents = pathName.getComponents();
  
-@@ -168,8 +168,8 @@ namespace ChimeraTK {
+@@ -173,8 +173,8 @@ namespace ChimeraTK {
  
      auto dataTypeName = mapTypeToName(net.valueType);
  
@@ -56,7 +55,7 @@ index 23c49be..ea9b777 100644
  
      // add sub-element containing the data flow direction
      std::string dataFlowName{"application_to_control_system"};
-@@ -182,23 +182,23 @@ namespace ChimeraTK {
+@@ -187,23 +187,23 @@ namespace ChimeraTK {
          dataFlowName = "control_system_to_application_with_return";
        }
      }
@@ -89,9 +88,9 @@ index 23c49be..ea9b777 100644
      std::list nodeList(net.consumers.begin(), net.consumers.end());
      nodeList.push_back(net.feeder);
  
-@@ -212,7 +212,7 @@ namespace ChimeraTK {
-     for(const auto& peerNode : nodeList) {
-       if(peerNode.getType() == NodeType::ControlSystem) continue;
+@@ -219,7 +219,7 @@ namespace ChimeraTK {
+         continue;
+       }
        bool feeding = peerNode == nodeList.back();
 -      xmlpp::Element* peer = connectedModules->add_child("peer");
 +      xmlpp::Element* peer = connectedModules->add_child_element("peer");
@@ -99,7 +98,7 @@ index 23c49be..ea9b777 100644
        if(peerNode.getType() == NodeType::Application) {
          peer->set_attribute("type", "ApplicationModule");
 diff --git a/tests/executables_src/testApplication.cc b/tests/executables_src/testApplication.cc
-index eac2cc3..50edb6a 100644
+index d63346e..93d771d 100644
 --- a/tests/executables_src/testApplication.cc
 +++ b/tests/executables_src/testApplication.cc
 @@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(testApplicationExceptions) {
@@ -109,9 +108,9 @@ index eac2cc3..50edb6a 100644
 -  xmlpp::Node* theChild = nullptr;
 +  const xmlpp::Node* theChild = nullptr;
    for(const auto& child : node->get_children()) {
-     if(child->get_name() == subnodeName) theChild = child;
-   }
-@@ -93,7 +93,7 @@ std::string getValueFromNode(const xmlpp::Node* node, const std::string& subnode
+     if(child->get_name() == subnodeName) {
+       theChild = child;
+@@ -95,7 +95,7 @@ std::string getValueFromNode(const xmlpp::Node* node, const std::string& subnode
    }
    BOOST_REQUIRE_EQUAL(subChildList.size(),
        1); // child tag contains only text (no further sub-tags)

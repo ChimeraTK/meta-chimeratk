@@ -1,4 +1,4 @@
-From 5ee4299a6ba49393e876959dc90942bd6e855ef3 Mon Sep 17 00:00:00 2001
+From 92ddf07a5d3e03c5e823a6e70d37519a7696e4a5 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Wed, 12 Apr 2023 14:35:32 +0200
 Subject: [PATCH] Remote install rpath
@@ -8,12 +8,12 @@ Subject: [PATCH] Remote install rpath
  1 file changed, 3 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index bef958e..da5cc1d 100644
+index 9a0ef96..3c22bc9 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -72,9 +72,6 @@ target_link_libraries(${PROJECT_NAME}
-   PUBLIC ${Boost_LIBRARIES}
-   PRIVATE Threads::Threads PkgConfig::LibXML++ PkgConfig::glib ${HDF5_LIBRARIES})
+@@ -75,9 +75,6 @@ target_link_libraries(${PROJECT_NAME}
+ 
+ target_compile_definitions(${PROJECT_NAME} PRIVATE CHIMERATK_INSIDE_APPLICATION_CORE)
  
 -# do not remove runtime path of the library when installing
 -set_property(TARGET ${PROJECT_NAME} PROPERTY INSTALL_RPATH_USE_LINK_PATH TRUE)
