@@ -1,4 +1,4 @@
-From e8e7027dbc70a532ddf5de9c3d16adf1b18fb0e7 Mon Sep 17 00:00:00 2001
+From 1a92159bc032706cc9390aa3eeb4584b732de8d5 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 25 Jul 2023 15:52:29 +0200
 Subject: [PATCH] Drop glib2 dependency
@@ -8,7 +8,7 @@ Subject: [PATCH] Drop glib2 dependency
  1 file changed, 1 insertion(+), 2 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index e532346..0a69b43 100644
+index 3c22bc9..d3e6534 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -20,7 +20,6 @@ FIND_PACKAGE(ChimeraTK-DeviceAccess 03.11 REQUIRED)
@@ -19,12 +19,12 @@ index e532346..0a69b43 100644
  
  # Find BOOST filesystem
  # Note: we need to search this before looking for the unit_test_framework, since we must not link against the
-@@ -70,7 +69,7 @@ target_link_libraries(${PROJECT_NAME}
+@@ -71,7 +70,7 @@ target_link_libraries(${PROJECT_NAME}
    # put ControlSystemAdapter public since implicit dep DeviceAccess must be public
    PUBLIC ChimeraTK::ChimeraTK-ControlSystemAdapter
    PUBLIC ${Boost_LIBRARIES}
 -  PRIVATE Threads::Threads PkgConfig::LibXML++ PkgConfig::glib ${HDF5_LIBRARIES})
 +  PRIVATE Threads::Threads PkgConfig::LibXML++ ${HDF5_LIBRARIES})
  
- # add a target to generate API documentation with Doxygen
- include(cmake/enable_doxygen_documentation.cmake)
+ target_compile_definitions(${PROJECT_NAME} PRIVATE CHIMERATK_INSIDE_APPLICATION_CORE)
+ 
