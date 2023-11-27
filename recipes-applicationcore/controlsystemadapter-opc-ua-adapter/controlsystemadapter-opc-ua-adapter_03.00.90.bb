@@ -10,6 +10,7 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=3000208d539ec061b899bce1d9ce9404"
 SRC_URI = "git://github.com/ChimeraTK/ControlSystemAdapter-OPC-UA-Adapter;protocol=https;branch=history_test \
            file://0001-Remove-RPATH-handling.patch \
            file://0002-Do-not-install-Find-CMake-files.patch \
+           file://0001-Fix-compatibility-with-latest-CSA.patch \
            "
 
 # Modify these as desired
