@@ -9,7 +9,6 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=1ebbd3e34237af26da5dc08a4e440464 \
                     file://COPYING.LESSER;md5=3000208d539ec061b899bce1d9ce9404"
 
 SRC_URI = "git://github.com/ChimeraTK/ControlSystemAdapter.git;protocol=https;branch=master \
-           file://0001-Bump-libxml-version-to-5.0.patch \
            "
 
 # Modify these as desired
@@ -20,7 +19,7 @@ S = "${WORKDIR}/git"
 
 # NOTE: the following library dependencies are unknown, ignoring: libatomic
 #       (this is based on recipes that have previously been built and packaged)
-DEPENDS = "libxml++-5.0 boost deviceaccess"
+DEPENDS = "libxml++ boost deviceaccess"
 
 inherit cmake pkgconfig
 

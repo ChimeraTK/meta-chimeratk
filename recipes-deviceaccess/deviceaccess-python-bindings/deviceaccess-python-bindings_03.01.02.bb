@@ -16,7 +16,7 @@ DEPENDS = "boost python3 python3-numpy deviceaccess"
 RDEPENDS:${PN} = "python3-numpy"
 
 # We are using setuptools3-base here to get the proper FILES defines for python
-inherit cmake pkgconfig python3-dir setuptools3-base
+inherit cmake pkgconfig python3-dir distutils-common-base
 
 # Specify any options you want to pass to cmake using EXTRA_OECMAKE:
 EXTRA_OECMAKE = "-DNUMPY_INCLUDE_DIRS:PATH=${STAGING_DIR_HOST}/${PYTHON_SITEPACKAGES_DIR}/numpy/core/include"

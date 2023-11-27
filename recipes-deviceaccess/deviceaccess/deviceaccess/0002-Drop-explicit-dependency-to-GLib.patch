@@ -1,4 +1,4 @@
-From 39a20d740bf84b777e5bf42b6f5ad4dcfa426601 Mon Sep 17 00:00:00 2001
+From 765477867fe7b99ffdd5b4ef9624868f41910d6a Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 11 Apr 2023 16:35:25 +0200
 Subject: [PATCH] Drop explicit dependency to GLib
@@ -8,12 +8,12 @@ Subject: [PATCH] Drop explicit dependency to GLib
  1 file changed, 1 insertion(+), 2 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 7dd1efb2..c9e51168 100644
+index b17eaa00..8445fe6b 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -37,7 +37,6 @@ FIND_PACKAGE(exprtk 01.04 REQUIRED)
  FIND_PACKAGE(PkgConfig REQUIRED)
- set(LIBXML++_VERSION "libxml++-5.0")
+ set(LIBXML++_VERSION "libxml++-2.6")
  PKG_CHECK_MODULES(LibXML++ REQUIRED IMPORTED_TARGET ${LIBXML++_VERSION})
 -PKG_CHECK_MODULES(glib REQUIRED IMPORTED_TARGET glib-2.0)
  

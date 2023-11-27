@@ -1,4 +1,4 @@
-From 711e02bd88b11832e094321dbbe66801936f48a6 Mon Sep 17 00:00:00 2001
+From ba11a5c404ebb30924a5c4c4ddca61b229865e5e Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 25 Jul 2023 15:52:29 +0200
 Subject: [PATCH] Drop glib2 dependency
@@ -8,12 +8,12 @@ Subject: [PATCH] Drop glib2 dependency
  1 file changed, 1 insertion(+), 2 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 81f862f..0bfb241 100644
+index da5cc1d..ecc0c68 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -20,7 +20,6 @@ FIND_PACKAGE(ChimeraTK-DeviceAccess 03.11 REQUIRED)
  FIND_PACKAGE(PkgConfig REQUIRED)
- set(LIBXML++_VERSION "libxml++-5.0")
+ set(LIBXML++_VERSION "libxml++-2.6")
  PKG_CHECK_MODULES(LibXML++ REQUIRED IMPORTED_TARGET ${LIBXML++_VERSION})
 -PKG_CHECK_MODULES(glib REQUIRED IMPORTED_TARGET glib-2.0)
  

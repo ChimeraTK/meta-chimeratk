@@ -1,4 +1,4 @@
-From 97dd696d4486a9fa223242bc2a4cbe8179c27d97 Mon Sep 17 00:00:00 2001
+From 1afa6e45c706adb673a3f81c6ca43b51d8306e5c Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 25 Jul 2023 15:01:04 +0200
 Subject: [PATCH] Remove install rpath, part 2
