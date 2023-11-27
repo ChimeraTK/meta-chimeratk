@@ -8,15 +8,13 @@ LICENSE = "LGPL-3.0-only"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=3000208d539ec061b899bce1d9ce9404"
 
 SRC_URI = "git://github.com/ChimeraTK/ControlSystemAdapter-OPC-UA-Adapter;protocol=https;branch=master \
-           file://0001-use-imported-targets-and-cmake-exports.patch \
-           file://0002-use-lib-install-dir-defined-by-GNUInstallDirs.patch \
            file://0003-Drop-cmake-requirement.patch \
-           file://0004-Do-not-set-RPATH-on-install.patch \
+           file://0001-csa-opc-ua-Remove-RPATH-handling.patch \
            "
 
 # Modify these as desired
-PV = "1.0+git${SRCPV}"
-SRCREV = "f3a10b199c82f472d9e18f7372cd35c60f888135"
+PV = "03.02.02"
+SRCREV = "5a3fa2f6d83016c17ca926b67aba3cee5f0618a8"
 
 S = "${WORKDIR}/git"
 
