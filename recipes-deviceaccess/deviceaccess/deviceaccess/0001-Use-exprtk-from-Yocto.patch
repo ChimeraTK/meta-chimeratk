@@ -11,7 +11,7 @@ diff --git a/CMakeLists.txt b/CMakeLists.txt
 index afd8ee93..744b72e8 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -32,7 +32,6 @@ endif(SUPPRESS_AUTO_DOC_BUILD)
+@@ -33,7 +33,6 @@ endif(SUPPRESS_AUTO_DOC_BUILD)
  
  FIND_PACKAGE(Boost COMPONENTS thread system chrono filesystem REQUIRED)
  FIND_PACKAGE(ChimeraTK-cppext 01.05 REQUIRED)
@@ -23,8 +23,8 @@ index afd8ee93..744b72e8 100644
  target_include_directories(${PROJECT_NAME} INTERFACE "$<INSTALL_INTERFACE:include>")
  set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_FULL_LIBRARY_VERSION} SOVERSION ${${PROJECT_NAME}_SOVERSION})
  target_link_libraries(${PROJECT_NAME}
--    PRIVATE ${CMAKE_DL_LIBS} PkgConfig::LibXML++ ChimeraTK::exprtk
+-  PRIVATE ${CMAKE_DL_LIBS} PkgConfig::LibXML++ ChimeraTK::exprtk
 +    PRIVATE ${CMAKE_DL_LIBS} PkgConfig::LibXML++
-     # we set this public because of Backend libs using shm_open (e.g. test code)
-     PUBLIC ${RT_LIBRARIES}
-     PUBLIC ${Boost_LIBRARIES}
+ 
+   # we set this public because of Backend libs using shm_open (e.g. test code)
+   PUBLIC ${RT_LIBRARIES}

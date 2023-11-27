@@ -1,10 +1,10 @@
-From ec7c891a041af9834d72f7c8bfa40b0b0e0d97e7 Mon Sep 17 00:00:00 2001
+From d591cb68534d593e01a2bb146678bee79868f24f Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Thu, 13 Jul 2023 14:14:54 +0200
 Subject: [PATCH] Extract mmio from XDMA backend, reuse in UIO
 
 ---
- CMakeLists.txt                                |  5 +
+ CMakeLists.txt                                |  4 +
  .../{xdma => mmio}/include/DeviceFile.h       | 18 ++--
  device_backends/mmio/include/MmioAccess.h     | 39 ++++++++
  device_backends/mmio/src/DeviceFile.cc        | 65 +++++++++++++
@@ -16,7 +16,7 @@ Subject: [PATCH] Extract mmio from XDMA backend, reuse in UIO
  device_backends/xdma/src/DeviceFile.cc        | 49 ----------
  device_backends/xdma/src/DmaIntf.cc           |  4 +-
  device_backends/xdma/src/EventFile.cc         |  2 +-
- 12 files changed, 240 insertions(+), 143 deletions(-)
+ 12 files changed, 239 insertions(+), 143 deletions(-)
  rename device_backends/{xdma => mmio}/include/DeviceFile.h (52%)
  create mode 100644 device_backends/mmio/include/MmioAccess.h
  create mode 100644 device_backends/mmio/src/DeviceFile.cc
@@ -24,14 +24,13 @@ Subject: [PATCH] Extract mmio from XDMA backend, reuse in UIO
  delete mode 100644 device_backends/xdma/src/DeviceFile.cc
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 8445fe6b..afd8ee93 100644
+index 60686d4d..47809d00 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -63,6 +63,11 @@ install(DIRECTORY ${PROJECT_BINARY_DIR}/generated_include/ DESTINATION include/C
- set(subdirs device device_backends exception util fileparsers
-             device_backends/NumericAddressedBackend device_backends/DummyBackend device_backends/LogicalNameMapping
-             device_backends/Subdevice device_backends/SharedDummy device_backends/Rebot)
-+
+@@ -66,6 +66,10 @@ set(subdirs device device_backends exception util fileparsers
+   device_backends/NumericAddressedBackend device_backends/DummyBackend device_backends/LogicalNameMapping
+   device_backends/Subdevice device_backends/SharedDummy device_backends/Rebot)
+ 
 +if(HAVE_XDMA_BACKEND OR HAVE_UIO_BACKEND)
 +    set(subdirs ${subdirs} device_backends/mmio)
 +endif()
