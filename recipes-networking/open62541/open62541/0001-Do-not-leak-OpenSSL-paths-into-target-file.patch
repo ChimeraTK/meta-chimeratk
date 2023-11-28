@@ -1,0 +1,22 @@
+From b21244e09c20d8a2a0a2c602cdf258aac20c3e94 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Tue, 28 Nov 2023 14:26:10 +0100
+Subject: [PATCH] Do not leak OpenSSL paths into target file
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1934374ec..940fcad4a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -601,7 +601,7 @@ if(UA_ENABLE_ENCRYPTION_OPENSSL OR UA_ENABLE_MQTT_TLS_OPENSSL)
+     # use the OpenSSL encryption library
+     # https://cmake.org/cmake/help/v3.0/module/FindOpenSSL.html
+     find_package(OpenSSL REQUIRED)
+-    list(APPEND open62541_LIBRARIES ${OPENSSL_LIBRARIES})
++    list(APPEND open62541_LIBRARIES PRIVATE ${OPENSSL_LIBRARIES})
+     endif ()
+ 
+ if(UA_ENABLE_ENCRYPTION_LIBRESSL)
