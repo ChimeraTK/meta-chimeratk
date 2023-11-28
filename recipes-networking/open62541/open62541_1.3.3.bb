@@ -6,7 +6,8 @@ SRC_URI = "gitsm://github.com/open62541/open62541.git;protocol=https;branch=mast
            file://FixForZeroSamplingInterval.patch \
            file://RemovePythonDependency.patch \
            file://SkipFirstHistoryEntry.patch \
-          "
+           file://0001-Do-not-leak-OpenSSL-paths-into-target-file.patch \
+           "
 
 # Modify these as desired
 PV = "1.0+git${SRCPV}"
