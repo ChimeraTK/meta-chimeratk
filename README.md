@@ -13,6 +13,8 @@ Dependencies
   branch: zeus
   revision: HEAD
 
+Recommends
+==========
   URI: https://github.com/meta-qt5/meta-qt5
   branch: zeus
   revision: HEAD
