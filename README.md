@@ -13,6 +13,8 @@ Dependencies
   branch: kirkstone
   revision: HEAD
 
+Recommends
+==========
   URI: https://github.com/meta-qt5/meta-qt5
   branch: kirkstone
   revision: HEAD
