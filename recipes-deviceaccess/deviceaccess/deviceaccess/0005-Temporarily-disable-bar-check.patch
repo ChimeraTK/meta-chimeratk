@@ -1,4 +1,4 @@
-From 009c480d7192c0bc62eb352739c495589fc20225 Mon Sep 17 00:00:00 2001
+From dc49e3f4c6a8583936dad6a521d24476c605d0d3 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Fri, 15 Sep 2023 12:48:09 +0200
 Subject: [PATCH] Temporarily disable bar check

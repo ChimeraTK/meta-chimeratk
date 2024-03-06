@@ -7,6 +7,7 @@ SRC_URI = "git://github.com/ChimeraTK/DeviceAccess.git;protocol=https;branch=mas
            file://0004-Drop-debug-message.patch \
            file://0005-Temporarily-disable-bar-check.patch \
            file://0001-Drop-CMake-required-version.patch \
+           file://0006-Enable-symlink-devices-for-uio.patch \
            "
 
 # Modify these as desired

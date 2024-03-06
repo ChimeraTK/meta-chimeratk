@@ -1,4 +1,4 @@
-From fcce7cb50a7370bf88e7438d7dda3cdc5fa05985 Mon Sep 17 00:00:00 2001
+From b423a61c8f19740340356ada0800a9bafe9d0002 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Fri, 15 Sep 2023 12:47:50 +0200
 Subject: [PATCH] Drop debug message
