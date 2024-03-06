@@ -6,6 +6,10 @@ SRC_URI = "git://github.com/ChimeraTK/DeviceAccess.git;protocol=https;branch=mas
            file://0001-Bump-LibXML-version.patch \
            file://0003-Extract-mmio-from-XDMA-backend-reuse-in-UIO.patch \
            file://0001-Use-exprtk-from-Yocto.patch \
+           file://0003-Temporarily-disable-BAR-check.patch \
+           file://0004-Remove-debug-output.patch \
+           file://0005-Enable-symlinked-devices-for-UIO.patch \
+           file://0001-Add-missing-memory-include.patch \
            "
 
 # Modify these as desired
