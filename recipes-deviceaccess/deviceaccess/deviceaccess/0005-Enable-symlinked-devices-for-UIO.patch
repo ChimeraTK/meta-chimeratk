@@ -1,0 +1,23 @@
+From a04a13d4e2e852bacf092f62a0877c65da5de902 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Wed, 6 Mar 2024 09:40:20 +0100
+Subject: [PATCH] Enable symlinked devices for UIO
+
+---
+ device_backends/uio/src/UioAccess.cc | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/device_backends/uio/src/UioAccess.cc b/device_backends/uio/src/UioAccess.cc
+index 1c8417f7..5d07388a 100644
+--- a/device_backends/uio/src/UioAccess.cc
++++ b/device_backends/uio/src/UioAccess.cc
+@@ -16,6 +16,9 @@
+ namespace ChimeraTK {
+ 
+   UioAccess::UioAccess(const std::string& deviceFilePath) : _deviceFilePath(deviceFilePath.c_str()) {
++    if(boost::filesystem::is_symlink(_deviceFilePath)) {
++      _deviceFilePath = boost::filesystem::canonical(_deviceFilePath);
++    }
+     std::string fileName = _deviceFilePath.filename().string();
+     //NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+     _deviceKernelBase = reinterpret_cast<void*>(readUint64HexFromFile("/sys/class/uio/" + fileName + "/maps/map0/addr"));

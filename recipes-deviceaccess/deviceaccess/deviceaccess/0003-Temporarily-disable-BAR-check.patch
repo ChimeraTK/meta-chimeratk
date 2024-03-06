@@ -1,0 +1,49 @@
+From 10ed6a845c5bc8742deeb8ab7f4fb7bab02cfe5f Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Wed, 6 Mar 2024 09:38:39 +0100
+Subject: [PATCH] Temporarily disable BAR check
+
+---
+ device_backends/uio/src/UioAccess.cc  | 8 --------
+ device_backends/uio/src/UioBackend.cc | 2 --
+ 2 files changed, 10 deletions(-)
+
+diff --git a/device_backends/uio/src/UioAccess.cc b/device_backends/uio/src/UioAccess.cc
+index b8f6b1d6..58cf832b 100644
+--- a/device_backends/uio/src/UioAccess.cc
++++ b/device_backends/uio/src/UioAccess.cc
+@@ -46,10 +46,6 @@ namespace ChimeraTK {
+   }
+ 
+   void UioAccess::read(uint64_t map, uint64_t address, int32_t* data, size_t sizeInBytes) {
+-    if(map > 0) {
+-      throw ChimeraTK::logic_error("UIO: Multiple memory regions are not supported");
+-    }
+-
+     // This is a temporary work around, because register nodes of current map use absolute bus addresses.
+     //NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+     address = address % reinterpret_cast<uint64_t>(_deviceKernelBase);
+@@ -62,10 +58,6 @@ namespace ChimeraTK {
+   }
+ 
+   void UioAccess::write(uint64_t map, uint64_t address, int32_t const* data, size_t sizeInBytes) {
+-    if(map > 0) {
+-      throw ChimeraTK::logic_error("UIO: Multiple memory regions are not supported");
+-    }
+-
+     std::cout << "Calling uio-access write " << map << " " << address << ":" << (void*)data << " " << sizeInBytes
+               << std::endl;
+ 
+diff --git a/device_backends/uio/src/UioBackend.cc b/device_backends/uio/src/UioBackend.cc
+index ae4a74f4..21257c93 100644
+--- a/device_backends/uio/src/UioBackend.cc
++++ b/device_backends/uio/src/UioBackend.cc
+@@ -54,8 +54,6 @@ namespace ChimeraTK {
+   }
+ 
+   bool UioBackend::barIndexValid(uint64_t bar) {
+-    if(bar != 0) return false;
+-
+     return true;
+   }
+ 
