@@ -1,4 +1,4 @@
-From d591cb68534d593e01a2bb146678bee79868f24f Mon Sep 17 00:00:00 2001
+From 2df7f0d4917f510bbb5f0647934c8c2b8eb5d23d Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Thu, 13 Jul 2023 14:14:54 +0200
 Subject: [PATCH] Extract mmio from XDMA backend, reuse in UIO
@@ -24,7 +24,7 @@ Subject: [PATCH] Extract mmio from XDMA backend, reuse in UIO
  delete mode 100644 device_backends/xdma/src/DeviceFile.cc
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 60686d4d..47809d00 100644
+index 975a2d51..e8163a7e 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -66,6 +66,10 @@ set(subdirs device device_backends exception util fileparsers

@@ -5,6 +5,9 @@ LIC_FILES_CHKSUM = "file://COPYING.LESSER;md5=3000208d539ec061b899bce1d9ce9404 \
 SRC_URI = "git://github.com/ChimeraTK/DeviceAccess.git;protocol=https;branch=master \
            file://0003-Extract-mmio-from-XDMA-backend-reuse-in-UIO.patch \
            file://0001-Use-exprtk-from-Yocto.patch \
+           file://0003-Temporarily-disable-BAR-check.patch \
+           file://0004-Remove-debug-output.patch \
+           file://0005-Enable-symlinked-devices-for-UIO.patch \
            "
 
 # Modify these as desired
