@@ -6,8 +6,8 @@ inherit module
 
 SRC_URI = "git://github.com/ChimeraTK/pciedummy-driver;protocol=https;branch=master"
 
-PV = "1.0+git${SRCPV}"
-SRCREV = "b9e161a40f0d303f34ad43d901cd840f94d80e17"
+PV = "00.10.03"
+SRCREV = "9a65ea49b2c55fecafb61a04fa41afb89fa8881e"
 
 S = "${WORKDIR}/git"
 
