@@ -1,17 +1,18 @@
-From e0c31fee74156b61081050f04fdec45f5951c248 Mon Sep 17 00:00:00 2001
+From 9d2ff9fab21bcd5f84ac701f909aa6bad2d162b7 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Fri, 22 Jul 2022 15:58:45 +0200
 Subject: [PATCH] Hard-code numpy include paths
 
+Upstream-Status: Inappropriate [embedded specific]
 ---
- tools/build/src/tools/python.jam | 20 +++-----------------
+ src/tools/python.jam | 20 +++-----------------
  1 file changed, 3 insertions(+), 17 deletions(-)
 
-diff --git a/tools/build/src/tools/python.jam b/tools/build/src/tools/python.jam
-index 00d2a36c6..bb4b6b180 100644
---- a/tools/build/src/tools/python.jam
-+++ b/tools/build/src/tools/python.jam
-@@ -838,23 +838,9 @@ local rule configure ( version ? : cmd-or-prefix ? : includes * : libraries ? :
+diff --git a/src/tools/python.jam b/src/tools/python.jam
+index 0dfc750a2..39b2f10ce 100644
+--- a/src/tools/python.jam
++++ b/src/tools/python.jam
+@@ -847,23 +847,9 @@ local rule configure ( version ? : cmd-or-prefix ? : includes * : libraries ? :
      #
      # Discover the presence of NumPy
      #
