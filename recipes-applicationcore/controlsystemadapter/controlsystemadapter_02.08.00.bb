@@ -10,6 +10,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=1ebbd3e34237af26da5dc08a4e440464 \
 
 SRC_URI = "git://github.com/ChimeraTK/ControlSystemAdapter.git;protocol=https;branch=master \
            file://0001-Drop-CMake-requirement.patch \
+           file://0001-Drop-libatomic.patch \
            "
 
 # Modify these as desired
