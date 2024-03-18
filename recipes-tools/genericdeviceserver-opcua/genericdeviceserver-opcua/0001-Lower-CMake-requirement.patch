@@ -1,20 +1,21 @@
-From c7a655440fc1f8e0011a72175774e70b34629a77 Mon Sep 17 00:00:00 2001
+From 49e35e06d3fdac084117929f121cfdee01228a6c Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Fri, 10 Feb 2023 11:22:43 +0100
 Subject: [PATCH] Lower CMake requirement
 
 3.16 does not really seem to be necessary anyway
+
 ---
  CMakeLists.txt | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 22e37aa..ed0c72c 100644
+index 4bfbc2d..dea5aa7 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,4 +1,4 @@
 -cmake_minimum_required(VERSION 3.16)
 +cmake_minimum_required(VERSION 3.15)
  
- set(PROJECT_BASE_NAME generic-chimeratk-server)
- # Unfortunately application core does not allow hyphens in the app name. Have to use underscore.
+ project(ChimeraTK-Generic-Device-Server)
+ 

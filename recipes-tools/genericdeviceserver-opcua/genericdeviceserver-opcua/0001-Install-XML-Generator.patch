@@ -1,4 +1,4 @@
-From 3ee431d1a252f9fc2b27845763ad39bee2fd7b0a Mon Sep 17 00:00:00 2001
+From 66c923dbce08ae5aa3cf9094fd1d4591b2a30d12 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Wed, 19 Apr 2023 13:40:47 +0200
 Subject: [PATCH] Install XML Generator
@@ -8,14 +8,12 @@ Subject: [PATCH] Install XML Generator
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 20d3250..643b905 100644
+index dea5aa7..7d683fa 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -91,6 +91,6 @@ enable_testing()
+@@ -83,4 +83,4 @@ enable_testing()
  add_test(testGenericServer ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/testGenericServer)
  
- 
--install(TARGETS ${PROJECT_NAME}
-+install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}-xmlGenerator
-   RUNTIME DESTINATION bin
- )
+ #install executables
+-install(TARGETS ${EXE_NAME} RUNTIME DESTINATION bin)
++install(TARGETS ${EXE_NAME} ${EXE_NAME}-xmlGenerator RUNTIME DESTINATION bin)

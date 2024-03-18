@@ -1,4 +1,4 @@
-From 6ea0f82d2a63ef0542ad1c28737704a21d6be0ae Mon Sep 17 00:00:00 2001
+From 632eada0de051b5b98923b94e5b37d8dfbf40937 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Thu, 9 Feb 2023 12:55:39 +0100
 Subject: [PATCH] Make internal library static
@@ -8,15 +8,15 @@ Subject: [PATCH] Make internal library static
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index f2f374e..22e37aa 100644
+index e12cf66..4bfbc2d 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -51,7 +51,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
+@@ -47,7 +47,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
  # library for code shared between server executable and tests
  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
  
--add_library(${PROJECT_BASE_NAME} SHARED ${library_sources} )
-+add_library(${PROJECT_BASE_NAME} STATIC ${library_sources} )
+-add_library(${EXE_NAME}_impl ${library_sources})
++add_library(${EXE_NAME}_impl STATIC ${library_sources})
+ target_link_libraries(${EXE_NAME}_impl ChimeraTK::ChimeraTK-ApplicationCore)
  
  # main server executable
- add_executable(${PROJECT_NAME} ${server_sources})
