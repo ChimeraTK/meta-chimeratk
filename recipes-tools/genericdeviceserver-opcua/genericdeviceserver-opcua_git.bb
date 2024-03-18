@@ -9,14 +9,13 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=e6a600fd5e1d9cbde2d983680233ad02"
 
 SRC_URI = "git://github.com/ChimeraTK/GenericDeviceServer;protocol=https;branch=master \
            file://0001-Drop-RPATH-handling.patch \
-           file://0002-Drop-hard-dependency-on-DOOCS.patch \
            file://0003-Make-internal-library-static.patch \
            file://0001-Install-XML-Generator.patch \
            "
 
 # Modify these as desired
-PV = "1.0+git${SRCPV}"
-SRCREV = "7cfa924fb9a983ac2e7383eaf15bcaa8996a29bd"
+PV = "01.04.01"
+SRCREV = "103e30063a2ac9e23b2d4c370aa03b8b6c1f6fe8"
 
 S = "${WORKDIR}/git"
 
