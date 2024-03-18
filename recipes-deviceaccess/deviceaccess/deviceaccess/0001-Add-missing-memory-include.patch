@@ -1,0 +1,21 @@
+From 38b601144ac6b89f876c93b1c2d2d358d4b57e74 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Fri, 15 Mar 2024 15:23:09 +0100
+Subject: [PATCH] Add missing <memory> include
+
+---
+ device_backends/uio/include/UioAccess.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/device_backends/uio/include/UioAccess.h b/device_backends/uio/include/UioAccess.h
+index 26106eda..f8aaf265 100644
+--- a/device_backends/uio/include/UioAccess.h
++++ b/device_backends/uio/include/UioAccess.h
+@@ -7,6 +7,7 @@
+ #include <boost/filesystem.hpp>
+ 
+ #include <atomic>
++#include <memory>
+ #include <string>
+ 
+ namespace ChimeraTK {
