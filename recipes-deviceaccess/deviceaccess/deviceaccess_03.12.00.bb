@@ -10,6 +10,7 @@ SRC_URI = "git://github.com/ChimeraTK/DeviceAccess.git;protocol=https;branch=mas
            file://0004-Remove-debug-output.patch \
            file://0005-Enable-symlinked-devices-for-UIO.patch \
            file://0001-Add-missing-memory-include.patch \
+           file://0001-Add-missing-include-for-cstdint.patch \
            "
 
 # Modify these as desired
