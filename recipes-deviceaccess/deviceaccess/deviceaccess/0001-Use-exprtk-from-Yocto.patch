@@ -1,14 +1,15 @@
-(??)From 4ddf4888dabf60e30defe76b289c84631714a965 Mon Sep 17 00:00:00 2001
+From ffe5d2862fd470c7918cf44cbaa34303a13e5389 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Wed, 22 Nov 2023 15:57:33 +0100
 Subject: [PATCH] Use exprtk from Yocto
 
+(??)From 4ddf4888dabf60e30defe76b289c84631714a965 Mon Sep 17 00:00:00 2001
 ---
  CMakeLists.txt | 3 +--
  1 file changed, 1 insertion(+), 2 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 47809d00..66f8331f 100644
+index a46b5dfd..ca9a7b59 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -33,7 +33,6 @@ endif(SUPPRESS_AUTO_DOC_BUILD)
@@ -16,10 +17,10 @@ index 47809d00..66f8331f 100644
  FIND_PACKAGE(Boost COMPONENTS thread system chrono filesystem REQUIRED)
  FIND_PACKAGE(ChimeraTK-cppext 01.05 REQUIRED)
 -FIND_PACKAGE(exprtk 01.04 REQUIRED)
+ FIND_PACKAGE(nlohmann_json 03.07 REQUIRED)
  
  FIND_PACKAGE(PkgConfig REQUIRED)
- set(LIBXML++_VERSION "libxml++-5.0")
-@@ -114,7 +113,7 @@ target_compile_options(${PROJECT_NAME} PUBLIC ${projectCxxFlags})
+@@ -111,7 +110,7 @@ target_compile_options(${PROJECT_NAME} PUBLIC ${projectCxxFlags})
  target_include_directories(${PROJECT_NAME} INTERFACE "$<INSTALL_INTERFACE:include>")
  set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_FULL_LIBRARY_VERSION} SOVERSION ${${PROJECT_NAME}_SOVERSION})
  target_link_libraries(${PROJECT_NAME}

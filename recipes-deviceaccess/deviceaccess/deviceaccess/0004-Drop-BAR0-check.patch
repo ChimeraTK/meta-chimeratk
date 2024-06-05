@@ -1,0 +1,35 @@
+From 59a1fd65586bcaf89439c2ad6773664330d36d3e Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Wed, 5 Jun 2024 14:25:27 +0200
+Subject: [PATCH] Drop BAR0 check
+
+---
+ backends/uio/src/UioAccess.cc | 8 --------
+ 1 file changed, 8 deletions(-)
+
+diff --git a/backends/uio/src/UioAccess.cc b/backends/uio/src/UioAccess.cc
+index 59dde846..103d4c0e 100644
+--- a/backends/uio/src/UioAccess.cc
++++ b/backends/uio/src/UioAccess.cc
+@@ -47,10 +47,6 @@ namespace ChimeraTK {
+   }
+ 
+   void UioAccess::read(uint64_t map, uint64_t address, int32_t* __restrict__ data, size_t sizeInBytes) {
+-    if(map > 0) {
+-      throw ChimeraTK::logic_error("UIO: Multiple memory regions are not supported");
+-    }
+-
+     // This is a temporary work around, because register nodes of current map use absolute bus addresses.
+     address = address % reinterpret_cast<uint64_t>(_deviceKernelBase);
+ 
+@@ -66,10 +62,6 @@ namespace ChimeraTK {
+   }
+ 
+   void UioAccess::write(uint64_t map, uint64_t address, int32_t const* data, size_t sizeInBytes) {
+-    if(map > 0) {
+-      throw ChimeraTK::logic_error("UIO: Multiple memory regions are not supported");
+-    }
+-
+     // This is a temporary work around, because register nodes of current map use absolute bus addresses.
+     address = address % reinterpret_cast<uint64_t>(_deviceKernelBase);
+ 
