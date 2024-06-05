@@ -1,4 +1,4 @@
-From 7a2e68ec6b116d8bab3f6ceb3d42fd6d622d629b Mon Sep 17 00:00:00 2001
+From 1b64b1abfc8470d54869078fc1bdcf518b945f4b Mon Sep 17 00:00:00 2001
 From: OpenEmbedded <oe.patch@oe>
 Date: Fri, 25 Nov 2022 16:27:30 +0000
 Subject: [PATCH] %% original patch: drop-cmake-version.patch
