@@ -1,4 +1,4 @@
-From 92ddf07a5d3e03c5e823a6e70d37519a7696e4a5 Mon Sep 17 00:00:00 2001
+From ea988d51d8086f9ecd13889ed124645605418083 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Wed, 12 Apr 2023 14:35:32 +0200
 Subject: [PATCH] Remote install rpath
@@ -8,7 +8,7 @@ Subject: [PATCH] Remote install rpath
  1 file changed, 3 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 9a0ef96..3c22bc9 100644
+index c5858d9..25d5b2a 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -75,9 +75,6 @@ target_link_libraries(${PROJECT_NAME}
