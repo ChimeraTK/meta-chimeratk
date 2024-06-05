@@ -8,8 +8,8 @@ SRC_URI = "git://github.com/ChimeraTK/ApplicationCore.git;protocol=https;branch=
            file://0004-Drop-glib2-dependency.patch \
            "
 
-PV = "03.04.00"
-SRCREV = "71e13321795e2c0414fcaaab6c8f8e2f32147314"
+PV = "03.06.00"
+SRCREV = "1b3a59eab6ea5a13992217a4bf93ab22663e9ca5"
 
 S = "${WORKDIR}/git"
 
