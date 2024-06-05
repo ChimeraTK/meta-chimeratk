@@ -1,0 +1,23 @@
+From 3141eac28ff8e1f7d4216838dc45d21288e0f6c3 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Fri, 7 Jun 2024 09:10:57 +0200
+Subject: [PATCH] Drop version requirement of nlohmann_json
+
+Works fine with the version in zeus
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 368900af..24572657 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -34,7 +34,7 @@ endif(SUPPRESS_AUTO_DOC_BUILD)
+ FIND_PACKAGE(Boost COMPONENTS thread system chrono filesystem REQUIRED)
+ FIND_PACKAGE(ChimeraTK-cppext 01.05 REQUIRED)
+ FIND_PACKAGE(exprtk 01.04 REQUIRED)
+-FIND_PACKAGE(nlohmann_json 03.07 REQUIRED)
++FIND_PACKAGE(nlohmann_json 03.03 REQUIRED)
+ 
+ FIND_PACKAGE(PkgConfig REQUIRED)
+ set(LIBXML++_VERSION "libxml++-2.6")

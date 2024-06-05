@@ -3,20 +3,18 @@ LIC_FILES_CHKSUM = "file://COPYING.LESSER;md5=3000208d539ec061b899bce1d9ce9404 \
                     file://COPYING;md5=1ebbd3e34237af26da5dc08a4e440464"
 
 SRC_URI = "git://github.com/ChimeraTK/DeviceAccess.git;protocol=https;branch=master \
-           file://0003-Extract-mmio-from-XDMA-backend-reuse-in-UIO.patch \
-           file://0004-Drop-debug-message.patch \
-           file://0005-Temporarily-disable-bar-check.patch \
            file://0001-Drop-CMake-required-version.patch \
-           file://0006-Enable-symlink-devices-for-uio.patch \
+           file://0004-Drop-BAR0-check.patch \
+           file://0001-Drop-version-requirement-of-nlohmann_json.patch \
            "
 
 # Modify these as desired
-PV = "03.12.00"
-SRCREV = "1e1e28745703db938b06a752b4be41b74b52fcc6"
+PV = "03.15.01"
+SRCREV = "6388257aeeea097131ffc3a2b2dc0237566e59a7"
 
 S = "${WORKDIR}/git"
 
-DEPENDS = "libxml++ boost cppext exprtk exprtk"
+DEPENDS = "boost cppext exprtk libxml++ exprtk nlohmann-json"
 
 inherit cmake pkgconfig
 
