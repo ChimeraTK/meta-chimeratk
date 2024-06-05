@@ -1,4 +1,4 @@
-From bc1f5fa90fabac457921abcceafa7d0fd7ab80fa Mon Sep 17 00:00:00 2001
+From d12360906ff50729ef4c1580ceda8b1a4fe96d3b Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Wed, 12 Apr 2023 14:02:41 +0200
 Subject: [PATCH] Bump libxml++ version to 5.0
@@ -9,10 +9,10 @@ Subject: [PATCH] Bump libxml++ version to 5.0
  2 files changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index eaf625d..85df3ee 100644
+index 85b0683..59db6c7 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -42,7 +42,7 @@ FIND_PACKAGE(ChimeraTK-DeviceAccess 03.09 REQUIRED)
+@@ -47,7 +47,7 @@ FIND_PACKAGE(ChimeraTK-DeviceAccess 03.14 REQUIRED)
  
  # libXML++ is used for parsing/writing XML files
  FIND_PACKAGE(PkgConfig REQUIRED)
@@ -20,7 +20,7 @@ index eaf625d..85df3ee 100644
 +set(LIBXML++_VERSION "libxml++-5.0")
  PKG_CHECK_MODULES(LibXML++ REQUIRED IMPORTED_TARGET ${LIBXML++_VERSION})
  
- # libatomic is required on some patforms (and doesn't hurt on the others)
+ file(GLOB_RECURSE library_headers ${CMAKE_SOURCE_DIR}/include/ChimeraTK/*.h
 diff --git a/src/PersistentDataStorage.cc b/src/PersistentDataStorage.cc
 index 4c05e29..cb28ccf 100644
 --- a/src/PersistentDataStorage.cc

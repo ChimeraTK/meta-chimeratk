@@ -9,12 +9,11 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=1ebbd3e34237af26da5dc08a4e440464 \
                     file://COPYING.LESSER;md5=3000208d539ec061b899bce1d9ce9404"
 
 SRC_URI = "git://github.com/ChimeraTK/ControlSystemAdapter.git;protocol=https;branch=master \
-           file://0001-Drop-libatomic.patch \
            "
 
 # Modify these as desired
-PV = "02.08.00"
-SRCREV = "b0801fc8d2bb80da4c421bd648d11dd3033e9f37"
+PV = "02.10.00"
+SRCREV = "c421de5ae6c84ce239eca0a487707e4859c0e337"
 
 S = "${WORKDIR}/git"
 
