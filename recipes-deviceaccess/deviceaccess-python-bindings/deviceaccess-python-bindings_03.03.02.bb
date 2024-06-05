@@ -3,12 +3,13 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=e6a600fd5e1d9cbde2d983680233ad02"
 
 SRC_URI = "git://github.com/ChimeraTK/DeviceAccess-PythonBindings.git;protocol=https;branch=master \
            file://0002-original-patch-drop-cmake-version.patch.patch \
-           file://0001-Make-NUMPY-INCLUDES-a-cached-variable.patch \
-           file://0001-Drop-RPATH-from-python-bindings.patch \
+           file://0002-Drop-RPATH-handling.patch \
+           file://0003-Hard-code-numpy-include-path.patch \
+           file://0001-Do-not-use-Python_SITEARCH.patch \
            "
 
-PV = "03.02.02"
-SRCREV = "5aa5168a6cc727d2a13e447c4912bd394e9b34b3"
+PV = "03.03.02"
+SRCREV = "9b8bbcc50f0e48d0c4f3b60a483528d97ac53030"
 
 S = "${WORKDIR}/git"
 
@@ -19,5 +20,5 @@ RDEPENDS:${PN} = "python3-numpy"
 inherit cmake pkgconfig python3-dir setuptools3-base
 
 # Specify any options you want to pass to cmake using EXTRA_OECMAKE:
-EXTRA_OECMAKE = "-DNUMPY_INCLUDE_DIRS:PATH=${STAGING_DIR_HOST}/${PYTHON_SITEPACKAGES_DIR}/numpy/core/include"
+EXTRA_OECMAKE = ""
 

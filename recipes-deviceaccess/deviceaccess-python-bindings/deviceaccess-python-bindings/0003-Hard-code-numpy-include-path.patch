@@ -1,0 +1,34 @@
+From 0fde96fca92e962daa1c18c6a161c96bfb672d00 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Wed, 5 Jun 2024 16:47:11 +0200
+Subject: [PATCH] Hard-code numpy include path
+
+This needs most likely a fix to the CMake FindPython module.
+---
+ CMakeLists.txt | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3d6917a..c6b94da 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -19,7 +19,7 @@ include(cmake/enable_code_style_check.cmake)
+ # Find dependencies
+ find_package(ChimeraTK-DeviceAccess 03.14 REQUIRED)
+ 
+-find_package(Python 3 REQUIRED COMPONENTS Interpreter Development NumPy)
++find_package(Python 3 REQUIRED COMPONENTS Interpreter Development)
+ 
+ # Convert Python version into the format we need for BOOST component names
+ set(python_version_no_dot "${Python_VERSION_MAJOR}${Python_VERSION_MINOR}")
+@@ -46,9 +46,9 @@ file(GLOB_RECURSE sources "${CMAKE_CURRENT_SOURCE_DIR}/src/*")
+ 
+ add_library(${PROJECT_NAME} SHARED ${headers} ${sources})
+ 
++target_include_directories(${PROJECT_NAME} PRIVATE /usr/lib/python/${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages/numpy/core/include)
+ target_link_libraries(${PROJECT_NAME}
+   PRIVATE ChimeraTK::ChimeraTK-DeviceAccess
+-  PRIVATE Python::NumPy
+   PRIVATE Python::Module
+   PRIVATE ${Boost_LIBRARIES}
+   PRIVATE Boost::python${python_version_no_dot}

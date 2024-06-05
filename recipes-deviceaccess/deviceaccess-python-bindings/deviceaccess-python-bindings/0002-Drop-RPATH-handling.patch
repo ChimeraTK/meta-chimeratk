@@ -1,0 +1,22 @@
+From 6d04f5abe78e5faba68333db3d72029848b3ba29 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Wed, 5 Jun 2024 16:14:23 +0200
+Subject: [PATCH] Drop RPATH handling
+
+---
+ CMakeLists.txt | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7e0b92d..3d6917a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -54,8 +54,6 @@ target_link_libraries(${PROJECT_NAME}
+   PRIVATE Boost::python${python_version_no_dot}
+   PRIVATE Boost::numpy${python_version_no_dot})
+ 
+-# do not remove runtime path to libmtca-deviceaccess location from ${boost_python_core_module} when installing
+-set_property(TARGET ${PROJECT_NAME} PROPERTY INSTALL_RPATH_USE_LINK_PATH TRUE)
+ 
+ # set the right output file name for the the python core module library
+ set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" OUTPUT_NAME "_da_python_bindings")
