@@ -1,14 +1,16 @@
-From 81825dc7fa8154065835958e83f1a17d518cd283 Mon Sep 17 00:00:00 2001
+From 1d401f2bb3225a57270b92820e9aadba52cb2b28 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Wed, 22 Nov 2023 15:57:33 +0100
 Subject: [PATCH] Use exprtk from Yocto
+
+(??)From 4ddf4888dabf60e30defe76b289c84631714a965 Mon Sep 17 00:00:00 2001
 
 ---
  CMakeLists.txt | 3 +--
  1 file changed, 1 insertion(+), 2 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index e8163a7e..0bc7a410 100644
+index 55cd93d3..9b9b068d 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -33,7 +33,6 @@ endif(SUPPRESS_AUTO_DOC_BUILD)
@@ -16,15 +18,15 @@ index e8163a7e..0bc7a410 100644
  FIND_PACKAGE(Boost COMPONENTS thread system chrono filesystem REQUIRED)
  FIND_PACKAGE(ChimeraTK-cppext 01.05 REQUIRED)
 -FIND_PACKAGE(exprtk 01.04 REQUIRED)
+ FIND_PACKAGE(nlohmann_json 03.07 REQUIRED)
  
  FIND_PACKAGE(PkgConfig REQUIRED)
- set(LIBXML++_VERSION "libxml++-2.6")
-@@ -114,7 +113,7 @@ target_compile_options(${PROJECT_NAME} PUBLIC ${projectCxxFlags})
+@@ -111,7 +110,7 @@ target_compile_options(${PROJECT_NAME} PUBLIC ${projectCxxFlags})
  target_include_directories(${PROJECT_NAME} INTERFACE "$<INSTALL_INTERFACE:include>")
  set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_FULL_LIBRARY_VERSION} SOVERSION ${${PROJECT_NAME}_SOVERSION})
  target_link_libraries(${PROJECT_NAME}
 -  PRIVATE ${CMAKE_DL_LIBS} PkgConfig::LibXML++ ChimeraTK::exprtk
-+    PRIVATE ${CMAKE_DL_LIBS} PkgConfig::LibXML++
++  PRIVATE ${CMAKE_DL_LIBS} PkgConfig::LibXML++
  
    # we set this public because of Backend libs using shm_open (e.g. test code)
    PUBLIC ${RT_LIBRARIES}
