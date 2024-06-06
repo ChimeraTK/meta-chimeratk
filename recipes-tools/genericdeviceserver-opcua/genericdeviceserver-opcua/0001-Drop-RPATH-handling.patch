@@ -1,4 +1,4 @@
-From 27646713c8e0b520d5d7ab0af7b73204e600788d Mon Sep 17 00:00:00 2001
+From 343daf57f2a3fc7eeabe315dabbfb96c4c56e763 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Thu, 9 Feb 2023 12:55:22 +0100
 Subject: [PATCH] Drop RPATH handling
@@ -8,10 +8,10 @@ Subject: [PATCH] Drop RPATH handling
  1 file changed, 4 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 69a0f6b..e12cf66 100644
+index 38c2fb3..d51c997 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -35,8 +35,6 @@ endif(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "None")
+@@ -37,8 +37,6 @@ endif(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "None")
  
  include(cmake/set_default_flags.cmake)
  
@@ -20,7 +20,7 @@ index 69a0f6b..e12cf66 100644
  include(cmake/enable_code_coverage_report.cmake)
  include(cmake/set_control_system_adapter.cmake)
  find_package(ChimeraTK-ApplicationCore 03.00 REQUIRED)
-@@ -44,8 +42,6 @@ find_package(ChimeraTK-ApplicationCore 03.00 REQUIRED)
+@@ -46,8 +44,6 @@ find_package(ChimeraTK-ApplicationCore 03.00 REQUIRED)
  aux_source_directory(${CMAKE_SOURCE_DIR}/server server_sources)
  aux_source_directory(${CMAKE_SOURCE_DIR}/src library_sources)
  
