@@ -14,8 +14,8 @@ SRC_URI = "git://github.com/ChimeraTK/GenericDeviceServer;protocol=https;branch=
            "
 
 # Modify these as desired
-PV = "01.04.01"
-SRCREV = "103e30063a2ac9e23b2d4c370aa03b8b6c1f6fe8"
+PV = "01.05.00"
+SRCREV = "0adf42c6165b5f1fabdd6259622b137f6c62cdf1"
 
 S = "${WORKDIR}/git"
 
