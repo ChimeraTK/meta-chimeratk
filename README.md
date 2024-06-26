@@ -19,8 +19,16 @@ Recommends
   branch: zeus
   revision: HEAD
 
+  URI: https://github.com/voltumna-linux/meta-tango/
+  branch: dunfell
+  revision: HEAD
+
   More specifially, it just needs meta-oe for libxml++ and meta-qt5 only of
   you intend to build QtHardMon.
+
+  IF you intend to use the meta-tango layer, you MUST also include meta-tango-compat from
+  inside this folder as well as meta-tango only supports LTS versions and it provides
+  cppTango 9.4.2 which is the minimum version required for the Tango ControlSystem adapter.
 
 
 Patches
@@ -34,9 +42,9 @@ Table of Contents
 
   I. Adding the meta-chimeratk layer to your build
 
-
 I. Adding the meta-chimeratk layer to your build
 =================================================
 
 Run 'bitbake-layers add-layer meta-chimeratk'
+
 
