@@ -1,0 +1,27 @@
+From 6f7cb36589ebddbf282642b5bb2c8676e3903362 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Thu, 27 Jun 2024 08:37:25 +0200
+Subject: [PATCH] Port to new sysconfig
+
+Upstream-Status: Backport
+
+---
+ mk/python.mk | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/mk/python.mk b/mk/python.mk
+index a36431a..2f36f05 100644
+--- a/mk/python.mk
++++ b/mk/python.mk
+@@ -4,9 +4,9 @@
+ 
+ PYVERSION := $(shell $(PYTHON) -c 'import sys; sys.stdout.write(".".join(sys.version.split(".")[:2]))')
+ PYPREFIX  := $(shell $(PYTHON) -c 'import sys; sys.stdout.write(sys.exec_prefix.replace("\\","/"))')
+-PYINCDIR  := $(shell $(PYTHON) -c 'import sys, distutils.sysconfig; sys.stdout.write(distutils.sysconfig.get_python_inc().replace("\\","/"))')
++PYINCDIR  := $(shell $(PYTHON) -c 'import sys, sysconfig; sys.stdout.write(sysconfig.get_config_var("INCLUDEPY").replace("\\","/"))')
+ 
+-PythonSHAREDLIB_SUFFIX = $(shell $(PYTHON) -c 'import sys, distutils.sysconfig; sys.stdout.write((distutils.sysconfig.get_config_var("SO") or ".so").lstrip("."))')
++PythonSHAREDLIB_SUFFIX = $(shell $(PYTHON) -c 'import sys, sysconfig; sys.stdout.write((sysconfig.get_config_var("SO") or ".so").lstrip("."))')
+ 
+ PY_MODULE_SUFFIX := $(shell $(PYTHON) -c 'import sys; sys.stdout.write((sys.hexversion < 0x3000000) and "module" or "")')
+ 
