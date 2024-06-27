@@ -3,6 +3,8 @@ From: Jens Georg <jens.georg@desy.de>
 Date: Wed, 5 Jun 2024 14:25:27 +0200
 Subject: [PATCH] Drop BAR0 check
 
+Upstream-Status: Denied
+
 ---
  backends/uio/src/UioAccess.cc | 8 --------
  1 file changed, 8 deletions(-)

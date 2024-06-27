@@ -3,6 +3,7 @@ From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 28 Nov 2023 15:22:40 +0100
 Subject: [PATCH] csa-opc-ua: Remove RPATH handling
 
+Upstream-Status: Inappropriate [embedded specific]
 ---
  CMakeLists.txt | 4 ----
  1 file changed, 4 deletions(-)

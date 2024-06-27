@@ -3,6 +3,7 @@ From: Jens Georg <jens.georg@desy.de>
 Date: Wed, 12 Apr 2023 14:18:20 +0200
 Subject: [PATCH] Bump libxml++ to 5.0
 
+Upstream-Status: Submitted
 ---
  CMakeLists.txt                           |  2 +-
  src/XMLGeneratorVisitor.cc               | 28 ++++++++++++------------

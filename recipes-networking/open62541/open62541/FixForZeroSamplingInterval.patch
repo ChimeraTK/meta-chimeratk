@@ -1,3 +1,5 @@
+Upstream-Status: Pending
+
 diff --git a/src/server/ua_services_monitoreditem.c b/src/server/ua_services_monitoreditem.c
 index 5b62be801..32b0e77e0 100644
 --- a/src/server/ua_services_monitoreditem.c

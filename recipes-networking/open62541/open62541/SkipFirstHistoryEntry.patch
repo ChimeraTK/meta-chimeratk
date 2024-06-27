@@ -1,3 +1,4 @@
+Upstream-Status: Pending
 diff --git a/plugins/historydata/ua_history_data_backend_memory.c b/plugins/historydata/ua_history_data_backend_memory.c
 index 744216386..7df19b1b9 100644
 --- a/plugins/historydata/ua_history_data_backend_memory.c

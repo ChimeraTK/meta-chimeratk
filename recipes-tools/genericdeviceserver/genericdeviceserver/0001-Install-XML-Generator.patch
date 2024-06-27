@@ -3,6 +3,7 @@ From: Jens Georg <jens.georg@desy.de>
 Date: Wed, 19 Apr 2023 13:40:47 +0200
 Subject: [PATCH] Install XML Generator
 
+Upstream-Status: Inappropriate [enable feature]
 ---
  CMakeLists.txt | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)

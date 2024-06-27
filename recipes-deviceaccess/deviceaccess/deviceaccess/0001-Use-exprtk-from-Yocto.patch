@@ -3,6 +3,7 @@ From: Jens Georg <jens.georg@desy.de>
 Date: Wed, 22 Nov 2023 15:57:33 +0100
 Subject: [PATCH] Use exprtk from Yocto
 
+Upstream-Status: Inappropriate [embedded-specific]
 (??)From 4ddf4888dabf60e30defe76b289c84631714a965 Mon Sep 17 00:00:00 2001
 ---
  CMakeLists.txt | 3 +--

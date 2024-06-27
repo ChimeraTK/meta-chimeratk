@@ -3,6 +3,7 @@ From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 25 Jul 2023 15:01:04 +0200
 Subject: [PATCH] Remove install rpath, part 2
 
+Upstream-Status: Inappropriate [embedded specific]
 ---
  cmake/set_default_flags.cmake | 1 -
  1 file changed, 1 deletion(-)

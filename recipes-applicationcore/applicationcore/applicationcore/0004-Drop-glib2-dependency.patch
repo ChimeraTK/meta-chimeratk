@@ -3,6 +3,8 @@ From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 25 Jul 2023 15:52:29 +0200
 Subject: [PATCH] Drop glib2 dependency
 
+Upstream-Status: Submitted
+
 ---
  CMakeLists.txt | 3 +--
  1 file changed, 1 insertion(+), 2 deletions(-)

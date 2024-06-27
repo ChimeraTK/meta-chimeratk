@@ -3,6 +3,7 @@ From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 28 Nov 2023 14:26:10 +0100
 Subject: [PATCH] Do not leak OpenSSL paths into target file
 
+Upstream-Status: Pending
 ---
  CMakeLists.txt | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)

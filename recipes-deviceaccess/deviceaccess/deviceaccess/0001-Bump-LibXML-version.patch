@@ -3,6 +3,7 @@ From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 11 Apr 2023 16:35:11 +0200
 Subject: [PATCH] Bump LibXML++ version
 
+Upstream-Status: Submitted
 ---
  CMakeLists.txt | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)

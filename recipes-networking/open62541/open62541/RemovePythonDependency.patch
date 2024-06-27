@@ -1,3 +1,4 @@
+Upstream-Status: Inappropriate [embedded specific]
 diff --git a/tools/cmake/open62541Config.cmake.in b/tools/cmake/open62541Config.cmake.in
 index 0c2544ccb..59e7c933b 100644
 --- a/tools/cmake/open62541Config.cmake.in
