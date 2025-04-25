@@ -1,4 +1,4 @@
-From d12360906ff50729ef4c1580ceda8b1a4fe96d3b Mon Sep 17 00:00:00 2001
+From 20259e489138a82ea7867d3e433a9b2e8f3c8ac7 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Wed, 12 Apr 2023 14:02:41 +0200
 Subject: [PATCH] Bump libxml++ version to 5.0
@@ -9,10 +9,10 @@ Subject: [PATCH] Bump libxml++ version to 5.0
  2 files changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 85b0683..59db6c7 100644
+index c33ad80..7706221 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -47,7 +47,7 @@ FIND_PACKAGE(ChimeraTK-DeviceAccess 03.14 REQUIRED)
+@@ -48,7 +48,7 @@ FIND_PACKAGE(ChimeraTK-DeviceAccess 03.18 REQUIRED)
  
  # libXML++ is used for parsing/writing XML files
  FIND_PACKAGE(PkgConfig REQUIRED)
@@ -22,11 +22,11 @@ index 85b0683..59db6c7 100644
  
  file(GLOB_RECURSE library_headers ${CMAKE_SOURCE_DIR}/include/ChimeraTK/*.h
 diff --git a/src/PersistentDataStorage.cc b/src/PersistentDataStorage.cc
-index 4c05e29..cb28ccf 100644
+index a260f5f..fdf8405 100644
 --- a/src/PersistentDataStorage.cc
 +++ b/src/PersistentDataStorage.cc
-@@ -64,7 +64,7 @@ namespace ChimeraTK {
-         if(!_variableRegisteredFromApp[i]) continue; // exclude variables no longer present in the application
+@@ -67,7 +67,7 @@ namespace ChimeraTK {
+         }
  
          // create XML element for the variable and set name attribute
 -        xmlpp::Element* variable = rootElement->add_child("variable");
@@ -34,7 +34,7 @@ index 4c05e29..cb28ccf 100644
          variable->set_attribute("name", static_cast<std::string>(_variableNames[i]));
  
          // generate value XML tags and set type name as a string
-@@ -104,7 +104,7 @@ namespace ChimeraTK {
+@@ -107,7 +107,7 @@ namespace ChimeraTK {
      }
      // add one child element per element of the value
      for(size_t idx = 0; idx < pValue->size(); ++idx) {
