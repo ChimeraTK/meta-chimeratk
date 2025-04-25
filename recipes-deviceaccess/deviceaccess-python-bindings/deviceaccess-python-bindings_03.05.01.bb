@@ -7,8 +7,8 @@ SRC_URI = "git://github.com/ChimeraTK/DeviceAccess-PythonBindings.git;protocol=h
            file://0003-Hard-code-numpy-include-path.patch \
            "
 
-PV = "03.03.02"
-SRCREV = "9b8bbcc50f0e48d0c4f3b60a483528d97ac53030"
+PV = "03.05.01"
+SRCREV = "b9b6bae01a26cfe64ffa8f6c3003b236d75f18b5"
 
 S = "${WORKDIR}/git"
 

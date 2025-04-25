@@ -3,6 +3,8 @@ From: Jens Georg <jens.georg@desy.de>
 Date: Wed, 5 Jun 2024 16:47:11 +0200
 Subject: [PATCH] Hard-code numpy include path
 
+Upstream-Status: Inappropriate [embedded specific]
+
 This needs most likely a fix to the CMake FindPython module.
 ---
  CMakeLists.txt | 4 ++--

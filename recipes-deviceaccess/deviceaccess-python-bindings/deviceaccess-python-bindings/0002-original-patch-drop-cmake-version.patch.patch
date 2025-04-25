@@ -3,6 +3,10 @@ From: OpenEmbedded <oe.patch@oe>
 Date: Fri, 25 Nov 2022 16:27:30 +0000
 Subject: [PATCH] %% original patch: drop-cmake-version.patch
 
+Upstream-Status: Inappropriate [embedded specific]
+
+This is somehow different on Yocto then it is anywhere else
+
 ---
  cmake/create_cmake_config_files.cmake | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
