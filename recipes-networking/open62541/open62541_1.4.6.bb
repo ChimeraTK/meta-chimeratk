@@ -3,15 +3,11 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=815ca599c9df247a0c7f619bab123dad \
                     file://LICENSE-CC0;md5=6888abe69dbc6330301f0467e21c0317"
 
 SRC_URI = "gitsm://github.com/open62541/open62541.git;protocol=https;branch=master \
-           file://FixForZeroSamplingInterval.patch \
-           file://RemovePythonDependency.patch \
-           file://SkipFirstHistoryEntry.patch \
-           file://0001-Do-not-leak-OpenSSL-paths-into-target-file.patch \
            "
 
 # Modify these as desired
-PV = "1.0+git${SRCPV}"
-SRCREV = "v1.3.3"
+PV = "1.4.6"
+SRCREV = "50ae40d3c98a5ff0458ee2b5ae92bea53e11af4e"
 
 S = "${WORKDIR}/git"
 
@@ -25,7 +21,11 @@ EXTRA_OECMAKE = "-DUA_ENABLE_AMALGAMATION=Off \
                  -DUA_ENABLE_METHODCALLS=ON \
                  -DUA_ENABLE_NODEMANAGEMENT=ON \
                  -DUA_ENABLE_SUBSCRIPTIONS=ON \
-                 -DUA_LOGLEVEL=300 \
+                 -DUA_LOGLEVEL=100 \
                  -DUA_ENABLE_ENCRYPTION=OPENSSL \
-                 -DUA_ENABLE_HISTORIZING=ON"
+                 -DUA_ENABLE_HISTORIZING=ON \
+                 -DUA_NAMESPACE_ZERO=FULL \
+		 -DUA_ENABLE_PUBSUB=ON \
+	         -DUA_ENABLE_PUBSUB_MONITORING=ON \
+	         -DUA_ENABLE_ALLOW_REUSEADDR=ON"
 
