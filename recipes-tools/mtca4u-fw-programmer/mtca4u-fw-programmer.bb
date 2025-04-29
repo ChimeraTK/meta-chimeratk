@@ -4,8 +4,8 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=e6a600fd5e1d9cbde2d983680233ad02"
 SRC_URI = "git://github.com/ChimeraTK/FirmwareProgrammer.git;protocol=https;branch=master"
 
 # Modify these as desired
-PV = "1.0+git${SRCPV}"
-SRCREV = "b34b1081d71fbb945ec8a24e2c4ac15bb363d45f"
+PV = "04.10.00"
+SRCREV = "7e99a80d2369a97e9d5ac59219de1d0fb9c95554"
 
 S = "${WORKDIR}/git"
 
