@@ -6,29 +6,35 @@ Dependencies
 ============
 
   URI: git://github.com/openembedded/oe-core.git
-  branch: kirkstone
+  branch: master
   revision: HEAD
 
   URI: git://github.com/openembedded/meta-openembedded.git
-  branch: kirkstone
+  branch: master
   revision: HEAD
 
 Recommends
 ==========
-  URI: https://github.com/meta-qt5/meta-qt5
-  branch: kirkstone
+  URI: https://code.qt.io/cgit/yocto/meta-qt6.git/
+  branch: master
   revision: HEAD
 
   URI: https://github.com/voltumna-linux/meta-tango/
   branch: dunfell
   revision: HEAD
 
-  More specifially, it just needs meta-oe for libxml++ and meta-qt5 only of
-  you intend to build QtHardMon.
+  More specifially, it just needs meta-oe for libxml++, meta-python for pybind11
+  and meta-qt6 only of you intend to build QtHardMon.
 
   IF you intend to use the meta-tango layer, you MUST also include meta-tango-compat from
-  inside this folder as well as meta-tango only supports LTS versions.
-  You also MUST set `PREFFERED_VERSIONS_cpptango = "9.4%"` (or later) in your local.conf.
+  inside this folder as well. meta-tango only supports LTS versions and meta-tango-compat
+  adds an override for that.
+
+  It is recommended to use TANGO version 10. This can be achieved by setting the following
+  variables in your local.conf:
+
+  * `PREFERRED_VERSION_cpptango = "10.%"`
+  * `PREFERRED_VERSION_tango-idl = "6.0%"`.
 
 
 Patches
