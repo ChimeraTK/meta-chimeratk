@@ -1,0 +1,39 @@
+From b36e79315418a4537c08e7c963b65f879a3dec98 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Tue, 29 Apr 2025 16:19:06 +0000
+Subject: [PATCH] Do not strip binaries
+
+---
+ tools/pybind11NewTools.cmake | 4 ----
+ tools/pybind11Tools.cmake    | 3 ---
+ 2 files changed, 7 deletions(-)
+
+diff --git a/tools/pybind11NewTools.cmake b/tools/pybind11NewTools.cmake
+index 7d7424a7..522eeebb 100644
+--- a/tools/pybind11NewTools.cmake
++++ b/tools/pybind11NewTools.cmake
+@@ -235,10 +235,6 @@ function(pybind11_add_module target_name)
+ 
+   # Use case-insensitive comparison to match the result of $<CONFIG:cfgs>
+   string(TOUPPER "${CMAKE_BUILD_TYPE}" uppercase_CMAKE_BUILD_TYPE)
+-  if(NOT MSVC AND NOT "${uppercase_CMAKE_BUILD_TYPE}" MATCHES DEBUG|RELWITHDEBINFO)
+-    # Strip unnecessary sections of the binary on Linux/macOS
+-    pybind11_strip(${target_name})
+-  endif()
+ 
+   if(MSVC)
+     target_link_libraries(${target_name} PRIVATE pybind11::windows_extras)
+diff --git a/tools/pybind11Tools.cmake b/tools/pybind11Tools.cmake
+index 66ad00a4..4e991781 100644
+--- a/tools/pybind11Tools.cmake
++++ b/tools/pybind11Tools.cmake
+@@ -214,9 +214,6 @@ function(pybind11_add_module target_name)
+ 
+   # Use case-insensitive comparison to match the result of $<CONFIG:cfgs>
+   string(TOUPPER "${CMAKE_BUILD_TYPE}" uppercase_CMAKE_BUILD_TYPE)
+-  if(NOT MSVC AND NOT "${uppercase_CMAKE_BUILD_TYPE}" MATCHES DEBUG|RELWITHDEBINFO)
+-    pybind11_strip(${target_name})
+-  endif()
+ 
+   if(MSVC)
+     target_link_libraries(${target_name} PRIVATE pybind11::windows_extras)
