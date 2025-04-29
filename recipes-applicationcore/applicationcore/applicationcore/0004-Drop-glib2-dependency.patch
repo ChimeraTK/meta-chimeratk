@@ -1,4 +1,4 @@
-From ae9fc70d8b651110141190524619b509c308fe97 Mon Sep 17 00:00:00 2001
+From b21be87b21f2d81522daa49a24a23b7bbd1c3725 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 25 Jul 2023 15:52:29 +0200
 Subject: [PATCH] Drop glib2 dependency
@@ -10,23 +10,23 @@ Upstream-Status: Submitted
  1 file changed, 1 insertion(+), 2 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 25d5b2a..6af70f4 100644
+index dabf551..7a59ba2 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -20,7 +20,6 @@ FIND_PACKAGE(ChimeraTK-DeviceAccess 03.14 REQUIRED)
+@@ -34,7 +34,6 @@ FIND_PACKAGE(ChimeraTK-DeviceAccess 03.18 REQUIRED)
  FIND_PACKAGE(PkgConfig REQUIRED)
- set(LIBXML++_VERSION "libxml++-5.0")
+ set(LIBXML++_VERSION "libxml++-2.6")
  PKG_CHECK_MODULES(LibXML++ REQUIRED IMPORTED_TARGET ${LIBXML++_VERSION})
 -PKG_CHECK_MODULES(glib REQUIRED IMPORTED_TARGET glib-2.0)
  
  # Find BOOST filesystem
  # Note: we need to search this before looking for the unit_test_framework, since we must not link against the
-@@ -71,7 +70,7 @@ target_link_libraries(${PROJECT_NAME}
-   # put ControlSystemAdapter public since implicit dep DeviceAccess must be public
+@@ -89,7 +88,7 @@ target_include_directories(${PROJECT_NAME} INTERFACE "$<INSTALL_INTERFACE:includ
+ target_link_libraries(${PROJECT_NAME}
    PUBLIC ChimeraTK::ChimeraTK-ControlSystemAdapter
    PUBLIC ${Boost_LIBRARIES}
 -  PRIVATE Threads::Threads PkgConfig::LibXML++ PkgConfig::glib ${HDF5_LIBRARIES})
 +  PRIVATE Threads::Threads PkgConfig::LibXML++ ${HDF5_LIBRARIES})
  
- target_compile_definitions(${PROJECT_NAME} PRIVATE CHIMERATK_INSIDE_APPLICATION_CORE)
- 
+ if(${pybind11_FOUND})
+   target_link_libraries(${PROJECT_NAME} PRIVATE pybind11::embed)
