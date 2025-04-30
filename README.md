@@ -20,15 +20,21 @@ Recommends
   revision: HEAD
 
   URI: https://github.com/voltumna-linux/meta-tango/
-  branch: dunfell
-  revision: HEAD
+  branch: master
+  revision: 504ceac53460c9263ac3381c9130e3a0f66f693a
 
   More specifially, it just needs meta-oe for libxml++ and meta-qt5 only of
   you intend to build QtHardMon.
 
   IF you intend to use the meta-tango layer, you MUST also include meta-tango-compat from
-  inside this folder as well as meta-tango only supports LTS versions.
-  You also MUST set `PREFFERED_VERSIONS_cpptango = "9.4%"` (or later) in your local.conf.
+  inside this folder as well. meta-tango only supports LTS versions and meta-tango-compat
+  adds an override for that.
+
+  It is recommended to use TANGO version 10. This can be achieved by setting the following
+  variables in your local.conf:
+
+  * `PREFERRED_VERSION_cpptango = "10.%"`
+  * `PREFERRED_VERSION_tango-idl = "6.0%"`.
 
 
 Patches
