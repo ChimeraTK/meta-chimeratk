@@ -1,0 +1,23 @@
+From 984fd16befd82ec7d55ce85dcd858a881da6cf6c Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Fri, 2 May 2025 09:06:18 +0200
+Subject: [PATCH] Bump libxml++ API to 5.0
+
+Upstream-Status: Submitted
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index aab41c6..13bd241 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -19,7 +19,7 @@ find_package(PkgConfig)
+ 
+ # Add the dependencies
+ find_package(ChimeraTK-ControlSystemAdapter 02.07 REQUIRED)
+-pkg_check_modules(XMLPP REQUIRED IMPORTED_TARGET libxml++-2.6)
++pkg_check_modules(XMLPP REQUIRED IMPORTED_TARGET libxml++-5.0)
+ pkg_check_modules(TANGO REQUIRED IMPORTED_TARGET tango>=9.3)
+ 
+ # For some reason the system library has to be mentioned explicitly to the
