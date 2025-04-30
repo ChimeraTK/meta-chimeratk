@@ -6,11 +6,11 @@ Dependencies
 ============
 
   URI: git://github.com/openembedded/oe-core.git
-  branch: kirkstone
+  branch: honister
   revision: HEAD
 
   URI: git://github.com/openembedded/meta-openembedded.git
-  branch: kirkstone
+  branch: honister
   revision: HEAD
 
 Recommends
