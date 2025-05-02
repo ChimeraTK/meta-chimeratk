@@ -6,11 +6,11 @@ Dependencies
 ============
 
   URI: git://github.com/openembedded/oe-core.git
-  branch: kirkstone
+  branch: langdale
   revision: HEAD
 
   URI: git://github.com/openembedded/meta-openembedded.git
-  branch: kirkstone
+  branch: langdale
   revision: HEAD
 
 Recommends
@@ -23,8 +23,8 @@ Recommends
   branch: master
   revision: 504ceac53460c9263ac3381c9130e3a0f66f693a
 
-  More specifially, it just needs meta-oe for libxml++ and meta-qt5 only of
-  you intend to build QtHardMon.
+  More specifially, it just needs meta-oe for libxml++, meta-python for pybind11
+  and meta-qt5 only of you intend to build QtHardMon.
 
   IF you intend to use the meta-tango layer, you MUST also include meta-tango-compat from
   inside this folder as well. meta-tango only supports LTS versions and meta-tango-compat
