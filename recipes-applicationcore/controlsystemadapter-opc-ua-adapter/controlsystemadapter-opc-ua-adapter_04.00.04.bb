@@ -47,5 +47,5 @@ DEPENDS = "libxml2 boost open62541 deviceaccess controlsystemadapter"
 inherit cmake python3native
 
 # Specify any options you want to pass to cmake using EXTRA_OECMAKE:
-EXTRA_OECMAKE = ""
+EXTRA_OECMAKE = "-DBUILD_TESTS=OFF"
 

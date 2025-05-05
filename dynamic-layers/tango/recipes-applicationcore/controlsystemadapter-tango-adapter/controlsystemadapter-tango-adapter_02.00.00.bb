@@ -18,5 +18,5 @@ DEPENDS = "controlsystemadapter cpptango"
 inherit cmake pkgconfig
 
 # Specify any options you want to pass to cmake using EXTRA_OECMAKE:
-EXTRA_OECMAKE = ""
+EXTRA_OECMAKE = "-DBUILD_TESTS=OFF"
 
