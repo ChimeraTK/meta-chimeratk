@@ -22,5 +22,5 @@ FILES:${PN} += "${libdir}/${PYTHON_DIR}/site-packages"
 inherit cmake pkgconfig python3targetconfig python3-dir setuptools3-base
 
 # Specify any options you want to pass to cmake using EXTRA_OECMAKE:
-EXTRA_OECMAKE = ""
+EXTRA_OECMAKE = "-DBUILD_TESTS=OFF"
 
