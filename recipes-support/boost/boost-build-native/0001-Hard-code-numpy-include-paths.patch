@@ -35,7 +35,7 @@ index 0dfc750a2..39b2f10ce 100644
 -    }
 +    # Just hardcode numpy paths
 +    .numpy = true ;
-+    .numpy-include = $(libraries)/site-packages/numpy/core/include ;
++    .numpy-include = $(libraries)/site-packages/numpy/_core/include ;
  
      #
      # End autoconfiguration sequence.
