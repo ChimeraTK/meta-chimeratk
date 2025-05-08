@@ -6,11 +6,11 @@ Dependencies
 ============
 
   URI: git://github.com/openembedded/oe-core.git
-  branch: master
+  branch: walnascar
   revision: HEAD
 
   URI: git://github.com/openembedded/meta-openembedded.git
-  branch: master
+  branch: walnascar
   revision: HEAD
 
 Recommends
