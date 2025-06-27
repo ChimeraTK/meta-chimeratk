@@ -1,0 +1,32 @@
+From f303290bbe62dd7ea3a27fbd1bce177c2ccf9a2a Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Fri, 27 Jun 2025 14:07:35 +0000
+Subject: [PATCH] Add fmt
+
+---
+ CMakeLists.txt | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b6b0cb4..0f88256 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -25,6 +25,7 @@ find_package(Python 3 REQUIRED COMPONENTS Interpreter Development)
+ set(python_version_no_dot "${Python_VERSION_MAJOR}${Python_VERSION_MINOR}")
+ 
+ find_package(Boost REQUIRED COMPONENTS python${python_version_no_dot} numpy${python_version_no_dot})
++find_package(fmt)
+ 
+ # ==============================================================================#
+ 
+@@ -52,7 +53,9 @@ target_link_libraries(${PROJECT_NAME}
+   PRIVATE Python::Module
+   PRIVATE ${Boost_LIBRARIES}
+   PRIVATE Boost::python${python_version_no_dot}
+-  PRIVATE Boost::numpy${python_version_no_dot})
++  PRIVATE Boost::numpy${python_version_no_dot}
++  PRIVATE fmt::fmt
++  )
+ 
+ 
+ # set the right output file name for the the python core module library
