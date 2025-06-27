@@ -1,0 +1,31 @@
+From eff52d3484d4feb5c078ff757c7479bed26891e0 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Thu, 26 Jun 2025 16:31:23 +0000
+Subject: [PATCH] Add fmt package (dragged in from cppext)
+
+---
+ CMakeLists.txt | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1b0612d..38bfdc5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -10,6 +10,8 @@ include(cmake/set_version_numbers.cmake)
+ 
+ option(BUILD_TESTS "Build tests." ON)
+ 
++find_package(fmt)
++
+ set(PYBIND11_FINDPYTHON ON)
+ find_package(pybind11 2.10)
+ 
+@@ -82,7 +84,7 @@ target_include_directories(${PROJECT_NAME} INTERFACE "$<INSTALL_INTERFACE:includ
+ target_link_libraries(${PROJECT_NAME}
+   PUBLIC ChimeraTK::ChimeraTK-ControlSystemAdapter
+   PUBLIC ${Boost_LIBRARIES}
+-  PRIVATE Threads::Threads PkgConfig::LibXML++ ${HDF5_LIBRARIES})
++  PRIVATE Threads::Threads PkgConfig::LibXML++ ${HDF5_LIBRARIES} fmt::fmt)
+ 
+ if(${pybind11_FOUND})
+   target_link_libraries(${PROJECT_NAME} PRIVATE pybind11::embed)

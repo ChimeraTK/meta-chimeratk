@@ -1,4 +1,4 @@
-From 4a8e66ebdfb2d02d1c4cb55713a1a471b8ffcc26 Mon Sep 17 00:00:00 2001
+From 4e1d621f37cb554e904c78eb65748c086468ac3e Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 29 Apr 2025 16:01:53 +0000
 Subject: [PATCH] Do not set rpath

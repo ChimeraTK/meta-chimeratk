@@ -1,4 +1,4 @@
-From 00dd934ca4f4d70f6ebd825ddae48d5bc4b9df97 Mon Sep 17 00:00:00 2001
+From 25a98d9f32f2edac287723a67b85e58553e75246 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 29 Apr 2025 16:28:15 +0000
 Subject: [PATCH] Do not run stubgen

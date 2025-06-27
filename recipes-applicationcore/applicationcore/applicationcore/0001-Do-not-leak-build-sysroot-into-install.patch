@@ -1,4 +1,4 @@
-From bddf12e192e023593d8b70f5fd75f6497d9786c7 Mon Sep 17 00:00:00 2001
+From 2f9d8e3431ff67db2c573b405668e9e988e4e7cf Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 29 Apr 2025 17:34:06 +0000
 Subject: [PATCH] Do not leak build-sysroot into install

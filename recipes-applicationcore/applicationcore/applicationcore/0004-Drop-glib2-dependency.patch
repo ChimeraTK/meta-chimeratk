@@ -1,4 +1,4 @@
-From b21be87b21f2d81522daa49a24a23b7bbd1c3725 Mon Sep 17 00:00:00 2001
+From e183af6090712474ed7df3cb716762649d9d3ae8 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 25 Jul 2023 15:52:29 +0200
 Subject: [PATCH] Drop glib2 dependency

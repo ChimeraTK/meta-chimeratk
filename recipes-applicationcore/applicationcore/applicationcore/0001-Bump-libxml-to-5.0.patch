@@ -1,27 +1,26 @@
-From 142dc8e5ea48a52e91fa3f075fdeda8a4f5bfb5e Mon Sep 17 00:00:00 2001
+From 45b9e6582f98d2dc4f0350446fddabb64ed91561 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Wed, 12 Apr 2023 14:18:20 +0200
 Subject: [PATCH] Bump libxml++ to 5.0
 
 ---
- CMakeLists.txt                           |  2 +-
- src/XMLGeneratorVisitor.cc               | 28 ++++++++++++------------
- tests/executables_src/testApplication.cc |  4 ++--
- 3 files changed, 17 insertions(+), 17 deletions(-)
+ CMakeLists.txt             |  2 +-
+ src/XMLGeneratorVisitor.cc | 28 ++++++++++++++--------------
+ 2 files changed, 15 insertions(+), 15 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index d87bbf6..c5858d9 100644
+index b5a2467..07422dd 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -18,7 +18,7 @@ FIND_PACKAGE(ChimeraTK-DeviceAccess 03.14 REQUIRED)
+@@ -28,7 +28,7 @@ FIND_PACKAGE(ChimeraTK-DeviceAccess 03.18 REQUIRED)
  
  # Find the XML parser library libxml++
  FIND_PACKAGE(PkgConfig REQUIRED)
 -set(LIBXML++_VERSION "libxml++-2.6")
 +set(LIBXML++_VERSION "libxml++-5.0")
  PKG_CHECK_MODULES(LibXML++ REQUIRED IMPORTED_TARGET ${LIBXML++_VERSION})
- PKG_CHECK_MODULES(glib REQUIRED IMPORTED_TARGET glib-2.0)
  
+ # Find BOOST filesystem
 diff --git a/src/XMLGeneratorVisitor.cc b/src/XMLGeneratorVisitor.cc
 index dd701c7..2a35de9 100644
 --- a/src/XMLGeneratorVisitor.cc
@@ -97,25 +96,3 @@ index dd701c7..2a35de9 100644
  
        if(peerNode.getType() == NodeType::Application) {
          peer->set_attribute("type", "ApplicationModule");
-diff --git a/tests/executables_src/testApplication.cc b/tests/executables_src/testApplication.cc
-index a8ff277..413ba4d 100644
---- a/tests/executables_src/testApplication.cc
-+++ b/tests/executables_src/testApplication.cc
-@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(testApplicationExceptions) {
- // Helper function for testXmlGeneration:
- // Obtain a value from an XML node
- std::string getValueFromNode(const xmlpp::Node* node, const std::string& subnodeName) {
--  xmlpp::Node* theChild = nullptr;
-+  const xmlpp::Node* theChild = nullptr;
-   for(const auto& child : node->get_children()) {
-     if(child->get_name() == subnodeName) {
-       theChild = child;
-@@ -99,7 +99,7 @@ std::string getValueFromNode(const xmlpp::Node* node, const std::string& subnode
-   }
-   BOOST_REQUIRE_EQUAL(subChildList.size(),
-       1); // child tag contains only text (no further sub-tags)
--  const xmlpp::TextNode* textNode = dynamic_cast<xmlpp::TextNode*>(subChildList.front());
-+  const xmlpp::TextNode* textNode = dynamic_cast<const xmlpp::TextNode*>(subChildList.front());
-   BOOST_REQUIRE(textNode != nullptr);
-   return textNode->get_content();
- }
