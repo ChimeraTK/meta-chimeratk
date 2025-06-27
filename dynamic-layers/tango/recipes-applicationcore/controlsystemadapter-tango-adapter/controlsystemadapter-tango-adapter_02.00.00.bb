@@ -3,6 +3,7 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=e6a600fd5e1d9cbde2d983680233ad02"
 
 SRC_URI = "git://github.com/ChimeraTK/ControlSystemAdapter-TangoAdapter;protocol=https;branch=master \
            file://0001-Bump-libxml-API-to-5.0.patch \
+           file://0002-Add-libfmt.patch \
            "
 
 # Modify these as desired
