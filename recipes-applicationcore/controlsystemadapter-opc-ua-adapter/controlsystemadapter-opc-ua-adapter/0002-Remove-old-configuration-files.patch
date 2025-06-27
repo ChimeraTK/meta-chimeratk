@@ -1,0 +1,63 @@
+From 15983928103a5c2423c549feace45003487a5e7f Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Tue, 6 May 2025 11:14:16 +0200
+Subject: [PATCH] Remove old configuration files
+
+Upstream-Status: Submitted [https://github.com/ChimeraTK/project-template]
+---
+ cmake/PROJECT_NAMEConfig.cmake.in.in  | 18 ------------------
+ cmake/create_cmake_config_files.cmake | 15 ---------------
+ 2 files changed, 33 deletions(-)
+
+diff --git a/cmake/PROJECT_NAMEConfig.cmake.in.in b/cmake/PROJECT_NAMEConfig.cmake.in.in
+index b07f6352..f12e79a9 100644
+--- a/cmake/PROJECT_NAMEConfig.cmake.in.in
++++ b/cmake/PROJECT_NAMEConfig.cmake.in.in
+@@ -87,21 +87,3 @@ else()
+     endif()
+ endif() 
+ 
+-# Compatibility layer definitions.
+-# The following variables are generated automatically for projects supporting cmake-exports.
+-# Otherwise, values must be provided as inputs to create_cmake_config_files.
+-# The types of generated lists are precisely as in old DeviceAccess config
+-# inc dirs, lib dirs, libs are ";" separated
+-# cxx flags, link flags are " " separated
+-# ";" separated
+-set(@PROJECT_NAME@_INCLUDE_DIRS @@PROJECT_NAME@_INCLUDE_DIRS@)
+-# ";" separated
+-set(@PROJECT_NAME@_LIBRARY_DIRS @@PROJECT_NAME@_LIBRARY_DIRS@)
+-# ";" separated
+-set(@PROJECT_NAME@_LIBRARIES ${@PROJECT_NAME@_LIBRARIES} @@PROJECT_NAME@_LIBRARIES@)
+-# " " separated
+-set(@PROJECT_NAME@_CXX_FLAGS "@@PROJECT_NAME@_CXX_FLAGS@")
+-# " " separated
+-set(@PROJECT_NAME@_LINKER_FLAGS "@@PROJECT_NAME@_LINKER_FLAGS@ @@PROJECT_NAME@_LINK_FLAGS@")
+-# " " separated
+-set(@PROJECT_NAME@_LINK_FLAGS "@@PROJECT_NAME@_LINKER_FLAGS@ @@PROJECT_NAME@_LINK_FLAGS@")
+diff --git a/cmake/create_cmake_config_files.cmake b/cmake/create_cmake_config_files.cmake
+index 9be96d82..9024da6b 100644
+--- a/cmake/create_cmake_config_files.cmake
++++ b/cmake/create_cmake_config_files.cmake
+@@ -271,21 +271,6 @@ endif()
+ configure_file(cmake/PROJECT_NAMEConfigVersion.cmake.in.in "${PROJECT_BINARY_DIR}/cmake/${PROJECT_NAME}ConfigVersion.cmake.in" @ONLY)
+ configure_file(${PROJECT_BINARY_DIR}/cmake/${PROJECT_NAME}ConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake" @ONLY)
+ 
+-# create the shell script for standard make files
+-configure_file(cmake/PROJECT_NAME-config.in.in "${PROJECT_BINARY_DIR}/cmake/${PROJECT_NAME}-config.in" @ONLY)
+-configure_file(${PROJECT_BINARY_DIR}/cmake/${PROJECT_NAME}-config.in "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config" @ONLY)
+-
+-# create the pkgconfig file
+-configure_file(cmake/PROJECT_NAME.pc.in.in "${PROJECT_BINARY_DIR}/cmake/${PROJECT_NAME}.pc.in" @ONLY)
+-configure_file(${PROJECT_BINARY_DIR}/cmake/${PROJECT_NAME}.pc.in "${PROJECT_BINARY_DIR}/${PROJECT_NAME}.pc" @ONLY)
+-
+-# install script for Makefiles
+-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config DESTINATION bin COMPONENT dev)
+-
+-# install configuration file for pkgconfig
+-install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}.pc" DESTINATION share/pkgconfig COMPONENT dev)
+-
+-
+ if(${PROVIDES_EXPORTED_TARGETS})
+     #  imported targets should be namespaced, so define namespaced alias
+     add_library(ChimeraTK::${PROJECT_NAME} ALIAS ${PROJECT_NAME})

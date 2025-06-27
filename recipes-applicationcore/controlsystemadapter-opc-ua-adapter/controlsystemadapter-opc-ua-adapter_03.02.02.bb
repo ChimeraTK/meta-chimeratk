@@ -10,6 +10,7 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=3000208d539ec061b899bce1d9ce9404"
 SRC_URI = "git://github.com/ChimeraTK/ControlSystemAdapter-OPC-UA-Adapter;protocol=https;branch=master \
            file://0003-Drop-cmake-requirement.patch \
            file://0001-csa-opc-ua-Remove-RPATH-handling.patch \
+           file://0001-Add-dependency-to-fmt.patch \
            "
 
 # Modify these as desired
