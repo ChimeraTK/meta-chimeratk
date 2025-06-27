@@ -1,0 +1,49 @@
+From 821d773321a2a10c948970719dcc5175f69ee088 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Thu, 26 Jun 2025 17:20:00 +0000
+Subject: [PATCH] Add fmt
+
+---
+ CMakeLists.txt | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d1eac5d..ee0433a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -40,6 +40,7 @@ include(cmake/set_default_flags.cmake)
+ include(cmake/enable_code_coverage_report.cmake)
+ include(cmake/set_control_system_adapter.cmake)
+ find_package(ChimeraTK-ApplicationCore 03.00 REQUIRED)
++find_package(fmt)
+ 
+ aux_source_directory(${CMAKE_SOURCE_DIR}/server server_sources)
+ aux_source_directory(${CMAKE_SOURCE_DIR}/src library_sources)
+@@ -50,15 +51,15 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
+ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+ 
+ add_library(${EXE_NAME}_impl STATIC ${library_sources})
+-target_link_libraries(${EXE_NAME}_impl ChimeraTK::ChimeraTK-ApplicationCore)
++target_link_libraries(${EXE_NAME}_impl ChimeraTK::ChimeraTK-ApplicationCore fmt::fmt)
+ 
+ # main server executable
+ add_executable(${EXE_NAME} ${server_sources})
+-target_link_libraries(${EXE_NAME} PUBLIC ${EXE_NAME}_impl PRIVATE ChimeraTK::SelectedAdapter)
++target_link_libraries(${EXE_NAME} PUBLIC ${EXE_NAME}_impl PRIVATE ChimeraTK::SelectedAdapter fmt::fmt)
+ 
+ add_executable(${EXE_NAME}-xmlGenerator ${server_sources})
+ target_compile_options(${EXE_NAME}-xmlGenerator PRIVATE "-DGENERATE_XML")
+-target_link_libraries(${EXE_NAME}-xmlGenerator PUBLIC ${EXE_NAME}_impl)
++target_link_libraries(${EXE_NAME}-xmlGenerator PUBLIC ${EXE_NAME}_impl fmt::fmt)
+ 
+ # copy example configuration to build directory - this is also needed for the tests
+ # The doocs server config and doocs adapter config
+@@ -77,7 +78,7 @@ find_package(Boost COMPONENTS unit_test_framework)
+ # Test executables and helper scripts
+ foreach(target writeWordStatus testGenericServer)
+     add_executable(${target} tests/${target}.cc)
+-    target_link_libraries(${target} PUBLIC ${EXE_NAME}_impl PRIVATE Boost::unit_test_framework)
++    target_link_libraries(${target} PUBLIC ${EXE_NAME}_impl PRIVATE Boost::unit_test_framework fmt::fmt)
+ endforeach()
+ 
+ enable_testing()

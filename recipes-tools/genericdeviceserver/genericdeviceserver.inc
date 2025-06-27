@@ -14,11 +14,12 @@ SRC_URI = "git://github.com/ChimeraTK/GenericDeviceServer;protocol=https;branch=
            file://0003-Make-internal-library-static.patch \
            file://0001-Lower-CMake-requirement.patch \
            file://0001-Install-XML-Generator.patch \
+           file://0001-Add-fmt.patch \
            "
 
 # Modify these as desired
-PV = "01.05.00"
-SRCREV = "0adf42c6165b5f1fabdd6259622b137f6c62cdf1"
+PV = "02.00.01"
+SRCREV = "586d3ee497cfee5a2b436891fdc7d23daac96999"
 
 S = "${WORKDIR}/git"
 
