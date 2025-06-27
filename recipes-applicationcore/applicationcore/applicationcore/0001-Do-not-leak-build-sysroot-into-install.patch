@@ -1,0 +1,26 @@
+From 2f9d8e3431ff67db2c573b405668e9e988e4e7cf Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Tue, 29 Apr 2025 17:34:06 +0000
+Subject: [PATCH] Do not leak build-sysroot into install
+
+Upstream-Status: embedded
+---
+ CMakeLists.txt | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9463f26..46b2eeb 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -121,11 +121,7 @@ install(DIRECTORY ${${PROJECT_NAME}_INCLUDE_DIRS} DESTINATION include/ChimeraTK/
+ 
+ if(${pybind11_FOUND})
+   # install Python modules to correct platform-dependent directory (if installing to system prefix)
+-  if("${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr" OR "${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr/local")
+-    set(python_install_path "${Python_SITEARCH}")
+-  else()
+     set(python_install_path "lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages")
+-  endif()
+ 
+   install(TARGETS PyApplicationCore LIBRARY DESTINATION "${python_install_path}/ChimeraTK/ApplicationCore${${PROJECT_NAME}_SOVERSION}")
+ endif()

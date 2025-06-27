@@ -1,0 +1,19 @@
+From a3497a157b4969479607ee174eaf2f85875ae8c3 Mon Sep 17 00:00:00 2001
+From: Martin Killenberg <martin.killenberg@desy.de>
+Date: Mon, 24 Mar 2025 13:56:50 +0100
+Subject: [PATCH] feat(project-template): Add soVersion to VersionInfo template
+
+---
+ cmake/version_info_template.h.in | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/cmake/version_info_template.h.in b/cmake/version_info_template.h.in
+index 7659c54..5483e2e 100644
+--- a/cmake/version_info_template.h.in
++++ b/cmake/version_info_template.h.in
+@@ -6,4 +6,5 @@ namespace ChimeraTK::VersionInfo {
+   const int minor{${${PROJECT_NAME}_MINOR_VERSION_INT}};
+   const int applicationPatch{${${PROJECT_NAME}_PATCH_VERSION_INT}};
+ 
++  static constexpr const char * soVersion = "${${PROJECT_NAME}_SOVERSION}";
+ } // namespace ChimeraTK::VersionInfo

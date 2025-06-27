@@ -1,0 +1,27 @@
+From 0cc42e4f0462aaf33522d7affdc8c22a303e9c12 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Thu, 26 Jun 2025 16:34:24 +0000
+Subject: [PATCH] Drop unneccessary constructor. Fails to compile with gcc9
+
+---
+ Python/bindings/include/PyDataConsistencyGroup.h | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/Python/bindings/include/PyDataConsistencyGroup.h b/Python/bindings/include/PyDataConsistencyGroup.h
+index 060f5c2..4345141 100644
+--- a/Python/bindings/include/PyDataConsistencyGroup.h
++++ b/Python/bindings/include/PyDataConsistencyGroup.h
+@@ -38,11 +38,10 @@ namespace ChimeraTK {
+    protected:
+     // Helper constructor that takes a std::vector and passes it on to the iterator constructor of
+     // ReadAnyGroup
+-    PyDataConsistencyGroup(std::vector<TransferElementAbstractor> args) : _impl(args.begin(), args.end()) {}
+ 
+     DataConsistencyGroup _impl;
+   };
+ 
+   /********************************************************************************************************************/
+ 
+-} // namespace ChimeraTK
+\ No newline at end of file
++} // namespace ChimeraTK

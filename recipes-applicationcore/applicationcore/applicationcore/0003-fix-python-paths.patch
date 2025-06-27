@@ -1,0 +1,47 @@
+From 2adee280665ed028a25801b491da89faa3da4842 Mon Sep 17 00:00:00 2001
+From: Martin Killenberg <martin.killenberg@desy.de>
+Date: Tue, 25 Mar 2025 16:40:12 +0100
+Subject: [PATCH] fix: python paths
+
+- PyApplicationCore.pyi must not be in versioned directory, so it is found by the IDE
+- prepend the versioned directories so old PyApplicationBindings in the system are not found first
+- remove debug output
+---
+ CMakeLists.txt                        | 6 +++---
+ Python/manager/PythonModuleManager.cc | 3 +--
+ 2 files changed, 4 insertions(+), 5 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a490a69..1a044e9 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -145,12 +145,12 @@ install(DIRECTORY ${${PROJECT_NAME}_INCLUDE_DIRS} DESTINATION include/ChimeraTK/
+ if(${pybind11_FOUND})
+   # install Python modules to correct platform-dependent directory (if installing to system prefix)
+   if("${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr" OR "${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr/local")
+-    set(python_install_path "${Python_SITEARCH}/ChimeraTK/ApplicationCore${${PROJECT_NAME}_SOVERSION}")
++    set(python_install_path "${Python_SITEARCH}")
+   else()
+-    set(python_install_path "lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages/ChimeraTK/ApplicationCore${${PROJECT_NAME}_SOVERSION}")
++    set(python_install_path "lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages")
+   endif()
+ 
+-  install(TARGETS PyApplicationCore LIBRARY DESTINATION ${python_install_path})
++  install(TARGETS PyApplicationCore LIBRARY DESTINATION "${python_install_path}/ChimeraTK/ApplicationCore${${PROJECT_NAME}_SOVERSION}")
+ 
+   if((NOT ${CMAKE_BUILD_TYPE} STREQUAL "asan") AND(NOT ${CMAKE_BUILD_TYPE} STREQUAL "tsan"))
+     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PyApplicationCore.pyi DESTINATION ${python_install_path})
+diff --git a/Python/manager/PythonModuleManager.cc b/Python/manager/PythonModuleManager.cc
+index 91ca307..9818e4b 100644
+--- a/Python/manager/PythonModuleManager.cc
++++ b/Python/manager/PythonModuleManager.cc
+@@ -54,8 +54,7 @@ namespace ChimeraTK {
+         for p in sys.path:
+           new_paths.append(os.path.join(p, 'ChimeraTK', 'ApplicationCore'+so_version))
+ 
+-        sys.path.extend(new_paths)
+-        print(sys.path)
++        sys.path = new_paths + sys.path # prepend so old system libraries are not found first
+       )",
+           py::globals(), locals);
+     }

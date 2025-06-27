@@ -1,0 +1,78 @@
+From b3aa2dfca7f799a4c3f905419e8e9a41f2f5bb31 Mon Sep 17 00:00:00 2001
+From: Martin Killenberg <martin.killenberg@desy.de>
+Date: Mon, 24 Mar 2025 15:07:17 +0100
+Subject: [PATCH] fix: put PyApplicationCore bindings into versioned directory
+
+Different library versions must use different files so they can be installed in parallel. The PyApplication bindings are now in a directory which has the ApplicationCore version in its name.
+---
+ CMakeLists.txt                        |  4 ++--
+ Python/manager/PythonModuleManager.cc | 22 ++++++++++++++++++++++
+ 2 files changed, 24 insertions(+), 2 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index fea3e96..a490a69 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -145,9 +145,9 @@ install(DIRECTORY ${${PROJECT_NAME}_INCLUDE_DIRS} DESTINATION include/ChimeraTK/
+ if(${pybind11_FOUND})
+   # install Python modules to correct platform-dependent directory (if installing to system prefix)
+   if("${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr" OR "${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr/local")
+-    set(python_install_path ${Python_SITEARCH})
++    set(python_install_path "${Python_SITEARCH}/ChimeraTK/ApplicationCore${${PROJECT_NAME}_SOVERSION}")
+   else()
+-    set(python_install_path "lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages")
++    set(python_install_path "lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages/ChimeraTK/ApplicationCore${${PROJECT_NAME}_SOVERSION}")
+   endif()
+ 
+   install(TARGETS PyApplicationCore LIBRARY DESTINATION ${python_install_path})
+diff --git a/Python/manager/PythonModuleManager.cc b/Python/manager/PythonModuleManager.cc
+index 19250f6..91ca307 100644
+--- a/Python/manager/PythonModuleManager.cc
++++ b/Python/manager/PythonModuleManager.cc
+@@ -8,10 +8,12 @@
+ #include "ConfigReader.h"
+ #include "PyModuleGroup.h"
+ #include "PythonModuleManager.h"
++#include "VersionInfo.h"
+ 
+ #include <filesystem>
+ 
+ namespace py = pybind11;
++using namespace py::literals;
+ 
+ namespace ChimeraTK {
+ 
+@@ -22,6 +24,7 @@ namespace ChimeraTK {
+       py::scoped_interpreter pyint{false}; // "false" = do not register signal handlers
+       py::exception<boost::thread_interrupted> exceptionObject;
+       std::function<void(const std::unique_ptr<PyModuleGroup>&)> onMainGroupChangeCallback;
++      PythonModuleManagerStatics();
+     };
+ 
+     /******************************************************************************************************************/
+@@ -37,6 +40,25 @@ namespace ChimeraTK {
+     std::unique_ptr<detail::PythonModuleManagerStatics> PythonModuleManagerImpl::statics;
+     /// \endcond
+ 
++    /******************************************************************************************************************/
++
++    PythonModuleManagerStatics::PythonModuleManagerStatics() {
++      py::gil_scoped_acquire gil;
++
++      auto locals = py::dict("so_version"_a = ChimeraTK::VersionInfo::soVersion);
++      py::exec(R"(
++        import sys
++        import os
++
++        new_paths = []
++        for p in sys.path:
++          new_paths.append(os.path.join(p, 'ChimeraTK', 'ApplicationCore'+so_version))
++
++        sys.path.extend(new_paths)
++        print(sys.path)
++      )",
++          py::globals(), locals);
++    }
+   } // namespace detail
+ 
+   /********************************************************************************************************************/
