@@ -1,0 +1,36 @@
+From a6fd0fb1e3a8530b4207a4b80026e7a0c0b4b60d Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Mon, 13 Feb 2023 15:46:39 +0100
+Subject: [PATCH] Install tests
+
+---
+ CMakeLists.txt | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c30dd31..121dba6 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -37,6 +37,7 @@ include(cmake/enable_latest_cxx_support.cmake)
+ include_directories(${CMAKE_SOURCE_DIR}/include)
+ 
+ option(BUILD_TESTS "Build test programs" ON)
++option(INSTALL_TESTS "Install test programs" OFF)
+ if(BUILD_TESTS)
+   enable_testing()
+ 
+@@ -47,8 +48,13 @@ if(BUILD_TESTS)
+     add_executable(${excutableName} ${testExecutableSrcFile})
+     target_link_libraries(${excutableName} ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} ${GCCLIBATOMIC_LIBRARY})
+     add_test(${excutableName} ${excutableName})
++    if (INSTALL_TESTS)
++        install(TARGETS ${excutableName} DESTINATION lib/cppext/installed-tests)
++    endif()
+   endforeach( testExecutableSrcFile )
+-
++  if (INSTALL_TESTS)
++      install(FILES ${CMAKE_BINARY_DIR}/CTestTestfile.cmake DESTINATION lib/cppext/installed-tests)
++  endif()
+ endif()
+ 
+ # generate Doxygen documentation

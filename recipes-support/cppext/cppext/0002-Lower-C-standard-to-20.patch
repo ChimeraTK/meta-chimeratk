@@ -1,0 +1,22 @@
+From 687e46d2c3eb6de13122994349d37a242ecac2c8 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Wed, 25 Jun 2025 12:38:18 +0000
+Subject: [PATCH] Lower C++ standard to 20
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index aedb089..afa409e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -27,7 +27,7 @@ include(cmake/set_default_flags.cmake)
+ include(cmake/enable_code_style_check.cmake)
+ 
+ # Require C++23 standard. This will be propagated to all targets that link against this library.
+-target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_23)
++target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_20)
+ 
+ target_include_directories(${PROJECT_NAME} INTERFACE
+   "$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
