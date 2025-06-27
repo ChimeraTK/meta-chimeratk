@@ -6,6 +6,7 @@ SRC_URI = "git://github.com/ChimeraTK/DeviceAccess-PythonBindings.git;protocol=h
            file://0002-Drop-RPATH-handling.patch \
            file://0003-Hard-code-numpy-include-path.patch \
            file://0001-Do-not-use-Python_SITEARCH.patch \
+           file://0006-Add-fmt.patch \
            "
 
 PV = "03.05.01"
@@ -14,7 +15,7 @@ SRCREV = "b9b6bae01a26cfe64ffa8f6c3003b236d75f18b5"
 S = "${WORKDIR}/git"
 
 DEPENDS = "boost python3 python3-numpy deviceaccess"
-RDEPENDS:${PN} = "python3-numpy"
+RDEPENDS:${PN} = "python3-numpy python3-typing"
 
 # We are using setuptools3-base here to get the proper FILES defines for python
 inherit cmake pkgconfig python3-dir setuptools3-base
