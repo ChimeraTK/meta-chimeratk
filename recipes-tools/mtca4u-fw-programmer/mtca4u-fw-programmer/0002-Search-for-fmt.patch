@@ -1,0 +1,21 @@
+From 699c4f32571d2b9b9a0ff85479c7de417ed6dbe5 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Fri, 27 Jun 2025 13:26:00 +0000
+Subject: [PATCH] Search for fmt
+
+---
+ CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e2f1b61..9d3d186 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -17,6 +17,7 @@ INCLUDE(${CMAKE_SOURCE_DIR}/cmake/set_default_flags.cmake)
+ 
+ find_package(ChimeraTK-DeviceAccess 03.09 REQUIRED)
+ find_package(Boost 1.46 REQUIRED COMPONENTS program_options)
++find_package(fmt)
+ 
+ include(cmake/enable_code_style_check.cmake)
+ 

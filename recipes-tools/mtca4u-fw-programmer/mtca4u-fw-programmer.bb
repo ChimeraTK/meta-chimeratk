@@ -1,11 +1,13 @@
 LICENSE = "LGPL-3.0-or-later"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=e6a600fd5e1d9cbde2d983680233ad02"
 
-SRC_URI = "git://github.com/ChimeraTK/FirmwareProgrammer.git;protocol=https;branch=master"
+SRC_URI = "git://github.com/ChimeraTK/FirmwareProgrammer.git;protocol=https;branch=master \
+           file://0002-Search-for-fmt.patch \
+           "
 
 # Modify these as desired
-PV = "04.10.00"
-SRCREV = "7e99a80d2369a97e9d5ac59219de1d0fb9c95554"
+PV = "04.10.01"
+SRCREV = "1a4020c141b8b5d70baad7ee2f7e0525fd8173fa"
 
 S = "${WORKDIR}/git"
 
