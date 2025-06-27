@@ -1,0 +1,22 @@
+From f1977aff62a2706e479fcffb3905d8e36c3202e7 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Thu, 26 Jun 2025 08:03:55 +0000
+Subject: [PATCH] Fix issue in code example
+
+---
+ cppapi/client/group.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/cppapi/client/group.h b/cppapi/client/group.h
+index 48e5ad8f..9a6b6013 100644
+--- a/cppapi/client/group.h
++++ b/cppapi/client/group.h
+@@ -847,7 +847,7 @@ public:
+  * only applied to the local set of elements. For instance, the following code remove any stepper motor in the
+  * hierarchy:
+  * @code
+- * root_group->remove("*/stepper_motor/*");
++ * root_group->remove("stepper_motor");
+  * @endcode
+  *
+  * @param [in] pattern The device selection pattern

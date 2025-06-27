@@ -1,0 +1,30 @@
+From 4cc1c9eaf88d4236afbbb63f936690d157c5eae3 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Fri, 27 Jun 2025 13:28:26 +0000
+Subject: [PATCH] Add libfmt
+
+---
+ CMakeLists.txt | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9cccbca..f427dbf 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -15,6 +15,7 @@ include(cmake/enable_code_coverage_report.cmake)
+ include(cmake/enable_doxygen_documentation.cmake)
+ include(cmake/enable_code_style_check.cmake)
+ 
++find_package(fmt)
+ find_package(PkgConfig)
+ 
+ # Add the dependencies
+@@ -50,7 +51,7 @@ set_target_properties(
+                              SOVERSION ${${PROJECT_NAME}_SOVERSION})
+ target_link_libraries(${PROJECT_NAME}
+                       PUBLIC ChimeraTK::ChimeraTK-ControlSystemAdapter)
+-target_link_libraries(${PROJECT_NAME} PRIVATE PkgConfig::TANGO PkgConfig::XMLPP)
++target_link_libraries(${PROJECT_NAME} PRIVATE PkgConfig::TANGO PkgConfig::XMLPP fmt::fmt)
+ 
+ # do not remove runtime paths of the library when installing (helps for unsually
+ # located implicit dependencies)

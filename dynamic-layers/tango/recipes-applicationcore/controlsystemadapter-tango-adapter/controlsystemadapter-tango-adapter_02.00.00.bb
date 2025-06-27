@@ -3,11 +3,12 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=e6a600fd5e1d9cbde2d983680233ad02"
 
 SRC_URI = "git://github.com/ChimeraTK/ControlSystemAdapter-TangoAdapter;protocol=https \
            file://0001-Drop-CMake-version-requirement.patch \
+           file://0002-Add-libfmt.patch \
            "
 
 # Modify these as desired
-PV = "01.00.00"
-SRCREV = "ce2f778877de3c88e251374bebb6f56d0581074e"
+PV = "02.00.00"
+SRCREV = "69aacc1f59ec6d984f61f9f8ffef2d6d5cad3542"
 
 S = "${WORKDIR}/git"
 

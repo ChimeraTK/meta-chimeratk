@@ -1,4 +1,4 @@
-From d21d4f2f2bc4e41c21e839525a2407e7f56c67f3 Mon Sep 17 00:00:00 2001
+From bf8be5a2dc9bb972713f13d43e60a7879e640129 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Wed, 26 Jun 2024 13:54:51 +0200
 Subject: [PATCH] Drop CMake version requirement
@@ -8,13 +8,12 @@ Subject: [PATCH] Drop CMake version requirement
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 7e9a896..800ad12 100644
+index aab41c6..9cccbca 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -1,5 +1,5 @@
- project(ChimeraTK-ControlSystemAdapter-TangoAdapter)
+@@ -1,4 +1,4 @@
 -cmake_minimum_required(VERSION 3.16)
 +cmake_minimum_required(VERSION 3.15)
+ project(ChimeraTK-ControlSystemAdapter-TangoAdapter)
  
  list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
- 
