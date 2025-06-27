@@ -1,0 +1,31 @@
+From ec0bbcc643cb8a76201098a78401352c9539fe93 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Fri, 27 Jun 2025 14:05:14 +0000
+Subject: [PATCH] Add fmt
+
+---
+ CMakeLists.txt | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b017624..d52c02e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -31,6 +31,8 @@ FIND_PACKAGE(Boost REQUIRED COMPONENTS thread)
+ # boost system is needed by some tests
+ FIND_PACKAGE(Boost REQUIRED COMPONENTS filesystem)
+ 
++FIND_PACKAGE(fmt REQUIRED)
++
+ # the unit test component is optional
+ option(BUILD_TESTS "Build test programs" ON)
+ 
+@@ -101,7 +103,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
+   "$<INSTALL_INTERFACE:include>")
+ 
+ set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_FULL_LIBRARY_VERSION} SOVERSION ${${PROJECT_NAME}_SOVERSION})
+-target_link_libraries(${PROJECT_NAME} PRIVATE PkgConfig::LibXML++)
++target_link_libraries(${PROJECT_NAME} PRIVATE PkgConfig::LibXML++ fmt::fmt)
+ target_link_libraries(${PROJECT_NAME}
+   PUBLIC
+   Boost::chrono Boost::system Boost::thread

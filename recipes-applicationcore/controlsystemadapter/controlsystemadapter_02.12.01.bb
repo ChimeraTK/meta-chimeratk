@@ -10,17 +10,18 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=1ebbd3e34237af26da5dc08a4e440464 \
 
 SRC_URI = "git://github.com/ChimeraTK/ControlSystemAdapter.git;protocol=https;branch=master \
            file://0001-Drop-CMake-requirement.patch \
+           file://0002-Add-fmt.patch \
            "
 
 # Modify these as desired
-PV = "02.10.00"
-SRCREV = "c421de5ae6c84ce239eca0a487707e4859c0e337"
+PV = "02.12.01"
+SRCREV = "d73d0c8e29c0ac00cc29edec7c32da9f3e1a260e"
 
 S = "${WORKDIR}/git"
 
 # NOTE: the following library dependencies are unknown, ignoring: libatomic
 #       (this is based on recipes that have previously been built and packaged)
-DEPENDS = "libxml++ boost deviceaccess"
+DEPENDS = "libxml++ boost deviceaccess fmt"
 
 inherit cmake pkgconfig
 
