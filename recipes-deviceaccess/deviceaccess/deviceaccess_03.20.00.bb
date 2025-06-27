@@ -6,15 +6,18 @@ SRC_URI = "git://github.com/ChimeraTK/DeviceAccess.git;protocol=https;branch=mas
            file://0001-Drop-CMake-required-version.patch \
            file://0004-Drop-BAR0-check.patch \
            file://0001-Drop-version-requirement-of-nlohmann_json.patch \
+           file://0004-Revert-feat-support-new-JSON-based-map-file-format.patch \
+           file://0005-Remove-C-23-features.patch \
+           file://0006-Add-fmt.patch \
            "
 
 # Modify these as desired
-PV = "03.15.01"
-SRCREV = "6388257aeeea097131ffc3a2b2dc0237566e59a7"
+PV = "03.20.00"
+SRCREV = "a8f33d15ebc1191163eca948ffacea6f0f4fe750"
 
 S = "${WORKDIR}/git"
 
-DEPENDS = "boost cppext exprtk libxml++ exprtk nlohmann-json"
+DEPENDS = "boost cppext exprtk libxml++ exprtk nlohmann-json fmt"
 
 inherit cmake pkgconfig
 
