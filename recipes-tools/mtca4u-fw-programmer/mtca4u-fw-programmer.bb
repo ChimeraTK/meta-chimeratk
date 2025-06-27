@@ -3,12 +3,12 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=e6a600fd5e1d9cbde2d983680233ad02"
 
 SRC_URI = "git://github.com/ChimeraTK/FirmwareProgrammer.git;protocol=https;branch=master \
            file://0001-Drop-CMake-version.patch \
-           file://0002-Remove-link-flags.patch \
+           file://0002-Search-for-fmt.patch \
            "
 
 # Modify these as desired
-PV = "1.0+git${SRCPV}"
-SRCREV = "b34b1081d71fbb945ec8a24e2c4ac15bb363d45f"
+PV = "04.10.01"
+SRCREV = "1a4020c141b8b5d70baad7ee2f7e0525fd8173fa"
 
 S = "${WORKDIR}/git"
 
