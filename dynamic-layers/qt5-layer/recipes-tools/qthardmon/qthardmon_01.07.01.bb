@@ -3,6 +3,7 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=e6a600fd5e1d9cbde2d983680233ad02"
 
 SRC_URI = "git://github.com/ChimeraTK/QtHardMon;protocol=https;branch=master \
            file://0001-Drop-CMake-version.patch \
+           file://0001-Search-for-fmt.patch \
            "
 
 # Modify these as desired
