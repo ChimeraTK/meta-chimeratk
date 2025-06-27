@@ -1,0 +1,219 @@
+From fa5c29bba54e1a80808e3255d6d3d7d653bfed00 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Wed, 25 Jun 2025 16:39:25 +0000
+Subject: [PATCH] Remove C++23 features
+
+---
+ .../src/LNMTagModifierPluign.cc               |  2 +-
+ include/VersionNumber.h                       | 43 +++-------------
+ include/async/AsyncAccessorManager.h          |  4 +-
+ include/async/DataConsistencyKey.h            | 51 +++++++++++++++++--
+ src/NumericAddressedBackend.cc                |  3 +-
+ 5 files changed, 62 insertions(+), 41 deletions(-)
+
+diff --git a/backends/LogicalNameMapping/src/LNMTagModifierPluign.cc b/backends/LogicalNameMapping/src/LNMTagModifierPluign.cc
+index 5f60483c..553ad46e 100644
+--- a/backends/LogicalNameMapping/src/LNMTagModifierPluign.cc
++++ b/backends/LogicalNameMapping/src/LNMTagModifierPluign.cc
+@@ -45,7 +45,7 @@ namespace ChimeraTK::LNMBackend {
+     }
+     else {
+       _info.tags.insert(_tagsToAdd.begin(), _tagsToAdd.end());
+-      std::ranges::set_difference(_info.tags, _tagsToRemove, std::inserter(_tagsToSet, _tagsToSet.end()));
++      std::set_difference(_info.tags.begin(), _info.tags.end(), _tagsToRemove.begin(), _tagsToRemove.end(), std::inserter(_tagsToSet, _tagsToSet.end()));
+       _info.tags = _tagsToSet;
+     }
+   }
+diff --git a/include/VersionNumber.h b/include/VersionNumber.h
+index 7922f69b..a34d34ca 100644
+--- a/include/VersionNumber.h
++++ b/include/VersionNumber.h
+@@ -5,7 +5,8 @@
+ #include <atomic>
+ #include <chrono>
+ #include <cstdint>
+-#include <format>
++#include <fmt/format.h>
++#include <fmt/chrono.h>
+ #include <string>
+ 
+ namespace ChimeraTK {
+@@ -95,7 +96,7 @@ namespace ChimeraTK {
+     friend std::ostream& operator<<(std::ostream& stream, const VersionNumber& version);
+ 
+     template<class T, class CharT>
+-    friend struct std::formatter;
++    friend struct fmt::formatter;
+   };
+ 
+   /********************************************************************************************************************/
+@@ -116,45 +117,17 @@ namespace ChimeraTK {
+ /**********************************************************************************************************************/
+ 
+ /** Formatter for C++20 std::format etc. */
+-template<class CharT>
+-struct std::formatter<ChimeraTK::VersionNumber, CharT> {
+-  bool printVersion{false};
+-  bool printTime{false};
++template <typename CharT>
++struct fmt::formatter<ChimeraTK::VersionNumber, CharT> {
+ 
+   template<class ParseContext>
+   constexpr ParseContext::iterator parse(ParseContext& ctx) {
+-    auto it = ctx.begin();
+-    if(it == ctx.end()) {
+-      return it;
+-    }
+-    if(*it == 'v') {
+-      printVersion = true;
+-      ++it;
+-    }
+-    if(*it == 't') {
+-      printTime = true;
+-      ++it;
+-    }
+-    if(it != ctx.end() && *it != '}') {
+-      throw std::format_error("Invalid format args for ChimeraTK::VersionNumber.");
+-    }
+-    if(!printVersion && !printTime) {
+-      // print version by default
+-      printVersion = true;
+-    }
+-    return it;
++	  return ctx.begin();
+   }
+ 
+   template<typename FormatContext>
+-  auto format(const ChimeraTK::VersionNumber& v, FormatContext& ctx) const {
+-    std::string fmt;
+-    if(printVersion) {
+-      fmt = "v{0}";
+-    }
+-    if(printTime) {
+-      fmt += "@{1}";
+-    }
+-    return std::vformat_to(ctx.out(), fmt, std::make_format_args(v._value, v._time));
++  auto format(const ChimeraTK::VersionNumber& v, FormatContext& ctx) {
++    return fmt::format_to(ctx.out(), "v{0}", v._value);
+   }
+ };
+ 
+diff --git a/include/async/AsyncAccessorManager.h b/include/async/AsyncAccessorManager.h
+index 90562420..30a4bba5 100644
+--- a/include/async/AsyncAccessorManager.h
++++ b/include/async/AsyncAccessorManager.h
+@@ -7,6 +7,8 @@
+ 
+ #include <utility>
+ 
++#include <fmt/format.h>
++
+ namespace ChimeraTK::async {
+ 
+   /** Typeless base class. The implementations will have a weak pointer of an AsyncNDRegisterAccessor<UserType>
+@@ -229,7 +231,7 @@ namespace ChimeraTK::async {
+     auto subscriber = _asyncAccessor.lock();
+ 
+     if(_lastSentVersion > _sendBuffer.versionNumber) {
+-      throw ChimeraTK::logic_error(std::format("Trying to send decreased version {} < {} on AsyncVariable {}.",
++      throw ChimeraTK::logic_error(fmt::format("Trying to send decreased version {} < {} on AsyncVariable {}.",
+           _sendBuffer.versionNumber, _lastSentVersion, subscriber->getName()));
+     }
+     _lastSentVersion = _sendBuffer.versionNumber;
+diff --git a/include/async/DataConsistencyKey.h b/include/async/DataConsistencyKey.h
+index 5b430e0f..3c13eab5 100644
+--- a/include/async/DataConsistencyKey.h
++++ b/include/async/DataConsistencyKey.h
+@@ -2,7 +2,6 @@
+ // SPDX-License-Identifier: LGPL-3.0-or-later
+ #pragma once
+ 
+-#include <compare>
+ #include <cstdint>
+ 
+ namespace ChimeraTK::async {
+@@ -24,8 +23,46 @@ namespace ChimeraTK::async {
+     explicit operator BaseType() const { return _value; }
+ 
+     /// Comparison operators
+-    std::strong_ordering operator<=>(const DataConsistencyKey&) const = default;
+-    std::strong_ordering operator<=>(BaseType other) const { return operator<=>(DataConsistencyKey(other)); }
++    bool operator==(const DataConsistencyKey& other) const {
++	    return _value == other._value;
++    }
++
++    bool operator<(const DataConsistencyKey& other) const {
++	    return _value < other._value;
++    }
++
++    bool operator>(const DataConsistencyKey& other) const {
++	    return _value > other._value;
++    }
++
++    bool operator<=(const DataConsistencyKey& other) const {
++	    return _value <= other._value;
++    }
++
++    bool operator>=(const DataConsistencyKey& other) const {
++	    return _value >= other._value;
++    }
++
++    bool operator==(const BaseType& other) const {
++	    return _value == other;
++    }
++
++    bool operator<(const BaseType& other) const {
++	    return _value < other;
++    }
++
++    bool operator<=(const BaseType& other) const {
++	    return _value <= other;
++    }
++
++    bool operator>=(const BaseType& other) const {
++	    return _value >= other;
++    }
++
++    bool operator>(const BaseType& other) const {
++	    return _value > other;
++    }
++
+ 
+     /// Increment operator
+     DataConsistencyKey& operator++() {
+@@ -51,6 +88,14 @@ namespace ChimeraTK::async {
+     BaseType _value;
+   };
+ 
++ inline  bool operator<=(const uint64_t& a, const DataConsistencyKey& b) {
++	  return DataConsistencyKey(a) <= b;
++  }
++
++  inline bool operator>(const uint64_t& a, const DataConsistencyKey& b) {
++	  return !(DataConsistencyKey(a) <= b);
++  }
++
+   /********************************************************************************************************************/
+ 
+ } // namespace ChimeraTK::async
+diff --git a/src/NumericAddressedBackend.cc b/src/NumericAddressedBackend.cc
+index bcdd99c8..6f329f45 100644
+--- a/src/NumericAddressedBackend.cc
++++ b/src/NumericAddressedBackend.cc
+@@ -13,6 +13,7 @@
+ #include "NumericAddressedBackendRegisterAccessor.h"
+ 
+ #include <nlohmann/json.hpp>
++#include <fmt/format.h>
+ 
+ using json = nlohmann::json;
+ 
+@@ -38,7 +39,7 @@ namespace ChimeraTK {
+         }
+       }
+       catch(json::parse_error& e) {
+-        throw ChimeraTK::logic_error(std::format("Parsing DataConsistencyKeys parameter '{}' results in JSON error: {}",
++        throw ChimeraTK::logic_error(fmt::format("Parsing DataConsistencyKeys parameter '{}' results in JSON error: {}",
+             dataConsistencyKeyDescriptor, e.what()));
+       }
+     }

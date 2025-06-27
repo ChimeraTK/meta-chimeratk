@@ -1,0 +1,30 @@
+From 5d6cc0edf0e64c5f31aaeb563d74faed46456057 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Thu, 10 Jul 2025 13:16:55 +0200
+Subject: [PATCH] Add dependency on fmt
+
+---
+ CMakeLists.txt | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e43aa437..2d03c564 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -38,6 +38,8 @@ FIND_PACKAGE(ChimeraTK-cppext 01.05 REQUIRED)
+ FIND_PACKAGE(nlohmann_json 03.11 REQUIRED)
+ add_compile_definitions(JSON_DIAGNOSTICS=1)
+ 
++FIND_PACKAGE(fmt)
++
+ FIND_PACKAGE(PkgConfig REQUIRED)
+ set(LIBXML++_VERSION "libxml++-5.0")
+ PKG_CHECK_MODULES(LibXML++ REQUIRED IMPORTED_TARGET ${LIBXML++_VERSION})
+@@ -118,6 +120,7 @@ target_link_libraries(${PROJECT_NAME}
+   # we set this public because of Backend libs using shm_open (e.g. test code)
+   PUBLIC ${RT_LIBRARIES}
+   PUBLIC ${Boost_LIBRARIES}
++  PUBLIC fmt::fmt
+ 
+   # cppext is public because anything using DeviceAccess also needs to find cppext headers
+   PUBLIC ChimeraTK::ChimeraTK-cppext)

@@ -1,0 +1,29 @@
+From f4321bcfb5a36a196a9b5ed02abe68b54729d6cd Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Fri, 27 Jun 2025 14:09:13 +0000
+Subject: [PATCH] Add fmt
+
+---
+ CMakeLists.txt | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index bfd56933..9e4f96e1 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -36,6 +36,7 @@ FIND_PACKAGE(Boost COMPONENTS thread system chrono filesystem REQUIRED)
+ FIND_PACKAGE(ChimeraTK-cppext 01.05 REQUIRED)
+ FIND_PACKAGE(exprtk 01.04 REQUIRED)
+ FIND_PACKAGE(nlohmann_json 03.07 REQUIRED)
++find_package(fmt)
+ 
+ FIND_PACKAGE(PkgConfig REQUIRED)
+ set(LIBXML++_VERSION "libxml++-2.6")
+@@ -117,6 +118,7 @@ target_link_libraries(${PROJECT_NAME}
+   # we set this public because of Backend libs using shm_open (e.g. test code)
+   PUBLIC ${RT_LIBRARIES}
+   PUBLIC ${Boost_LIBRARIES}
++  PUBLIC fmt::fmt
+ 
+   # cppext is public because anything using DeviceAccess also needs to find cppext headers
+   PUBLIC ChimeraTK::ChimeraTK-cppext)

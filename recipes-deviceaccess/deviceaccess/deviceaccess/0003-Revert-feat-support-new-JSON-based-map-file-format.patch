@@ -1,0 +1,2521 @@
+From 0e7b45bae6c6e2c4574450bff3246fd12afbd7e2 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Thu, 10 Jul 2025 13:18:00 +0200
+Subject: [PATCH] Revert "feat: support new JSON-based map file format"
+
+This reverts commit 774bff4a42a6e63dd964fd21152d34e55e1bf4f8.
+---
+ CMakeLists.txt                                |   6 +-
+ include/JsonMapFileParser.h                   |  35 --
+ include/MapFileParser.h                       | 120 +++-
+ include/NumericAddressedRegisterCatalogue.h   |   3 +-
+ include/TraditionalMapFileParser.h            | 127 ----
+ src/JsonMapFileParser.cc                      | 320 ----------
+ src/MapFileParser.cpp                         | 412 ++++++++++++-
+ src/TraditionalMapFileParser.cc               | 421 -------------
+ src/async/DummyMuxedInterruptDistributor.cc   |   1 -
+ src/async/GenericMuxedInterruptDistributor.cc |   1 +
+ src/async/MuxedInterruptDistributor.cc        |   2 +-
+ tests/CMakeLists.txt                          |   2 +-
+ .../executables_src/testJsonMapFileParser.cpp | 291 ---------
+ tests/irq_test.mapp                           |   5 +-
+ tests/simpleJsonFile.jmap                     | 561 ------------------
+ 15 files changed, 525 insertions(+), 1782 deletions(-)
+ delete mode 100644 include/JsonMapFileParser.h
+ delete mode 100644 include/TraditionalMapFileParser.h
+ delete mode 100644 src/JsonMapFileParser.cc
+ delete mode 100644 src/TraditionalMapFileParser.cc
+ delete mode 100644 tests/executables_src/testJsonMapFileParser.cpp
+ delete mode 100644 tests/simpleJsonFile.jmap
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2d03c564..4a4ccca5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -34,9 +34,7 @@ endif(SUPPRESS_AUTO_DOC_BUILD)
+ 
+ FIND_PACKAGE(Boost COMPONENTS thread system chrono filesystem REQUIRED)
+ FIND_PACKAGE(ChimeraTK-cppext 01.05 REQUIRED)
+-
+-FIND_PACKAGE(nlohmann_json 03.11 REQUIRED)
+-add_compile_definitions(JSON_DIAGNOSTICS=1)
++FIND_PACKAGE(nlohmann_json 03.07 REQUIRED)
+ 
+ FIND_PACKAGE(fmt)
+ 
+@@ -87,7 +85,7 @@ foreach(subdir ${subdirs})
+   aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/${subdir}/src/async async_sources)
+   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/${subdir}/include)
+   file(GLOB_RECURSE headers "${CMAKE_CURRENT_SOURCE_DIR}/${subdir}/include/*")
+-  set(SOURCE ${SOURCE} ${sources} ${async_sources} ${headers})
++  set(SOURCE ${SOURCE} ${sources}  ${async_sources} ${headers})
+   install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${subdir}/include/
+     DESTINATION include/ChimeraTK
+     PATTERN "internal" EXCLUDE)
+diff --git a/include/JsonMapFileParser.h b/include/JsonMapFileParser.h
+deleted file mode 100644
+index b2cf857f..00000000
+--- a/include/JsonMapFileParser.h
++++ /dev/null
+@@ -1,35 +0,0 @@
+-// SPDX-FileCopyrightText: Deutsches Elektronen-Synchrotron DESY, MSK, ChimeraTK Project <chimeratk-support@desy.de>
+-// SPDX-License-Identifier: LGPL-3.0-or-later
+-#pragma once
+-
+-#include "MetadataCatalogue.h"
+-#include "NumericAddressedRegisterCatalogue.h"
+-
+-#include <fstream>
+-
+-namespace ChimeraTK::detail {
+-
+-  /**
+-   * @brief  Provides method to parse MAP file
+-   *
+-   */
+-  class JsonMapFileParser {
+-   public:
+-    explicit JsonMapFileParser(std::string fileName);
+-    ~JsonMapFileParser();
+-
+-    /**
+-     * @brief Performs parsing of given input stream.
+-     *
+-     * @throw ChimeraTK::logic_error if parsing error detected
+-     * @param stream input stream to process
+-     * @return pair of the register catalogue and the metadata catalogue
+-     */
+-    std::pair<NumericAddressedRegisterCatalogue, MetadataCatalogue> parse(std::ifstream& stream);
+-
+-   private:
+-    struct Imp;
+-    std::unique_ptr<Imp> _theImp;
+-  };
+-
+-} // namespace ChimeraTK::detail
+diff --git a/include/MapFileParser.h b/include/MapFileParser.h
+index 849dfde5..84cb90a2 100644
+--- a/include/MapFileParser.h
++++ b/include/MapFileParser.h
+@@ -2,24 +2,132 @@
+ // SPDX-License-Identifier: LGPL-3.0-or-later
+ #pragma once
+ 
++#include "Exception.h"
+ #include "MetadataCatalogue.h"
+ #include "NumericAddressedRegisterCatalogue.h"
+ 
++#include <cstdint>
++#include <fstream>
++#include <iomanip>
++#include <list>
+ #include <string>
+ 
+ namespace ChimeraTK {
+ 
++  /**
++   * @brief  Provides method to parse MAP file
++   *
++   */
+   class MapFileParser {
+    public:
+     /**
+-     * @brief Performs parsing of specified MAP file, resulting in catalogue objects describing all registers and
+-     * metadata available in file.
++     * @brief Performs parsing of specified MAP file. Returns pointer to
++     * RegisterInfo object describing all registers and metadata available in
++     * file.
+      *
+-     * @throw ChimeraTK::logic_error if parsing error detected or the specified MAP file cannot be opened.
+-     * @param fileName name of MAP file
+-     * @return pair of the register catalogue and the metadata catalogue
++     *
++     * @throw ChimeraTK::logic_error if parsing error detected or the specified MAP
++     * file cannot be opened
++     * @param file_name name of MAP file
++     * @return pointer to RegisterInfoMap object
++     *
++     *
++     */
++    std::pair<NumericAddressedRegisterCatalogue, MetadataCatalogue> parse(const std::string& file_name);
++
++   private:
++    /** Hold parsed content of a single line */
++    struct ParsedLine {
++      RegisterPath pathName;      /**< Name of register */
++      uint32_t nElements{0};      /**< Number of elements in register */
++      uint64_t address{0};        /**< Relative address in bytes from beginning of the bar (Base Address Range) */
++      uint32_t nBytes{0};         /**< Size of register expressed in bytes */
++      uint64_t bar{0};            /**< Number of bar with register */
++      uint32_t width{32};         /**< Number of significant bits in the register */
++      int32_t nFractionalBits{0}; /**< Number of fractional bits */
++      bool signedFlag{true};      /**< Signed/Unsigned flag */
++      NumericAddressedRegisterInfo::Access registerAccess{NumericAddressedRegisterInfo::Access::READ_WRITE};
++      NumericAddressedRegisterInfo::Type type{NumericAddressedRegisterInfo::Type::FIXED_POINT};
++      std::vector<size_t> interruptID;
++    };
++
++    /**
++     * Split the string at the last dot. The part up to the last dot is the first
++     * returned argument, the part after the last dot is the second. Hence, the
++     * first part can contain dots itself, the second part cannot. If there is no
++     * dot, the first part is empty and the full string is returned as second (the
++     * part up to the first dot is considered as prefix).
++     */
++    static std::pair<RegisterPath, std::string> splitStringAtLastDot(RegisterPath moduleDotName);
++
++    static std::pair<NumericAddressedRegisterInfo::Type, int> getTypeAndNFractionalBits(
++        const std::string& bitInterpretation, uint32_t width);
++
++    // returns an empty vector if the type is not INTERRUPT
++    static std::vector<size_t> getInterruptId(std::string accessType);
++
++    static void checkFileConsitencyAndThrowIfError(NumericAddressedRegisterInfo::Access registerAccessMode,
++        NumericAddressedRegisterInfo::Type registerType, uint32_t nElements, uint64_t address, uint32_t nBytes,
++        uint64_t bar, uint32_t width, int32_t nFractionalBits, bool signedFlag);
++
++    void parseMetaData(std::string line);
++
++    ParsedLine parseLine(const std::string& line);
++
++    /**
++     * On detection of a AREA_MULTIPLEXED_SEQUENCE line, collects the associated paresed lines and creates the
++     * according RegisterInfo instance(s)
+      */
+-    static std::pair<NumericAddressedRegisterCatalogue, MetadataCatalogue> parse(const std::string& fileName);
++    void handle2D(const ParsedLine& pl);
++
++    /**
++     * On detection of line with a MEM_MULTIPLEXED 2D declaration collects the associated paresed lines and
++     * creates the according RegisterInfo instance(s)
++     */
++    void handle2DNewStyle(const ParsedLine& pl);
++
++    /**
++     * Checks whether the register name does not contain the special prefixes marking multiplexed registers and
++     * sequences etc.
++     */
++    static bool isScalarOr1D(const RegisterPath& pathName);
++
++    /**
++     * Checks whether the register name contains the prefix for a multiplexed register (but not for the individual
++     * sequences, so only the "main" entry matches).
++     */
++    static bool is2D(const RegisterPath& pathName);
++
++    /**
++     * Checks whether the register name contains the prefix for a multiplexed register (but not for the individual
++     * sequences, so only the "main" entry matches).
++     */
++    static bool is2DNewStyle(RegisterPath pathName);
++
++    /**
++     * Generate sequence name from main entry for multiplexed registers
++     */
++    static RegisterPath makeSequenceName(const RegisterPath& pathName, size_t index);
++
++    /**
++     * Generate 2D register name from main entry for multiplexed registers
++     */
++    static RegisterPath make2DName(const RegisterPath& pathName, const std::string& prefix);
++
++    /**
++     * Creates the two RegisterInfos that belong to a 2D multiplexed area, with a prefix according to the old or
++     * new syntax
++     */
++    void make2DRegisterInfos(const ParsedLine& pl, std::list<ParsedLine>& channelLines, const std::string& prefix);
++
++    NumericAddressedRegisterCatalogue pmap;
++    MetadataCatalogue metadataCatalogue;
++
++    std::string file_name;
++    uint32_t line_nr = 0;
++
++    std::vector<ParsedLine> parsedLines;
++    std::map<RegisterPath, const ParsedLine&> parsedLinesMap;
+   };
+ 
+ } // namespace ChimeraTK
+diff --git a/include/NumericAddressedRegisterCatalogue.h b/include/NumericAddressedRegisterCatalogue.h
+index 0711ccc5..86dedf1e 100644
+--- a/include/NumericAddressedRegisterCatalogue.h
++++ b/include/NumericAddressedRegisterCatalogue.h
+@@ -21,7 +21,7 @@ namespace ChimeraTK {
+      * \li read-write
+      * \li interrupt (implies read-only)
+      */
+-    enum class Access { READ_ONLY = 0, WRITE_ONLY = 1, READ_WRITE = 2, INTERRUPT = 3 };
++    enum class Access { READ_ONLY, WRITE_ONLY, READ_WRITE, INTERRUPT };
+ 
+     /**
+      *  Enum descibing the data interpretation:
+@@ -127,6 +127,7 @@ namespace ChimeraTK {
+ 
+     [[nodiscard]] std::vector<size_t> getQualifiedAsyncId() const override;
+ 
++   private:
+     void computeDataDescriptor();
+   };
+ 
+diff --git a/include/TraditionalMapFileParser.h b/include/TraditionalMapFileParser.h
+deleted file mode 100644
+index dbea5398..00000000
+--- a/include/TraditionalMapFileParser.h
++++ /dev/null
+@@ -1,127 +0,0 @@
+-// SPDX-FileCopyrightText: Deutsches Elektronen-Synchrotron DESY, MSK, ChimeraTK Project <chimeratk-support@desy.de>
+-// SPDX-License-Identifier: LGPL-3.0-or-later
+-#pragma once
+-
+-#include "MetadataCatalogue.h"
+-#include "NumericAddressedRegisterCatalogue.h"
+-
+-#include <cstdint>
+-#include <fstream>
+-#include <list>
+-#include <string>
+-
+-namespace ChimeraTK::detail {
+-
+-  /**
+-   * @brief  Provides method to parse MAP file
+-   *
+-   */
+-  class TraditionalMapFileParser {
+-   public:
+-    explicit TraditionalMapFileParser(std::string fileName);
+-
+-    /**
+-     * @brief Performs parsing of given input stream.
+-     *
+-     * @throw ChimeraTK::logic_error if parsing error detected
+-     * @param stream input stream to process
+-     * @return pair of the register catalogue and the metadata catalogue
+-     */
+-    std::pair<NumericAddressedRegisterCatalogue, MetadataCatalogue> parse(std::ifstream& stream);
+-
+-   private:
+-    /** Hold parsed content of a single line */
+-    struct ParsedLine {
+-      RegisterPath pathName;      /**< Name of register */
+-      uint32_t nElements{0};      /**< Number of elements in register */
+-      uint64_t address{0};        /**< Relative address in bytes from beginning of the bar (Base Address Range) */
+-      uint32_t nBytes{0};         /**< Size of register expressed in bytes */
+-      uint64_t bar{0};            /**< Number of bar with register */
+-      uint32_t width{32};         /**< Number of significant bits in the register */
+-      int32_t nFractionalBits{0}; /**< Number of fractional bits */
+-      bool signedFlag{true};      /**< Signed/Unsigned flag */
+-      NumericAddressedRegisterInfo::Access registerAccess{NumericAddressedRegisterInfo::Access::READ_WRITE};
+-      NumericAddressedRegisterInfo::Type type{NumericAddressedRegisterInfo::Type::FIXED_POINT};
+-      std::vector<size_t> interruptID;
+-    };
+-
+-    /**
+-     * Split the string at the last dot. The part up to the last dot is the first
+-     * returned argument, the part after the last dot is the second. Hence, the
+-     * first part can contain dots itself, the second part cannot. If there is no
+-     * dot, the first part is empty and the full string is returned as second (the
+-     * part up to the first dot is considered as prefix).
+-     */
+-    static std::pair<RegisterPath, std::string> splitStringAtLastDot(RegisterPath moduleDotName);
+-
+-    static std::pair<NumericAddressedRegisterInfo::Type, int> getTypeAndNFractionalBits(
+-        const std::string& bitInterpretation, uint32_t width);
+-
+-    // returns an empty vector if the type is not INTERRUPT
+-    static std::vector<size_t> getInterruptId(std::string accessType);
+-
+-    static void checkFileConsitencyAndThrowIfError(NumericAddressedRegisterInfo::Access registerAccessMode,
+-        NumericAddressedRegisterInfo::Type registerType, uint32_t nElements, uint64_t address, uint32_t nBytes,
+-        uint64_t bar, uint32_t width, int32_t nFractionalBits, bool signedFlag);
+-
+-    void parseMetaData(std::string line);
+-
+-    ParsedLine parseLine(const std::string& line);
+-
+-    /**
+-     * On detection of a AREA_MULTIPLEXED_SEQUENCE line, collects the associated paresed lines and creates the
+-     * according RegisterInfo instance(s)
+-     */
+-    void handle2D(const ParsedLine& pl);
+-
+-    /**
+-     * On detection of line with a MEM_MULTIPLEXED 2D declaration collects the associated paresed lines and
+-     * creates the according RegisterInfo instance(s)
+-     */
+-    void handle2DNewStyle(const ParsedLine& pl);
+-
+-    /**
+-     * Checks whether the register name does not contain the special prefixes marking multiplexed registers and
+-     * sequences etc.
+-     */
+-    static bool isScalarOr1D(const RegisterPath& pathName);
+-
+-    /**
+-     * Checks whether the register name contains the prefix for a multiplexed register (but not for the individual
+-     * sequences, so only the "main" entry matches).
+-     */
+-    static bool is2D(const RegisterPath& pathName);
+-
+-    /**
+-     * Checks whether the register name contains the prefix for a multiplexed register (but not for the individual
+-     * sequences, so only the "main" entry matches).
+-     */
+-    static bool is2DNewStyle(RegisterPath pathName);
+-
+-    /**
+-     * Generate sequence name from main entry for multiplexed registers
+-     */
+-    static RegisterPath makeSequenceName(const RegisterPath& pathName, size_t index);
+-
+-    /**
+-     * Generate 2D register name from main entry for multiplexed registers
+-     */
+-    static RegisterPath make2DName(const RegisterPath& pathName, const std::string& prefix);
+-
+-    /**
+-     * Creates the two RegisterInfos that belong to a 2D multiplexed area, with a prefix according to the old or
+-     * new syntax
+-     */
+-    void make2DRegisterInfos(const ParsedLine& pl, std::list<ParsedLine>& channelLines, const std::string& prefix);
+-
+-    NumericAddressedRegisterCatalogue _pmap;
+-    MetadataCatalogue _metadataCatalogue;
+-
+-    std::string _fileName;
+-    uint32_t _lineNo = 0;
+-
+-    std::vector<ParsedLine> _parsedLines;
+-    std::map<RegisterPath, const ParsedLine&> _parsedLinesMap;
+-  };
+-
+-} // namespace ChimeraTK::detail
+diff --git a/src/JsonMapFileParser.cc b/src/JsonMapFileParser.cc
+deleted file mode 100644
+index ed1b17ec..00000000
+--- a/src/JsonMapFileParser.cc
++++ /dev/null
+@@ -1,320 +0,0 @@
+-// SPDX-FileCopyrightText: Deutsches Elektronen-Synchrotron DESY, MSK, ChimeraTK Project <chimeratk-support@desy.de>
+-// SPDX-License-Identifier: LGPL-3.0-or-later
+-
+-#include "JsonMapFileParser.h"
+-
+-#include <nlohmann/json.hpp>
+-
+-#include <boost/algorithm/string.hpp>
+-
+-#include <string>
+-
+-using json = nlohmann::json;
+-
+-namespace ChimeraTK::detail {
+-
+-  /********************************************************************************************************************/
+-
+-  struct JsonAddressSpaceEntry;
+-
+-  struct JsonMapFileParser::Imp {
+-    std::pair<NumericAddressedRegisterCatalogue, MetadataCatalogue> parse(std::ifstream& stream);
+-
+-    std::string fileName;
+-    NumericAddressedRegisterCatalogue catalogue;
+-    MetadataCatalogue metadata;
+-  };
+-
+-  /********************************************************************************************************************/
+-
+-  JsonMapFileParser::JsonMapFileParser(std::string fileName) : _theImp(std::make_unique<Imp>(std::move(fileName))) {}
+-
+-  JsonMapFileParser::~JsonMapFileParser() = default;
+-
+-  /********************************************************************************************************************/
+-
+-  std::pair<NumericAddressedRegisterCatalogue, MetadataCatalogue> JsonMapFileParser::parse(std::ifstream& stream) {
+-    return _theImp->parse(stream);
+-  }
+-
+-  /********************************************************************************************************************/
+-  /********************************************************************************************************************/
+-
+-  // map Access enum to JSON as strings. Need to redefine the strongly typed enums as old-fashioned ones....
+-  enum Access {
+-    READ_ONLY = int(NumericAddressedRegisterInfo::Access::READ_ONLY),
+-    WRITE_ONLY = int(NumericAddressedRegisterInfo::Access::WRITE_ONLY),
+-    READ_WRITE = int(NumericAddressedRegisterInfo::Access::READ_WRITE),
+-    accessNotSet
+-  };
+-  NLOHMANN_JSON_SERIALIZE_ENUM(
+-      Access, {{Access::READ_ONLY, "RO"}, {Access::READ_WRITE, "RW"}, {Access::WRITE_ONLY, "WO"}})
+-
+-  /********************************************************************************************************************/
+-
+-  // map RepresentationType enum to JSON as strings
+-  enum RepresentationType {
+-    VOID = int(NumericAddressedRegisterInfo::Type::VOID),
+-    FIXED_POINT = int(NumericAddressedRegisterInfo::Type::FIXED_POINT),
+-    IEEE754 = int(NumericAddressedRegisterInfo::Type::IEEE754),
+-    ASCII = int(NumericAddressedRegisterInfo::Type::ASCII),
+-    representationNotSet
+-  };
+-  NLOHMANN_JSON_SERIALIZE_ENUM(RepresentationType,
+-      {{RepresentationType::FIXED_POINT, "fixedPoint"}, {RepresentationType::IEEE754, "IEEE754"},
+-          {RepresentationType::VOID, "void"}, {RepresentationType::ASCII, "string"}})
+-
+-  /********************************************************************************************************************/
+-
+-  // map AddressType enum to JSON as strings
+-  enum AddressType { IO, DMA, addressTypeNotSet };
+-  NLOHMANN_JSON_SERIALIZE_ENUM(AddressType, {{AddressType::IO, "IO"}, {AddressType::DMA, "DMA"}})
+-
+-  /********************************************************************************************************************/
+-
+-  // Allow hex string representation of values (but still accept plain int as well)
+-  struct HexValue {
+-    size_t v;
+-
+-    // NOLINTNEXTLINE(readability-identifier-naming)
+-    friend void from_json(const json& j, HexValue& hv) {
+-      if(j.is_string()) {
+-        auto sdata = std::string(j);
+-        try {
+-          hv.v = std::stoll(sdata, nullptr, 0);
+-        }
+-        catch(std::invalid_argument& e) {
+-          throw json::type_error::create(0, "Cannot parse string '" + sdata + "' as number.", &j);
+-        }
+-        catch(std::out_of_range& e) {
+-          throw json::type_error::create(0, "Number '" + sdata + "' out of range.", &j);
+-        }
+-      }
+-      else {
+-        hv.v = j;
+-      }
+-    }
+-
+-    // NOLINTNEXTLINE(readability-identifier-naming)
+-    friend void to_json(json& j, const HexValue& hv) { j = hv.v; }
+-  };
+-
+-  /********************************************************************************************************************/
+-  /********************************************************************************************************************/
+-
+-  /** Representation of an entry in the "addressSpace" section, can be either a register or a module (or both) */
+-
+-  struct JsonAddressSpaceEntry {
+-    std::string name;
+-    std::string engineeringUnit;
+-    std::string description;
+-    Access access{Access::accessNotSet};
+-    std::vector<size_t> triggeredByInterrupt;
+-    size_t numberOfElements{1};
+-    size_t bytesPerElement{0};
+-
+-    struct Address {
+-      AddressType type{AddressType::IO};
+-      size_t channel{0};
+-      HexValue offset{std::numeric_limits<size_t>::max()};
+-
+-      void fill(NumericAddressedRegisterInfo& info) const {
+-        assert(type != AddressType::addressTypeNotSet);
+-        info.address = offset.v;
+-        info.bar = channel + (type == AddressType::DMA ? 13 : 0);
+-      }
+-
+-      NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(Address, type, channel, offset)
+-    } address{AddressType::addressTypeNotSet};
+-
+-    struct Representation {
+-      RepresentationType type{RepresentationType::FIXED_POINT};
+-      uint32_t width{type != RepresentationType::representationNotSet ? 32U : 0U};
+-      int32_t fractionalBits{0};
+-      bool isSigned{false};
+-
+-      void fill(NumericAddressedRegisterInfo& info, size_t offset) const {
+-        if(type != RepresentationType::representationNotSet) {
+-          info.channels.emplace_back(8 * offset, NumericAddressedRegisterInfo::Type(type), width, fractionalBits,
+-              type != RepresentationType::IEEE754 ? isSigned : true);
+-        }
+-        else {
+-          Representation().fill(info, offset);
+-        }
+-      }
+-
+-      NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(Representation, type, width, fractionalBits, isSigned)
+-    } representation{RepresentationType::representationNotSet};
+-
+-    struct ChannelTab {
+-      size_t numberOfElements{0};
+-      size_t pitch{0};
+-
+-      struct Channel {
+-        std::string name;
+-        std::string engineeringUnit;
+-        std::string description;
+-        size_t offset;
+-        size_t bytesPerElement{4};
+-        Representation representation{};
+-
+-        void fill(NumericAddressedRegisterInfo& info) const { representation.fill(info, offset); }
+-
+-        NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(
+-            Channel, name, engineeringUnit, description, offset, bytesPerElement, representation)
+-      };
+-
+-      std::vector<Channel> channels;
+-
+-      NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(ChannelTab, numberOfElements, pitch, channels)
+-    };
+-    std::vector<ChannelTab> channelTabs;
+-
+-    void fill(NumericAddressedRegisterInfo& info, const RegisterPath& parentName) const {
+-      info.pathName = parentName / name;
+-
+-      if(triggeredByInterrupt.empty()) {
+-        info.registerAccess = access != Access::accessNotSet ? NumericAddressedRegisterInfo::Access(access) :
+-                                                               NumericAddressedRegisterInfo::Access::READ_WRITE;
+-      }
+-      else {
+-        if(access != Access::accessNotSet) {
+-          throw ChimeraTK::logic_error(
+-              "Register " + info.pathName + ": 'access' and 'triggeredByInterrupt' are mutually exclusive.");
+-        }
+-        info.interruptId = triggeredByInterrupt;
+-        info.registerAccess = NumericAddressedRegisterInfo::Access::INTERRUPT;
+-      }
+-
+-      if(address.type != AddressType::addressTypeNotSet) {
+-        if(representation.type == RepresentationType::VOID) {
+-          throw ChimeraTK::logic_error("Address is set for void-typed register " + info.pathName);
+-        }
+-        address.fill(info);
+-        if(channelTabs.empty()) {
+-          info.elementPitchBits = bytesPerElement * 8;
+-          info.nElements = numberOfElements;
+-          representation.fill(info, 0);
+-        }
+-        else {
+-          if(channelTabs[0].channels.empty()) {
+-            throw ChimeraTK::logic_error("Empty channel definition in register " + info.pathName);
+-          }
+-          info.elementPitchBits = channelTabs[0].pitch * 8;
+-          info.nElements = channelTabs[0].numberOfElements;
+-          for(const auto& channel : channelTabs[0].channels) {
+-            channel.fill(info);
+-          }
+-        }
+-      }
+-      else {
+-        if(representation.type != RepresentationType::VOID) {
+-          throw ChimeraTK::logic_error("Address not set but representation given in register " + parentName / name);
+-        }
+-        if(triggeredByInterrupt.empty()) {
+-          throw ChimeraTK::logic_error(
+-              "Void-typed register " + parentName / name + " needs 'triggeredByInterrupt' entry.");
+-        }
+-        info.nElements = 0;
+-        info.dataDescriptor = DataDescriptor{DataDescriptor::FundamentalType::nodata};
+-        info.interruptId = triggeredByInterrupt;
+-        info.channels.emplace_back(0, NumericAddressedRegisterInfo::Type::VOID, 0, 0, false);
+-      }
+-    }
+-
+-    std::vector<JsonAddressSpaceEntry> children;
+-
+-    void addInfos(NumericAddressedRegisterCatalogue& catalogue, const RegisterPath& parentName) const {
+-      if(name.empty()) {
+-        throw ChimeraTK::logic_error("Entry in module " + parentName + " has no name.");
+-      }
+-      if(address.type != AddressType::addressTypeNotSet ||
+-          representation.type != RepresentationType::representationNotSet) {
+-        NumericAddressedRegisterInfo my;
+-        my.channels.clear(); // default constructor already creates a channel with default settings...
+-        fill(my, parentName);
+-        my.computeDataDescriptor();
+-        catalogue.addRegister(my);
+-      }
+-      for(const auto& child : children) {
+-        child.addInfos(catalogue, parentName / name);
+-      }
+-    }
+-
+-    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(JsonAddressSpaceEntry, name, engineeringUnit, description, access,
+-        triggeredByInterrupt, numberOfElements, bytesPerElement, address, representation, children, channelTabs)
+-  };
+-
+-  /********************************************************************************************************************/
+-
+-  struct InterruptHandlerEntry {
+-    struct Controller {
+-      std::string path;
+-      std::set<std::string> options;
+-      int version{1};
+-      NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(Controller, path, options, version)
+-    } INTC;
+-
+-    std::map<std::string, InterruptHandlerEntry> subhandler;
+-
+-    void fill(const std::vector<size_t>& intId, MetadataCatalogue& metadata) const {
+-      if(!intId.empty()) {
+-        json jsonIntId;
+-        jsonIntId = intId;
+-        json jsonController;
+-        jsonController = INTC;
+-        metadata.addMetadata("!" + jsonIntId.dump(), R"({"INTC":)" + jsonController.dump() + "}");
+-      }
+-
+-      for(const auto& [subIntId, handler] : subhandler) {
+-        std::vector<size_t> qualfiedSubIntId = intId;
+-        qualfiedSubIntId.push_back(std::stoll(subIntId));
+-        handler.fill(qualfiedSubIntId, metadata);
+-      }
+-    }
+-
+-    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(InterruptHandlerEntry, INTC, subhandler)
+-  };
+-
+-  /********************************************************************************************************************/
+-  /********************************************************************************************************************/
+-
+-  std::pair<NumericAddressedRegisterCatalogue, MetadataCatalogue> JsonMapFileParser::Imp::parse(std::ifstream& stream) {
+-    // read and parse JSON data
+-    try {
+-      auto data = json::parse(stream);
+-
+-      std::vector<JsonAddressSpaceEntry> addressSpace = data.at("addressSpace");
+-      for(const auto& entry : addressSpace) {
+-        entry.addInfos(catalogue, "/");
+-      }
+-
+-      for(const auto& entry : data.at("metadata").items()) {
+-        if(entry.key().empty()) {
+-          throw ChimeraTK::logic_error(
+-              "Error parsing JSON map file '" + fileName + "': Metadata key must not be empty.");
+-        }
+-        if(entry.key()[0] == '_') {
+-          continue;
+-        }
+-        metadata.addMetadata(entry.key(), entry.value());
+-      }
+-
+-      // backwards compatibility: interrupt handler description is expected to be in metadata
+-      InterruptHandlerEntry interruptHandler;
+-      interruptHandler.subhandler = data.at("interruptHandler");
+-      interruptHandler.fill({}, metadata);
+-
+-      return {std::move(catalogue), std::move(metadata)};
+-    }
+-    catch(const ChimeraTK::logic_error& e) {
+-      throw ChimeraTK::logic_error("Error parsing JSON map file '" + fileName + "': " + e.what());
+-    }
+-    catch(const json::exception& e) {
+-      throw ChimeraTK::logic_error("Error parsing JSON map file '" + fileName + "': " + e.what());
+-    }
+-  }
+-
+-  /********************************************************************************************************************/
+-
+-} // namespace ChimeraTK::detail
+diff --git a/src/MapFileParser.cpp b/src/MapFileParser.cpp
+index 26ce1160..21473456 100644
+--- a/src/MapFileParser.cpp
++++ b/src/MapFileParser.cpp
+@@ -3,29 +3,419 @@
+ 
+ #include "MapFileParser.h"
+ 
+-#include "JsonMapFileParser.h"
+-#include "TraditionalMapFileParser.h"
++#include "NumericAddressedBackendMuxedRegisterAccessor.h" // for the MULTIPLEXED_SEQUENCE_PREFIX constant
+ 
+-#include <boost/algorithm/string/predicate.hpp>
++#include <boost/algorithm/string.hpp>
++
++#include <algorithm>
++#include <iostream>
++#include <sstream>
++#include <string>
+ 
+ namespace ChimeraTK {
+ 
+   /********************************************************************************************************************/
+ 
+-  std::pair<NumericAddressedRegisterCatalogue, MetadataCatalogue> MapFileParser::parse(const std::string& fileName) {
++  std::pair<NumericAddressedRegisterCatalogue, MetadataCatalogue> MapFileParser::parse(const std::string& file_name_) {
++    file_name = file_name_;
+     std::ifstream file;
+ 
+-    file.open(fileName.c_str());
++    file.open(file_name.c_str());
+     if(!file) {
+-      throw ChimeraTK::logic_error("Cannot open file \"" + fileName + "\"");
++      throw ChimeraTK::logic_error("Cannot open file \"" + file_name + "\"");
++    }
++
++    std::string line;
++    while(std::getline(file, line)) {
++      line_nr++;
++
++      // Remove whitespace from beginning of line
++      line.erase(line.begin(), std::find_if(line.begin(), line.end(), [](int c) { return !isspace(c); }));
++
++      // Remove comments from the end of the line
++      auto pos = line.find('#');
++      if(pos != std::string::npos) {
++        line.erase(pos, std::string::npos);
++      }
++
++      // Ignore empty lines (including all-comment lines)
++      if(line.empty()) {
++        continue;
++      }
++
++      // Parse meta data line
++      if(line[0] == '@') {
++        parseMetaData(line);
++        continue;
++      }
++
++      // Parse register line
++      parsedLines.push_back(parseLine(line));
++    }
++
++    // create map of register names to parsed lines
++    // This cannot be done in the above parsing loop, as the vector might get resized which invalidates the references
++    for(const auto& pl : parsedLines) {
++      parsedLinesMap.emplace(pl.pathName, pl);
++    }
++
++    // add registers to the catalogue
++    for(const auto& pl : parsedLines) {
++      if(isScalarOr1D(pl.pathName)) {
++        auto registerInfo = NumericAddressedRegisterInfo(pl.pathName, pl.nElements, pl.address, pl.nBytes, pl.bar,
++            pl.width, pl.nFractionalBits, pl.signedFlag, pl.registerAccess, pl.type, pl.interruptID);
++        pmap.addRegister(registerInfo);
++      }
++      else if(is2D(pl.pathName)) {
++        handle2D(pl);
++      }
++      else if(is2DNewStyle(pl.pathName)) {
++        handle2DNewStyle(pl);
++      }
++    }
++
++    return {std::move(pmap), std::move(metadataCatalogue)};
++  }
++
++  /********************************************************************************************************************/
++
++  std::pair<RegisterPath, std::string> MapFileParser::splitStringAtLastDot(RegisterPath moduleDotName) {
++    moduleDotName.setAltSeparator(".");
++    auto regname = moduleDotName.getComponents().back();
++    moduleDotName--;
++    return {moduleDotName, regname};
++  }
++
++  /********************************************************************************************************************/
++
++  std::pair<NumericAddressedRegisterInfo::Type, int> MapFileParser::getTypeAndNFractionalBits(
++      const std::string& bitInterpretation, unsigned int width) {
++    if(width == 0) return {NumericAddressedRegisterInfo::Type::VOID, 0};
++    if(bitInterpretation == "IEEE754") return {NumericAddressedRegisterInfo::Type::IEEE754, 0};
++    if(bitInterpretation == "ASCII") return {NumericAddressedRegisterInfo::Type::ASCII, 0};
++
++    // If it is a digit the implicit interpretation is FixedPoint
++    try {
++      int nBits = std::stoi(bitInterpretation, nullptr,
++          0); // base 0 = auto, hex or dec or oct
++      return {NumericAddressedRegisterInfo::Type::FIXED_POINT, nBits};
++    }
++    catch(std::exception& e) {
++      throw ChimeraTK::logic_error(std::string("Map file error in bitInterpretation: wrong argument '") +
++          bitInterpretation + "', caught exception: " + e.what());
++    }
++  }
++
++  /********************************************************************************************************************/
++  // FIXME: This funtion does a lot of string copying. This can be optimised, for instance by using a string_view.
++  std::vector<size_t> MapFileParser::getInterruptId(std::string accessTypeStr) {
++    std::string strToFind("INTERRUPT");
++    auto pos = accessTypeStr.find(strToFind);
++    if(pos == std::string::npos) return {};
++    std::vector<size_t> retVal;
++
++    accessTypeStr.erase(pos, strToFind.length());
++
++    size_t delimiterPos;
++    do {
++      delimiterPos = accessTypeStr.find(':');
++      std::string interruptStr = accessTypeStr.substr(0, delimiterPos);
++      size_t interruptNumber = 0;
++      try {
++        interruptNumber = std::stoul(interruptStr, nullptr, 0); // base 0 = auto, hex or dec or oct
++      }
++      catch(std::exception& e) {
++        throw ChimeraTK::logic_error(
++            std::string("Map file error in accessString: wrong argument in interrupt controller number. Argument: '") +
++            interruptStr + "', caught exception: " + e.what());
++      }
++      retVal.push_back(interruptNumber);
++
++      // cut off the already processed part and process the rest
++      if(delimiterPos != std::string::npos) {
++        accessTypeStr = accessTypeStr.substr(delimiterPos + 1);
++      }
++    } while(delimiterPos != std::string::npos);
++
++    return retVal;
++  }
++
++  /********************************************************************************************************************/
++
++  void MapFileParser::checkFileConsitencyAndThrowIfError(NumericAddressedRegisterInfo::Access registerAccessMode,
++      NumericAddressedRegisterInfo::Type registerType, uint32_t nElements, uint64_t address, uint32_t nBytes,
++      uint64_t bar, uint32_t width, int32_t nFractionalBits, bool signedFlag) {
++    //
++    // if type is VOID, access mode cannot me read only
++    if(registerType == NumericAddressedRegisterInfo::Type::VOID &&
++        registerAccessMode == NumericAddressedRegisterInfo::Access::READ_ONLY) {
++      throw ChimeraTK::logic_error(std::string("Map file error. Register Type is VOID and access mode is READ only. "));
++    }
++    //
++    // if register type is VOID and push-type. then all fields must be '0'
++    if(registerType == NumericAddressedRegisterInfo::Type::VOID &&
++        registerAccessMode == NumericAddressedRegisterInfo::Access::INTERRUPT) {
++      if(width || nElements || address || nBytes || bar || nFractionalBits || signedFlag) {
++        throw ChimeraTK::logic_error(
++            std::string("Map file error. Register Type is VOID (width field set to 0). All other fields must be '0'."));
++      }
++    }
++  }
++
++  /********************************************************************************************************************/
++
++  void MapFileParser::parseMetaData(std::string line) {
++    std::string metadata_name, metadata_value;
++
++    // Remove the '@' character...
++    line.erase(line.begin(), line.begin() + 1);
++
++    // ... and remove all the whitespace after it
++    line.erase(line.begin(), std::find_if(line.begin(), line.end(), [](int c) { return !isspace(c); }));
++
++    std::istringstream is;
++    is.str(line);
++    is >> metadata_name;
++    if(!is) {
++      throw ChimeraTK::logic_error("Parsing error in map file '" + file_name + "' on line " + std::to_string(line_nr));
++    }
++    // remove name from the string
++    line.erase(line.begin(), line.begin() + static_cast<std::string::difference_type>(metadata_name.length()));
++
++    line.erase(std::remove_if(line.begin(), line.end(), [](unsigned char x) { return std::isspace(x); }),
++        line.end()); // remove whitespaces from rest of the string (before and after the value)
++    metadata_value = line;
++    metadataCatalogue.addMetadata(metadata_name, metadata_value);
++    is.clear();
++  }
++
++  /********************************************************************************************************************/
++
++  MapFileParser::ParsedLine MapFileParser::parseLine(const std::string& line) {
++    ParsedLine pl;
++
++    std::istringstream is;
++    is.str(line);
++
++    // extract register name
++    std::string name;
++    is >> name;
++    pl.pathName = name;
++    pl.pathName.setAltSeparator(".");
++
++    // extract mandatory address information
++    is >> std::setbase(0) >> pl.nElements >> std::setbase(0) >> pl.address >> std::setbase(0) >> pl.nBytes;
++    if(!is) {
++      throw ChimeraTK::logic_error("Parsing error in map file '" + file_name + "' on line " + std::to_string(line_nr));
+     }
+ 
+-    if(boost::ends_with(fileName, ".jmap")) {
+-      detail::JsonMapFileParser parser(fileName);
+-      return parser.parse(file);
++    // Note: default values for optional information are set in ParsedLine declaration
++
++    // extract bar
++    is >> std::setbase(0) >> pl.bar;
++
++    // extract width
++    if(!is.fail()) {
++      is >> std::setbase(0) >> pl.width;
++      if(pl.width > 32) {
++        throw ChimeraTK::logic_error("Parsing error in map file '" + file_name + "' on line " +
++            std::to_string(line_nr) + ": register width too big");
++      }
+     }
+-    detail::TraditionalMapFileParser parser(fileName);
+-    return parser.parse(file);
++
++    // extract bit interpretation field (nb. of fractional bits, IEEE754, VOID, ...)
++    if(!is.fail()) {
++      std::string bitInterpretation;
++      is >> bitInterpretation;
++      if(!is.fail()) {
++        // width is needed to determine whether type is VOID
++        std::tie(pl.type, pl.nFractionalBits) = getTypeAndNFractionalBits(bitInterpretation, pl.width);
++        if(pl.nFractionalBits > 1023 || pl.nFractionalBits < -1024) {
++          throw ChimeraTK::logic_error("Parsing error in map file '" + file_name + "' on line " +
++              std::to_string(line_nr) + ": too many fractional bits");
++        }
++      }
++    }
++
++    // extract signed flag
++    if(!is.fail()) {
++      is >> std::setbase(0) >> pl.signedFlag;
++    }
++
++    // extract access mode string (RO, RW, WO, INTERRUPT)
++    if(!is.fail()) {
++      std::string accessString;
++      is >> accessString;
++      if(!is.fail()) {
++        // first transform to uppercase
++        std::transform(accessString.begin(), accessString.end(), accessString.begin(),
++            [](unsigned char c) { return std::toupper(c); });
++
++        // first check if access mode is INTERRUPT
++        auto interruptId = getInterruptId(accessString);
++
++        if(!interruptId.empty()) {
++          pl.registerAccess = NumericAddressedRegisterInfo::Access::INTERRUPT;
++          pl.interruptID = interruptId;
++        }
++        else if(accessString == "RO") {
++          pl.registerAccess = NumericAddressedRegisterInfo::Access::READ_ONLY;
++        }
++        else if(accessString == "RW") {
++          pl.registerAccess = NumericAddressedRegisterInfo::Access::READ_WRITE;
++        }
++        else if(accessString == "WO") {
++          pl.registerAccess = NumericAddressedRegisterInfo::Access::WRITE_ONLY;
++        }
++        else {
++          throw ChimeraTK::logic_error("Parsing error in map file '" + file_name + "' on line " +
++              std::to_string(line_nr) + ": invalid data access");
++        }
++      }
++    }
++
++    checkFileConsitencyAndThrowIfError(pl.registerAccess, pl.type, pl.nElements, pl.address, pl.nBytes, pl.bar,
++        pl.width, pl.nFractionalBits, pl.signedFlag);
++
++    return pl;
++  }
++
++  /********************************************************************************************************************/
++
++  bool MapFileParser::isScalarOr1D(const RegisterPath& pathName) {
++    auto [module, name] = splitStringAtLastDot(pathName);
++    return !boost::algorithm::starts_with(name, MULTIPLEXED_SEQUENCE_PREFIX) &&
++        !boost::algorithm::starts_with(name, SEQUENCE_PREFIX) &&
++        !boost::algorithm::starts_with(name, MEM_MULTIPLEXED_PREFIX) && !is2DNewStyle(module);
++  }
++
++  /********************************************************************************************************************/
++
++  bool MapFileParser::is2D(const RegisterPath& pathName) {
++    auto [module, name] = splitStringAtLastDot(pathName);
++    return boost::algorithm::starts_with(name, MULTIPLEXED_SEQUENCE_PREFIX);
++  }
++
++  /********************************************************************************************************************/
++
++  bool MapFileParser::is2DNewStyle(RegisterPath pathName) {
++    // Intentional copy of the parameter
++    pathName.setAltSeparator(".");
++    auto components = pathName.getComponents();
++    if(components.size() != 2) return false;
++    return boost::algorithm::starts_with(components[1], MEM_MULTIPLEXED_PREFIX);
++  }
++
++  /********************************************************************************************************************/
++
++  RegisterPath MapFileParser::makeSequenceName(const RegisterPath& pathName, size_t index) {
++    auto [module, name] = splitStringAtLastDot(pathName);
++    assert(boost::algorithm::starts_with(name, MULTIPLEXED_SEQUENCE_PREFIX));
++    name = name.substr(strlen(MULTIPLEXED_SEQUENCE_PREFIX)); // strip prefix
++    auto r = RegisterPath(module) / (SEQUENCE_PREFIX + name + "_" + std::to_string(index));
++    r.setAltSeparator(".");
++    return r;
++  }
++
++  /********************************************************************************************************************/
++
++  RegisterPath MapFileParser::make2DName(const RegisterPath& pathName, const std::string& prefix) {
++    auto [module, name] = splitStringAtLastDot(pathName);
++    assert(boost::algorithm::starts_with(name, prefix));
++    name = name.substr(prefix.size()); // strip prefix
++    auto r = RegisterPath(module) / name;
++    r.setAltSeparator(".");
++    return r;
++  }
++
++  /********************************************************************************************************************/
++
++  void MapFileParser::handle2DNewStyle(const ParsedLine& pl) {
++    // search for sequence entries matching the given register, create ChannelInfos from them
++
++    // Find all channels associated with the area
++    std::list<ParsedLine> channelLines;
++    for(auto& [key, value] : parsedLinesMap) {
++      if(key.startsWith(pl.pathName) and pl.pathName.length() < key.length()) {
++        // First sanity check, address must not be smaller than start address
++        if(value.address < pl.address) {
++          throw ChimeraTK::logic_error(
++              "Start address of channel smaller than 2D register start address ('" + pl.pathName + "').");
++        }
++        channelLines.push_back(value);
++      }
++    }
++
++    channelLines.sort([](auto& a, auto& b) { return a.address < b.address; });
++    make2DRegisterInfos(pl, channelLines, MEM_MULTIPLEXED_PREFIX);
++  }
++
++  void MapFileParser::make2DRegisterInfos(
++      const ParsedLine& pl, std::list<ParsedLine>& channelLines, const std::string& prefix) {
++    if(channelLines.empty()) {
++      throw ChimeraTK::logic_error("No sequences found for register " + pl.pathName);
++    }
++
++    std::vector<NumericAddressedRegisterInfo::ChannelInfo> channels;
++    size_t bytesPerBlock = 0;
++
++    for(auto& channel : channelLines) {
++      channels.emplace_back(NumericAddressedRegisterInfo::ChannelInfo{uint32_t(channel.address - pl.address) * 8,
++          channel.type, channel.width, channel.nFractionalBits, channel.signedFlag});
++      bytesPerBlock += channel.nBytes;
++      if(channel.nBytes != 1 && channel.nBytes != 2 && channel.nBytes != 4) {
++        throw ChimeraTK::logic_error("Sequence word size must correspond to a primitive type");
++      }
++    }
++
++    assert(bytesPerBlock > 0);
++
++    // make sure channel bit interpretation widths are not wider than the actual channel width
++    for(size_t i = 0; i < channels.size() - 1; ++i) {
++      auto actualWidth = channels[i + 1].bitOffset - channels[i].bitOffset;
++      if(channels[i].width > actualWidth) {
++        channels[i].width = actualWidth;
++      }
++    }
++    {
++      // last channel needs special treatment
++      auto actualWidth = bytesPerBlock * 8 - channels.back().bitOffset;
++      if(channels.back().width > actualWidth) {
++        channels.back().width = actualWidth;
++      }
++    }
++
++    // compute number of blocks (= samples per channel)
++    auto nBlocks = static_cast<uint32_t>(std::floor(pl.nBytes / bytesPerBlock));
++    auto name2D = make2DName(pl.pathName, prefix);
++    auto registerInfo = NumericAddressedRegisterInfo(
++        name2D, pl.bar, pl.address, nBlocks, bytesPerBlock * 8, channels, pl.registerAccess, pl.interruptID);
++    pmap.addRegister(registerInfo);
++
++    // create 1D entry for reading the multiplexed raw data
++    assert(pl.nBytes % 4 == 0);
++    auto registerInfoMuxedRaw =
++        NumericAddressedRegisterInfo(name2D + ".MULTIPLEXED_RAW", pl.nBytes / 4, pl.address, pl.nBytes, pl.bar, 32, 0,
++            true, pl.registerAccess, NumericAddressedRegisterInfo::Type::FIXED_POINT, pl.interruptID);
++    pmap.addRegister(registerInfoMuxedRaw);
++  }
++
++  /********************************************************************************************************************/
++
++  void MapFileParser::handle2D(const ParsedLine& pl) {
++    // search for sequence entries matching the given register, create ChannelInfos from them
++    std::list<ParsedLine> channelLines;
++    while(true) {
++      auto it = parsedLinesMap.find(makeSequenceName(pl.pathName, channelLines.size()));
++      if(it == parsedLinesMap.end()) break;
++      if(it->second.address < pl.address) {
++        throw ChimeraTK::logic_error(
++            "Start address of channel smaller than 2D register start address ('" + pl.pathName + "').");
++      }
++      channelLines.push_back(it->second);
++    }
++
++    make2DRegisterInfos(pl, channelLines, MULTIPLEXED_SEQUENCE_PREFIX);
+   }
+ 
+   /********************************************************************************************************************/
+diff --git a/src/TraditionalMapFileParser.cc b/src/TraditionalMapFileParser.cc
+deleted file mode 100644
+index 6f9022da..00000000
+--- a/src/TraditionalMapFileParser.cc
++++ /dev/null
+@@ -1,421 +0,0 @@
+-// SPDX-FileCopyrightText: Deutsches Elektronen-Synchrotron DESY, MSK, ChimeraTK Project <chimeratk-support@desy.de>
+-// SPDX-License-Identifier: LGPL-3.0-or-later
+-
+-#include "TraditionalMapFileParser.h"
+-
+-#include "NumericAddressedBackendMuxedRegisterAccessor.h" // for the MULTIPLEXED_SEQUENCE_PREFIX constant
+-
+-#include <boost/algorithm/string.hpp>
+-
+-#include <algorithm>
+-#include <iostream>
+-#include <sstream>
+-#include <string>
+-
+-namespace ChimeraTK::detail {
+-
+-  /********************************************************************************************************************/
+-
+-  TraditionalMapFileParser::TraditionalMapFileParser(std::string fileName) : _fileName(std::move(fileName)) {}
+-
+-  /********************************************************************************************************************/
+-
+-  std::pair<NumericAddressedRegisterCatalogue, MetadataCatalogue> TraditionalMapFileParser::parse(
+-      std::ifstream& stream) {
+-    std::string line;
+-    while(std::getline(stream, line)) {
+-      _lineNo++;
+-
+-      // Remove whitespace from beginning of line
+-      line.erase(line.begin(), std::find_if(line.begin(), line.end(), [](int c) { return !isspace(c); }));
+-
+-      // Remove comments from the end of the line
+-      auto pos = line.find('#');
+-      if(pos != std::string::npos) {
+-        line.erase(pos, std::string::npos);
+-      }
+-
+-      // Ignore empty lines (including all-comment lines)
+-      if(line.empty()) {
+-        continue;
+-      }
+-
+-      // Parse meta data line
+-      if(line[0] == '@') {
+-        parseMetaData(line);
+-        continue;
+-      }
+-
+-      // Parse register line
+-      _parsedLines.push_back(parseLine(line));
+-    }
+-
+-    // create map of register names to parsed lines
+-    // This cannot be done in the above parsing loop, as the vector might get resized which invalidates the references
+-    for(const auto& pl : _parsedLines) {
+-      _parsedLinesMap.emplace(pl.pathName, pl);
+-    }
+-
+-    // add registers to the catalogue
+-    for(const auto& pl : _parsedLines) {
+-      if(isScalarOr1D(pl.pathName)) {
+-        auto registerInfo = NumericAddressedRegisterInfo(pl.pathName, pl.nElements, pl.address, pl.nBytes, pl.bar,
+-            pl.width, pl.nFractionalBits, pl.signedFlag, pl.registerAccess, pl.type, pl.interruptID);
+-        _pmap.addRegister(registerInfo);
+-      }
+-      else if(is2D(pl.pathName)) {
+-        handle2D(pl);
+-      }
+-      else if(is2DNewStyle(pl.pathName)) {
+-        handle2DNewStyle(pl);
+-      }
+-    }
+-
+-    return {std::move(_pmap), std::move(_metadataCatalogue)};
+-  }
+-
+-  /********************************************************************************************************************/
+-
+-  std::pair<RegisterPath, std::string> TraditionalMapFileParser::splitStringAtLastDot(RegisterPath moduleDotName) {
+-    moduleDotName.setAltSeparator(".");
+-    auto regname = moduleDotName.getComponents().back();
+-    moduleDotName--;
+-    return {moduleDotName, regname};
+-  }
+-
+-  /********************************************************************************************************************/
+-
+-  std::pair<NumericAddressedRegisterInfo::Type, int> TraditionalMapFileParser::getTypeAndNFractionalBits(
+-      const std::string& bitInterpretation, unsigned int width) {
+-    if(width == 0) return {NumericAddressedRegisterInfo::Type::VOID, 0};
+-    if(bitInterpretation == "IEEE754") return {NumericAddressedRegisterInfo::Type::IEEE754, 0};
+-    if(bitInterpretation == "ASCII") return {NumericAddressedRegisterInfo::Type::ASCII, 0};
+-
+-    // If it is a digit the implicit interpretation is FixedPoint
+-    try {
+-      int nBits = std::stoi(bitInterpretation, nullptr,
+-          0); // base 0 = auto, hex or dec or oct
+-      return {NumericAddressedRegisterInfo::Type::FIXED_POINT, nBits};
+-    }
+-    catch(std::exception& e) {
+-      throw ChimeraTK::logic_error(std::string("Map file error in bitInterpretation: wrong argument '") +
+-          bitInterpretation + "', caught exception: " + e.what());
+-    }
+-  }
+-
+-  /********************************************************************************************************************/
+-  // FIXME: This funtion does a lot of string copying. This can be optimised, for instance by using a string_view.
+-  std::vector<size_t> TraditionalMapFileParser::getInterruptId(std::string accessTypeStr) {
+-    std::string strToFind("INTERRUPT");
+-    auto pos = accessTypeStr.find(strToFind);
+-    if(pos == std::string::npos) return {};
+-    std::vector<size_t> retVal;
+-
+-    accessTypeStr.erase(pos, strToFind.length());
+-
+-    size_t delimiterPos;
+-    do {
+-      delimiterPos = accessTypeStr.find(':');
+-      std::string interruptStr = accessTypeStr.substr(0, delimiterPos);
+-      size_t interruptNumber = 0;
+-      try {
+-        interruptNumber = std::stoul(interruptStr, nullptr, 0); // base 0 = auto, hex or dec or oct
+-      }
+-      catch(std::exception& e) {
+-        throw ChimeraTK::logic_error(
+-            std::string("Map file error in accessString: wrong argument in interrupt controller number. Argument: '") +
+-            interruptStr + "', caught exception: " + e.what());
+-      }
+-      retVal.push_back(interruptNumber);
+-
+-      // cut off the already processed part and process the rest
+-      if(delimiterPos != std::string::npos) {
+-        accessTypeStr = accessTypeStr.substr(delimiterPos + 1);
+-      }
+-    } while(delimiterPos != std::string::npos);
+-
+-    return retVal;
+-  }
+-
+-  /********************************************************************************************************************/
+-
+-  void TraditionalMapFileParser::checkFileConsitencyAndThrowIfError(
+-      NumericAddressedRegisterInfo::Access registerAccessMode, NumericAddressedRegisterInfo::Type registerType,
+-      uint32_t nElements, uint64_t address, uint32_t nBytes, uint64_t bar, uint32_t width, int32_t nFractionalBits,
+-      bool signedFlag) {
+-    //
+-    // if type is VOID, access mode cannot me read only
+-    if(registerType == NumericAddressedRegisterInfo::Type::VOID &&
+-        registerAccessMode == NumericAddressedRegisterInfo::Access::READ_ONLY) {
+-      throw ChimeraTK::logic_error(std::string("Map file error. Register Type is VOID and access mode is READ only. "));
+-    }
+-    //
+-    // if register type is VOID and push-type. then all fields must be '0'
+-    if(registerType == NumericAddressedRegisterInfo::Type::VOID &&
+-        registerAccessMode == NumericAddressedRegisterInfo::Access::INTERRUPT) {
+-      if(width || nElements || address || nBytes || bar || nFractionalBits || signedFlag) {
+-        throw ChimeraTK::logic_error(
+-            std::string("Map file error. Register Type is VOID (width field set to 0). All other fields must be '0'."));
+-      }
+-    }
+-  }
+-
+-  /********************************************************************************************************************/
+-
+-  void TraditionalMapFileParser::parseMetaData(std::string line) {
+-    std::string metadata_name, metadata_value;
+-
+-    // Remove the '@' character...
+-    line.erase(line.begin(), line.begin() + 1);
+-
+-    // ... and remove all the whitespace after it
+-    line.erase(line.begin(), std::find_if(line.begin(), line.end(), [](int c) { return !isspace(c); }));
+-
+-    std::istringstream is;
+-    is.str(line);
+-    is >> metadata_name;
+-    if(!is) {
+-      throw ChimeraTK::logic_error("Parsing error in map file '" + _fileName + "' on line " + std::to_string(_lineNo));
+-    }
+-    // remove name from the string
+-    line.erase(line.begin(), line.begin() + static_cast<std::string::difference_type>(metadata_name.length()));
+-
+-    line.erase(std::remove_if(line.begin(), line.end(), [](unsigned char x) { return std::isspace(x); }),
+-        line.end()); // remove whitespaces from rest of the string (before and after the value)
+-    metadata_value = line;
+-    _metadataCatalogue.addMetadata(metadata_name, metadata_value);
+-    is.clear();
+-  }
+-
+-  /********************************************************************************************************************/
+-
+-  TraditionalMapFileParser::ParsedLine TraditionalMapFileParser::parseLine(const std::string& line) {
+-    ParsedLine pl;
+-
+-    std::istringstream is;
+-    is.str(line);
+-
+-    // extract register name
+-    std::string name;
+-    is >> name;
+-    pl.pathName = name;
+-    pl.pathName.setAltSeparator(".");
+-
+-    // extract mandatory address information
+-    is >> std::setbase(0) >> pl.nElements >> std::setbase(0) >> pl.address >> std::setbase(0) >> pl.nBytes;
+-    if(!is) {
+-      throw ChimeraTK::logic_error("Parsing error in map file '" + _fileName + "' on line " + std::to_string(_lineNo));
+-    }
+-
+-    // Note: default values for optional information are set in ParsedLine declaration
+-
+-    // extract bar
+-    is >> std::setbase(0) >> pl.bar;
+-
+-    // extract width
+-    if(!is.fail()) {
+-      is >> std::setbase(0) >> pl.width;
+-      if(pl.width > 32) {
+-        throw ChimeraTK::logic_error("Parsing error in map file '" + _fileName + "' on line " +
+-            std::to_string(_lineNo) + ": register width too big");
+-      }
+-    }
+-
+-    // extract bit interpretation field (nb. of fractional bits, IEEE754, VOID, ...)
+-    if(!is.fail()) {
+-      std::string bitInterpretation;
+-      is >> bitInterpretation;
+-      if(!is.fail()) {
+-        // width is needed to determine whether type is VOID
+-        std::tie(pl.type, pl.nFractionalBits) = getTypeAndNFractionalBits(bitInterpretation, pl.width);
+-        if(pl.nFractionalBits > 1023 || pl.nFractionalBits < -1024) {
+-          throw ChimeraTK::logic_error("Parsing error in map file '" + _fileName + "' on line " +
+-              std::to_string(_lineNo) + ": too many fractional bits");
+-        }
+-      }
+-    }
+-
+-    // extract signed flag
+-    if(!is.fail()) {
+-      is >> std::setbase(0) >> pl.signedFlag;
+-    }
+-
+-    // extract access mode string (RO, RW, WO, INTERRUPT)
+-    if(!is.fail()) {
+-      std::string accessString;
+-      is >> accessString;
+-      if(!is.fail()) {
+-        // first transform to uppercase
+-        std::transform(accessString.begin(), accessString.end(), accessString.begin(),
+-            [](unsigned char c) { return std::toupper(c); });
+-
+-        // first check if access mode is INTERRUPT
+-        auto interruptId = getInterruptId(accessString);
+-
+-        if(!interruptId.empty()) {
+-          pl.registerAccess = NumericAddressedRegisterInfo::Access::INTERRUPT;
+-          pl.interruptID = interruptId;
+-        }
+-        else if(accessString == "RO") {
+-          pl.registerAccess = NumericAddressedRegisterInfo::Access::READ_ONLY;
+-        }
+-        else if(accessString == "RW") {
+-          pl.registerAccess = NumericAddressedRegisterInfo::Access::READ_WRITE;
+-        }
+-        else if(accessString == "WO") {
+-          pl.registerAccess = NumericAddressedRegisterInfo::Access::WRITE_ONLY;
+-        }
+-        else {
+-          throw ChimeraTK::logic_error("Parsing error in map file '" + _fileName + "' on line " +
+-              std::to_string(_lineNo) + ": invalid data access");
+-        }
+-      }
+-    }
+-
+-    checkFileConsitencyAndThrowIfError(pl.registerAccess, pl.type, pl.nElements, pl.address, pl.nBytes, pl.bar,
+-        pl.width, pl.nFractionalBits, pl.signedFlag);
+-
+-    return pl;
+-  }
+-
+-  /********************************************************************************************************************/
+-
+-  bool TraditionalMapFileParser::isScalarOr1D(const RegisterPath& pathName) {
+-    auto [module, name] = splitStringAtLastDot(pathName);
+-    return !boost::algorithm::starts_with(name, MULTIPLEXED_SEQUENCE_PREFIX) &&
+-        !boost::algorithm::starts_with(name, SEQUENCE_PREFIX) &&
+-        !boost::algorithm::starts_with(name, MEM_MULTIPLEXED_PREFIX) && !is2DNewStyle(module);
+-  }
+-
+-  /********************************************************************************************************************/
+-
+-  bool TraditionalMapFileParser::is2D(const RegisterPath& pathName) {
+-    auto [module, name] = splitStringAtLastDot(pathName);
+-    return boost::algorithm::starts_with(name, MULTIPLEXED_SEQUENCE_PREFIX);
+-  }
+-
+-  /********************************************************************************************************************/
+-
+-  bool TraditionalMapFileParser::is2DNewStyle(RegisterPath pathName) {
+-    // Intentional copy of the parameter
+-    pathName.setAltSeparator(".");
+-    auto components = pathName.getComponents();
+-    if(components.size() != 2) return false;
+-    return boost::algorithm::starts_with(components[1], MEM_MULTIPLEXED_PREFIX);
+-  }
+-
+-  /********************************************************************************************************************/
+-
+-  RegisterPath TraditionalMapFileParser::makeSequenceName(const RegisterPath& pathName, size_t index) {
+-    auto [module, name] = splitStringAtLastDot(pathName);
+-    assert(boost::algorithm::starts_with(name, MULTIPLEXED_SEQUENCE_PREFIX));
+-    name = name.substr(strlen(MULTIPLEXED_SEQUENCE_PREFIX)); // strip prefix
+-    auto r = RegisterPath(module) / (SEQUENCE_PREFIX + name + "_" + std::to_string(index));
+-    r.setAltSeparator(".");
+-    return r;
+-  }
+-
+-  /********************************************************************************************************************/
+-
+-  RegisterPath TraditionalMapFileParser::make2DName(const RegisterPath& pathName, const std::string& prefix) {
+-    auto [module, name] = splitStringAtLastDot(pathName);
+-    assert(boost::algorithm::starts_with(name, prefix));
+-    name = name.substr(prefix.size()); // strip prefix
+-    auto r = RegisterPath(module) / name;
+-    r.setAltSeparator(".");
+-    return r;
+-  }
+-
+-  /********************************************************************************************************************/
+-
+-  void TraditionalMapFileParser::handle2DNewStyle(const ParsedLine& pl) {
+-    // search for sequence entries matching the given register, create ChannelInfos from them
+-
+-    // Find all channels associated with the area
+-    std::list<ParsedLine> channelLines;
+-    for(auto& [key, value] : _parsedLinesMap) {
+-      if(key.startsWith(pl.pathName) and pl.pathName.length() < key.length()) {
+-        // First sanity check, address must not be smaller than start address
+-        if(value.address < pl.address) {
+-          throw ChimeraTK::logic_error(
+-              "Start address of channel smaller than 2D register start address ('" + pl.pathName + "').");
+-        }
+-        channelLines.push_back(value);
+-      }
+-    }
+-
+-    channelLines.sort([](auto& a, auto& b) { return a.address < b.address; });
+-    make2DRegisterInfos(pl, channelLines, MEM_MULTIPLEXED_PREFIX);
+-  }
+-
+-  void TraditionalMapFileParser::make2DRegisterInfos(
+-      const ParsedLine& pl, std::list<ParsedLine>& channelLines, const std::string& prefix) {
+-    if(channelLines.empty()) {
+-      throw ChimeraTK::logic_error("No sequences found for register " + pl.pathName);
+-    }
+-
+-    std::vector<NumericAddressedRegisterInfo::ChannelInfo> channels;
+-    size_t bytesPerBlock = 0;
+-
+-    for(auto& channel : channelLines) {
+-      channels.emplace_back(NumericAddressedRegisterInfo::ChannelInfo{uint32_t(channel.address - pl.address) * 8,
+-          channel.type, channel.width, channel.nFractionalBits, channel.signedFlag});
+-      bytesPerBlock += channel.nBytes;
+-      if(channel.nBytes != 1 && channel.nBytes != 2 && channel.nBytes != 4) {
+-        throw ChimeraTK::logic_error("Sequence word size must correspond to a primitive type");
+-      }
+-    }
+-
+-    assert(bytesPerBlock > 0);
+-
+-    // make sure channel bit interpretation widths are not wider than the actual channel width
+-    for(size_t i = 0; i < channels.size() - 1; ++i) {
+-      auto actualWidth = channels[i + 1].bitOffset - channels[i].bitOffset;
+-      if(channels[i].width > actualWidth) {
+-        channels[i].width = actualWidth;
+-      }
+-    }
+-    {
+-      // last channel needs special treatment
+-      auto actualWidth = bytesPerBlock * 8 - channels.back().bitOffset;
+-      if(channels.back().width > actualWidth) {
+-        channels.back().width = actualWidth;
+-      }
+-    }
+-
+-    // compute number of blocks (= samples per channel)
+-    auto nBlocks = static_cast<uint32_t>(std::floor(pl.nBytes / bytesPerBlock));
+-    auto name2D = make2DName(pl.pathName, prefix);
+-    auto registerInfo = NumericAddressedRegisterInfo(
+-        name2D, pl.bar, pl.address, nBlocks, bytesPerBlock * 8, channels, pl.registerAccess, pl.interruptID);
+-    _pmap.addRegister(registerInfo);
+-
+-    // create 1D entry for reading the multiplexed raw data
+-    assert(pl.nBytes % 4 == 0);
+-    auto registerInfoMuxedRaw =
+-        NumericAddressedRegisterInfo(name2D + ".MULTIPLEXED_RAW", pl.nBytes / 4, pl.address, pl.nBytes, pl.bar, 32, 0,
+-            true, pl.registerAccess, NumericAddressedRegisterInfo::Type::FIXED_POINT, pl.interruptID);
+-    _pmap.addRegister(registerInfoMuxedRaw);
+-  }
+-
+-  /********************************************************************************************************************/
+-
+-  void TraditionalMapFileParser::handle2D(const ParsedLine& pl) {
+-    // search for sequence entries matching the given register, create ChannelInfos from them
+-    std::list<ParsedLine> channelLines;
+-    while(true) {
+-      auto it = _parsedLinesMap.find(makeSequenceName(pl.pathName, channelLines.size()));
+-      if(it == _parsedLinesMap.end()) break;
+-      if(it->second.address < pl.address) {
+-        throw ChimeraTK::logic_error(
+-            "Start address of channel smaller than 2D register start address ('" + pl.pathName + "').");
+-      }
+-      channelLines.push_back(it->second);
+-    }
+-
+-    make2DRegisterInfos(pl, channelLines, MULTIPLEXED_SEQUENCE_PREFIX);
+-  }
+-
+-  /********************************************************************************************************************/
+-
+-} // namespace ChimeraTK::detail
+diff --git a/src/async/DummyMuxedInterruptDistributor.cc b/src/async/DummyMuxedInterruptDistributor.cc
+index c9ce7e7b..bc85b22f 100644
+--- a/src/async/DummyMuxedInterruptDistributor.cc
++++ b/src/async/DummyMuxedInterruptDistributor.cc
+@@ -4,7 +4,6 @@
+ #include "async/DummyMuxedInterruptDistributor.h"
+ 
+ #include "async/SubDomain.h"
+-
+ #include <nlohmann/json.hpp>
+ 
+ namespace ChimeraTK::async {
+diff --git a/src/async/GenericMuxedInterruptDistributor.cc b/src/async/GenericMuxedInterruptDistributor.cc
+index 86edb367..2979ff2a 100644
+--- a/src/async/GenericMuxedInterruptDistributor.cc
++++ b/src/async/GenericMuxedInterruptDistributor.cc
+@@ -3,6 +3,7 @@
+ #include "async/GenericMuxedInterruptDistributor.h"
+ 
+ #include "async/SubDomain.h"
++#include <nlohmann/json.hpp> // https://json.nlohmann.me/features/element_access/
+ 
+ #include <nlohmann/json.hpp>
+ 
+diff --git a/src/async/MuxedInterruptDistributor.cc b/src/async/MuxedInterruptDistributor.cc
+index 57374c4a..86ff777d 100644
+--- a/src/async/MuxedInterruptDistributor.cc
++++ b/src/async/MuxedInterruptDistributor.cc
+@@ -7,7 +7,7 @@
+ #include "async/SubDomain.h"
+ #include "async/TriggeredPollDistributor.h"
+ 
+-#include <nlohmann/json.hpp> // https://json.nlohmann.me/features/element_access/
++#include <nlohmann/json.hpp>
+ 
+ using json = nlohmann::json;
+ 
+diff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt
+index 28258d0c..eb6663a3 100644
+--- a/tests/CMakeLists.txt
++++ b/tests/CMakeLists.txt
+@@ -73,7 +73,7 @@ COPY_CONTENT_TO_BUILD_DIR("${CMAKE_CURRENT_SOURCE_DIR}/manualTests")
+ 
+ MACRO(COPY_MAPPING_FILES)
+   # run_performance_test.sh is not a map file but should be copied also into the tests directory
+-  FILE(GLOB testConfigFiles *.map *.mapp *.dmap *.xlmap *.jmap)
++  FILE(GLOB testConfigFiles *.map *.mapp *.dmap *.xlmap)
+   FILE(COPY ${testConfigFiles} DESTINATION ${PROJECT_BINARY_DIR}/tests)
+ 
+   # The valid dmap file has an absolute path which has to be configured by cmake
+diff --git a/tests/executables_src/testJsonMapFileParser.cpp b/tests/executables_src/testJsonMapFileParser.cpp
+deleted file mode 100644
+index 37f0831d..00000000
+--- a/tests/executables_src/testJsonMapFileParser.cpp
++++ /dev/null
+@@ -1,291 +0,0 @@
+-// SPDX-FileCopyrightText: Deutsches Elektronen-Synchrotron DESY, MSK, ChimeraTK Project <chimeratk-support@desy.de>
+-// SPDX-License-Identifier: LGPL-3.0-or-later
+-
+-#define BOOST_TEST_DYN_LINK
+-
+-#define BOOST_TEST_MODULE JsonMapFileParser
+-
+-#include "Device.h"
+-#include "Exception.h"
+-#include "MapFileParser.h"
+-
+-using namespace ChimeraTK;
+-
+-#include <boost/test/unit_test.hpp>
+-using namespace boost::unit_test_framework;
+-
+-BOOST_AUTO_TEST_SUITE(JsonMapFileParserTestSuite)
+-
+-/**********************************************************************************************************************/
+-/**********************************************************************************************************************/
+-
+-BOOST_AUTO_TEST_CASE(TestFileDoesNotExist) {
+-  ChimeraTK::MapFileParser fileparser;
+-  BOOST_CHECK_THROW(fileparser.parse("NonexistentFile.jmap"), ChimeraTK::logic_error);
+-}
+-
+-/**********************************************************************************************************************/
+-
+-BOOST_AUTO_TEST_CASE(TestGoodMapFileParse) {
+-  auto [regs, metas] = ChimeraTK::MapFileParser::parse("simpleJsonFile.jmap");
+-
+-  BOOST_TEST(regs.hasRegister("/SomeTopLevelRegister"));
+-
+-  {
+-    auto reg = regs.getBackendRegister("/SomeTopLevelRegister");
+-    BOOST_TEST(reg.pathName == "/SomeTopLevelRegister");
+-    BOOST_TEST(reg.nElements == 1);
+-    BOOST_TEST(reg.elementPitchBits == 4 * 8);
+-    BOOST_TEST(reg.bar == 0);
+-    BOOST_TEST(reg.address == 32);
+-    BOOST_CHECK(reg.registerAccess == NumericAddressedRegisterInfo::Access::READ_WRITE);
+-    BOOST_REQUIRE(reg.channels.size() == 1);
+-    BOOST_TEST(reg.channels[0].bitOffset == 0);
+-    BOOST_CHECK(reg.channels[0].dataType == NumericAddressedRegisterInfo::Type::FIXED_POINT);
+-    BOOST_TEST(reg.channels[0].width == 32);
+-    BOOST_TEST(reg.channels[0].nFractionalBits == 8);
+-    BOOST_TEST(reg.channels[0].signedFlag == true);
+-  }
+-  {
+-    auto reg = regs.getBackendRegister("BSP.VERSION");
+-    BOOST_TEST(reg.pathName == "/BSP/VERSION");
+-    BOOST_TEST(reg.nElements == 1);
+-    BOOST_TEST(reg.elementPitchBits == 4 * 8);
+-    BOOST_TEST(reg.bar == 0);
+-    BOOST_TEST(reg.address == 4);
+-    BOOST_CHECK(reg.registerAccess == NumericAddressedRegisterInfo::Access::READ_ONLY);
+-    BOOST_REQUIRE(reg.channels.size() == 1);
+-    BOOST_TEST(reg.channels[0].bitOffset == 0);
+-    BOOST_CHECK(reg.channels[0].dataType == NumericAddressedRegisterInfo::Type::FIXED_POINT);
+-    BOOST_TEST(reg.channels[0].width == 32);
+-    BOOST_TEST(reg.channels[0].nFractionalBits == 0);
+-    BOOST_TEST(reg.channels[0].signedFlag == false);
+-  }
+-  {
+-    auto reg = regs.getBackendRegister("BSP");
+-    BOOST_TEST(reg.pathName == "/BSP");
+-    BOOST_TEST(reg.nElements == 19201);
+-    BOOST_TEST(reg.elementPitchBits == 4 * 8);
+-    BOOST_TEST(reg.bar == 0);
+-    BOOST_TEST(reg.address == 0);
+-    BOOST_CHECK(reg.registerAccess == NumericAddressedRegisterInfo::Access::READ_WRITE);
+-    BOOST_REQUIRE(reg.channels.size() == 1);
+-    BOOST_TEST(reg.channels[0].bitOffset == 0);
+-    BOOST_CHECK(reg.channels[0].dataType == NumericAddressedRegisterInfo::Type::FIXED_POINT);
+-    BOOST_TEST(reg.channels[0].width == 32);
+-    BOOST_TEST(reg.channels[0].nFractionalBits == 0);
+-    BOOST_TEST(reg.channels[0].signedFlag == false);
+-  }
+-  {
+-    auto reg = regs.getBackendRegister("APP.STATUS");
+-    BOOST_TEST(reg.pathName == "/APP/STATUS");
+-    BOOST_TEST(reg.nElements == 1);
+-    BOOST_TEST(reg.elementPitchBits == 4 * 8);
+-    BOOST_TEST(reg.bar == 2);
+-    BOOST_TEST(reg.address == 0x8000);
+-    BOOST_CHECK(reg.registerAccess == NumericAddressedRegisterInfo::Access::READ_ONLY);
+-    BOOST_REQUIRE(reg.channels.size() == 1);
+-    BOOST_TEST(reg.channels[0].bitOffset == 0);
+-    BOOST_CHECK(reg.channels[0].dataType == NumericAddressedRegisterInfo::Type::FIXED_POINT);
+-    BOOST_TEST(reg.channels[0].width == 32);
+-    BOOST_TEST(reg.channels[0].nFractionalBits == 0);
+-    BOOST_TEST(reg.channels[0].signedFlag == false);
+-  }
+-  {
+-    auto reg = regs.getBackendRegister("APP.SomeTable");
+-    BOOST_TEST(reg.pathName == "/APP/SomeTable");
+-    BOOST_TEST(reg.nElements == 16384);
+-    BOOST_TEST(reg.elementPitchBits == 2 * 8);
+-    BOOST_TEST(reg.bar == 0);
+-    BOOST_TEST(reg.address == 2048);
+-    BOOST_CHECK(reg.registerAccess == NumericAddressedRegisterInfo::Access::WRITE_ONLY);
+-    BOOST_REQUIRE(reg.channels.size() == 1);
+-    BOOST_TEST(reg.channels[0].bitOffset == 0);
+-    BOOST_CHECK(reg.channels[0].dataType == NumericAddressedRegisterInfo::Type::FIXED_POINT);
+-    BOOST_TEST(reg.channels[0].width == 14);
+-    BOOST_TEST(reg.channels[0].nFractionalBits == 10);
+-    BOOST_TEST(reg.channels[0].signedFlag == true);
+-  }
+-  {
+-    auto reg = regs.getBackendRegister("DAQ.CTRL");
+-    BOOST_TEST(reg.pathName == "/DAQ/CTRL");
+-    BOOST_TEST(reg.nElements == 16384);
+-    BOOST_TEST(reg.elementPitchBits == 64 * 8);
+-    BOOST_TEST(reg.bar == 13);
+-    BOOST_TEST(reg.address == 0x80000000);
+-    BOOST_CHECK(reg.registerAccess == NumericAddressedRegisterInfo::Access::INTERRUPT);
+-    BOOST_TEST(reg.interruptId == std::vector<size_t>({3, 0, 1}), boost::test_tools::per_element());
+-
+-    BOOST_REQUIRE(reg.channels.size() == 5);
+-
+-    BOOST_TEST(reg.channels[0].bitOffset == 0);
+-    BOOST_CHECK(reg.channels[0].dataType == NumericAddressedRegisterInfo::Type::FIXED_POINT);
+-    BOOST_TEST(reg.channels[0].width == 16);
+-    BOOST_TEST(reg.channels[0].nFractionalBits == -2);
+-    BOOST_TEST(reg.channels[0].signedFlag == true);
+-
+-    BOOST_TEST(reg.channels[1].bitOffset == 2 * 8);
+-    BOOST_CHECK(reg.channels[1].dataType == NumericAddressedRegisterInfo::Type::FIXED_POINT);
+-    BOOST_TEST(reg.channels[1].width == 16);
+-    BOOST_TEST(reg.channels[1].nFractionalBits == -2);
+-    BOOST_TEST(reg.channels[1].signedFlag == true);
+-
+-    BOOST_TEST(reg.channels[2].bitOffset == 4 * 8);
+-    BOOST_CHECK(reg.channels[2].dataType == NumericAddressedRegisterInfo::Type::FIXED_POINT);
+-    BOOST_TEST(reg.channels[2].width == 32);
+-    BOOST_TEST(reg.channels[2].nFractionalBits == 0);
+-    BOOST_TEST(reg.channels[2].signedFlag == false);
+-  }
+-  {
+-    auto reg = regs.getBackendRegister("DAQ.FD");
+-    BOOST_TEST(reg.pathName == "/DAQ/FD");
+-    BOOST_TEST(reg.nElements == 16384);
+-    BOOST_TEST(reg.elementPitchBits == 64 * 8);
+-    BOOST_TEST(reg.bar == 13);
+-    BOOST_TEST(reg.address == 0x81000000);
+-    BOOST_CHECK(reg.registerAccess == NumericAddressedRegisterInfo::Access::INTERRUPT);
+-    BOOST_TEST(reg.interruptId == std::vector<size_t>({0}), boost::test_tools::per_element());
+-
+-    BOOST_REQUIRE(reg.channels.size() == 2);
+-
+-    BOOST_TEST(reg.channels[0].bitOffset == 0);
+-    BOOST_CHECK(reg.channels[0].dataType == NumericAddressedRegisterInfo::Type::FIXED_POINT);
+-    BOOST_TEST(reg.channels[0].width == 16);
+-    BOOST_TEST(reg.channels[0].nFractionalBits == -2);
+-    BOOST_TEST(reg.channels[0].signedFlag == true);
+-
+-    BOOST_TEST(reg.channels[1].bitOffset == 2 * 8);
+-    BOOST_CHECK(reg.channels[1].dataType == NumericAddressedRegisterInfo::Type::FIXED_POINT);
+-    BOOST_TEST(reg.channels[1].width == 16);
+-    BOOST_TEST(reg.channels[1].nFractionalBits == -2);
+-    BOOST_TEST(reg.channels[1].signedFlag == true);
+-  }
+-  {
+-    auto reg = regs.getBackendRegister("DAQ.DOUBLE_BUF.ENA");
+-    BOOST_TEST(reg.pathName == "/DAQ/DOUBLE_BUF/ENA");
+-    BOOST_TEST(reg.nElements == 3);
+-    BOOST_TEST(reg.elementPitchBits == 4 * 8);
+-    BOOST_TEST(reg.bar == 0);
+-    BOOST_TEST(reg.address == 1234);
+-    BOOST_REQUIRE(reg.channels.size() == 1);
+-    BOOST_TEST(reg.channels[0].bitOffset == 0);
+-    BOOST_CHECK(reg.channels[0].dataType == NumericAddressedRegisterInfo::Type::FIXED_POINT);
+-    BOOST_TEST(reg.channels[0].width == 1);
+-    BOOST_TEST(reg.channels[0].nFractionalBits == 0);
+-    BOOST_TEST(reg.channels[0].signedFlag == false);
+-  }
+-  {
+-    auto reg = regs.getBackendRegister("DAQ.DOUBLE_BUF.INACTIVE_BUF_ID");
+-    BOOST_TEST(reg.pathName == "/DAQ/DOUBLE_BUF/INACTIVE_BUF_ID");
+-    BOOST_TEST(reg.nElements == 3);
+-    BOOST_TEST(reg.elementPitchBits == 4 * 8);
+-    BOOST_TEST(reg.bar == 0);
+-    BOOST_TEST(reg.address == 1238);
+-    BOOST_REQUIRE(reg.channels.size() == 1);
+-    BOOST_TEST(reg.channels[0].bitOffset == 0);
+-    BOOST_CHECK(reg.channels[0].dataType == NumericAddressedRegisterInfo::Type::FIXED_POINT);
+-    BOOST_TEST(reg.channels[0].width == 1);
+-    BOOST_TEST(reg.channels[0].nFractionalBits == 0);
+-    BOOST_TEST(reg.channels[0].signedFlag == false);
+-  }
+-  {
+-    auto reg = regs.getBackendRegister("DAQ.MUX_SEL");
+-    BOOST_TEST(reg.pathName == "/DAQ/MUX_SEL");
+-    BOOST_TEST(reg.nElements == 1);
+-    BOOST_TEST(reg.elementPitchBits == 4 * 8);
+-    BOOST_TEST(reg.bar == 0);
+-    BOOST_TEST(reg.address == 1242);
+-    BOOST_REQUIRE(reg.channels.size() == 1);
+-    BOOST_TEST(reg.channels[0].bitOffset == 0);
+-    BOOST_CHECK(reg.channels[0].dataType == NumericAddressedRegisterInfo::Type::FIXED_POINT);
+-    BOOST_TEST(reg.channels[0].width == 2);
+-    BOOST_TEST(reg.channels[0].nFractionalBits == 0);
+-    BOOST_TEST(reg.channels[0].signedFlag == false);
+-  }
+-  {
+-    auto reg = regs.getBackendRegister("DAQ.MACRO_PULSE_NUMBER");
+-    BOOST_TEST(reg.pathName == "/DAQ/MACRO_PULSE_NUMBER");
+-    BOOST_TEST(reg.nElements == 1);
+-    BOOST_TEST(reg.elementPitchBits == 4 * 8);
+-    BOOST_TEST(reg.bar == 13);
+-    BOOST_TEST(reg.address == 0x8100003C);
+-    BOOST_REQUIRE(reg.channels.size() == 1);
+-    BOOST_TEST(reg.channels[0].bitOffset == 0);
+-    BOOST_CHECK(reg.channels[0].dataType == NumericAddressedRegisterInfo::Type::FIXED_POINT);
+-    BOOST_TEST(reg.channels[0].width == 32);
+-    BOOST_TEST(reg.channels[0].nFractionalBits == 0);
+-    BOOST_TEST(reg.channels[0].signedFlag == false);
+-  }
+-  {
+-    auto reg = regs.getBackendRegister("BSP.SOME_INFO");
+-    BOOST_TEST(reg.pathName == "/BSP/SOME_INFO");
+-    BOOST_TEST(reg.nElements == 1);
+-    BOOST_TEST(reg.elementPitchBits == 40 * 8);
+-    BOOST_TEST(reg.bar == 0);
+-    BOOST_TEST(reg.address == 8);
+-    BOOST_REQUIRE(reg.channels.size() == 1);
+-    BOOST_TEST(reg.channels[0].bitOffset == 0);
+-    BOOST_CHECK(reg.channels[0].dataType == NumericAddressedRegisterInfo::Type::ASCII);
+-    BOOST_TEST(reg.channels[0].width == 32);
+-    BOOST_TEST(reg.channels[0].nFractionalBits == 0);
+-    BOOST_TEST(reg.channels[0].signedFlag == false);
+-  }
+-  {
+-    auto reg = regs.getBackendRegister("APP.SomeFloat");
+-    BOOST_TEST(reg.pathName == "/APP/SomeFloat");
+-    BOOST_TEST(reg.nElements == 1);
+-    BOOST_TEST(reg.elementPitchBits == 4 * 8);
+-    BOOST_TEST(reg.bar == 0);
+-    BOOST_TEST(reg.address == 4096);
+-    BOOST_REQUIRE(reg.channels.size() == 1);
+-    BOOST_TEST(reg.channels[0].bitOffset == 0);
+-    BOOST_CHECK(reg.channels[0].dataType == NumericAddressedRegisterInfo::Type::IEEE754);
+-    BOOST_TEST(reg.channels[0].width == 32);
+-    BOOST_TEST(reg.channels[0].nFractionalBits == 0);
+-    BOOST_TEST(reg.channels[0].signedFlag == true);
+-  }
+-  {
+-    auto reg = regs.getBackendRegister("BSP.VOID_INTERRUPT_0");
+-    BOOST_TEST(reg.pathName == "/BSP/VOID_INTERRUPT_0");
+-    BOOST_TEST(reg.nElements == 0);
+-    BOOST_REQUIRE(reg.channels.size() == 1);
+-    BOOST_TEST(reg.channels[0].bitOffset == 0);
+-    BOOST_CHECK(reg.channels[0].dataType == NumericAddressedRegisterInfo::Type::VOID);
+-    BOOST_TEST(reg.channels[0].width == 0);
+-    BOOST_TEST(reg.channels[0].nFractionalBits == 0);
+-    BOOST_TEST(reg.channels[0].signedFlag == false);
+-  }
+-
+-  BOOST_TEST(metas.getNumberOfMetadata() == 6);
+-
+-  BOOST_TEST(metas.getMetadata("mapfileRevision") == "1.8.3-0-gdeadbeef");
+-  BOOST_TEST(metas.getMetadata("someRandomEntry") == "some random value");
+-
+-  BOOST_TEST(metas.getMetadata("![0]") == R"({"INTC":{"options":[],"path":"DAQ","version":1}})");
+-  BOOST_TEST(metas.getMetadata("![3]") == R"({"INTC":{"options":["MER"],"path":"MY_INTC","version":1}})");
+-  BOOST_TEST(metas.getMetadata("![3,0]") == R"({"INTC":{"options":[],"path":"MY_INTC.SUB0","version":1}})");
+-  BOOST_TEST(metas.getMetadata("![3,1]") == R"({"INTC":{"options":["MER"],"path":"MY_INTC.SUB1","version":1}})");
+-
+-  auto loi = regs.getListOfInterrupts();
+-  BOOST_TEST(loi.size() == 2);
+-  BOOST_CHECK(loi.find({0}) != loi.end());
+-  BOOST_CHECK(loi.find({3, 0, 1}) != loi.end());
+-}
+-
+-/**********************************************************************************************************************/
+-
+-BOOST_AUTO_TEST_CASE(TestInterruptIntegration) {
+-  ChimeraTK::Device dev("(dummy?map=simpleJsonFile.jmap)");
+-
+-  dev.open();
+-
+-  auto int0 = dev.getVoidRegisterAccessor("/BSP/VOID_INTERRUPT_0", {ChimeraTK::AccessMode::wait_for_new_data});
+-  auto int301 = dev.getVoidRegisterAccessor("/BSP/VOID_INTERRUPT_3_0_1", {ChimeraTK::AccessMode::wait_for_new_data});
+-  dev.activateAsyncRead();
+-  BOOST_TEST(int0.readNonBlocking() == true);
+-  BOOST_TEST(int301.readNonBlocking() == true);
+-}
+-
+-/**********************************************************************************************************************/
+-
+-BOOST_AUTO_TEST_SUITE_END()
+diff --git a/tests/irq_test.mapp b/tests/irq_test.mapp
+index 4334bb19..d06ff53f 100644
+--- a/tests/irq_test.mapp
++++ b/tests/irq_test.mapp
+@@ -4,7 +4,7 @@
+ @![2] {"INTC" : {"path": "TEST2", "options": ["ICR"], "version":1} }
+ 
+ @![3] {"INTC" : {"path": "TEST3", "options": ["MER"],  "version":1} }
+-@![3,0] {"INTC" : {"path": "TEST3.SUB0"}, "options": []}
++@![3,0] {"INTC" : {"path": "TEST3.SUB0"}  "options": []}
+ @![3,1] {"INTC" : {"path": "TEST3.SUB1", "options": ["MER"]} }
+ 
+ @![4] {"INTC" : {"path": "TEST4", "options": ["IMR"], "version":1} }
+@@ -44,7 +44,7 @@
+ # Unknown version
+ @![19] {"INTC" : {"path": "TEST19", "version":9999999} }
+ 
+-# Unknown primary key
++# Unknown primary key 
+ @![20] {"INTC" : {"path": "TEST20", "answerToEverything": 42} }
+ 
+ # both MIE and GIE are there
+@@ -272,3 +272,4 @@ TEST34.CIE                                                    1  0x0001800C
+ TEST34.IER                                                    1  0x00018004            4    0    7    0    0   RW
+ TEST34.ISR                                                    1  0x00018008            4    0    7    0    0   RW
+ TEST34.DAQ_READY                                              0  0x00000000            0    0    0    0    0   INTERRUPT34:4
++
+diff --git a/tests/simpleJsonFile.jmap b/tests/simpleJsonFile.jmap
+deleted file mode 100644
+index e2e1f12f..00000000
+--- a/tests/simpleJsonFile.jmap
++++ /dev/null
+@@ -1,561 +0,0 @@
+-{
+-  "_comment": "Any unknown keys will be ignored. By convention, comments shall use keys starting with an underscore.",
+-  "_blubb": "This is also a comment",
+-  "foo": "This is ignored as well, but shouldn't be used for comments",
+-  "mapFormatVersion": "0.0.1",
+-  "metadata": {
+-    "_comment": "Suggested naming convention: camelcase for property names",
+-    "mapfileRevision": "1.8.3-0-gdeadbeef",
+-    "someRandomEntry": "some random value"
+-  },
+-  "interruptHandler": {
+-    "0": {
+-      "INTC": {
+-        "path": "DAQ",
+-        "version": 1,
+-        "_comment": "This is exactly the current JSON snippet from the metadata"
+-      }
+-    },
+-    "3": {
+-      "INTC": {
+-        "path": "MY_INTC",
+-        "options": [
+-          "MER"
+-        ],
+-        "version": 1
+-      },
+-      "subhandler": {
+-        "0": {
+-          "INTC": {
+-            "path": "MY_INTC.SUB0",
+-            "options": []
+-          }
+-        },
+-        "1": {
+-          "INTC": {
+-            "path": "MY_INTC.SUB1",
+-            "options": [
+-              "MER"
+-            ]
+-          }
+-        }
+-      }
+-    }
+-  },
+-  "addressSpace": [
+-    {
+-      "name": "SomeTopLevelRegister",
+-      "engineeringUnit": "mV",
+-      "description": "This is an example register",
+-      "access": "RW",
+-      "cacheable": true,
+-      "_": "cacheable: Software may assume value never changed from remote side - unused in the beginning. Default: true",
+-      "numberOfElements": 1,
+-      "bytesPerElement": 4,
+-      "address": {
+-        "type": "I/O",
+-        "channel": 0,
+-        "offset": 32,
+-        "_comment": "'type' can be 'I/O' (default), or 'DMA'. 'channel' is optional and defaults to 0."
+-      },
+-      "representation": {
+-        "type": "fixedPoint",
+-        "width": 32,
+-        "fractionalBits": 8,
+-        "isSigned": true,
+-        "_comment": "type might be fixedPoint (default), IEEE754, bitField, string, or void",
+-        "validRange": [
+-          -0.5,
+-          12.345
+-        ]
+-      },
+-      "initialValue": 3.5,
+-      "__": "Unclear how to implement, must be written only during initialisation, not upon every open. Maybe remove."
+-    },
+-    {
+-      "name": "BSP",
+-      "address": {
+-        "channel": 0,
+-        "offset": 0
+-      },
+-      "numberOfElements": 19201,
+-      "bytesPerElement": 4,
+-      "_comment": "omitting 'representation': width = bytesPerElement * 8 bits, unsigned integer",
+-      "_comment2": "This is the equivalent of 'ch0_top.BSP', with the BSP.* registers defined as 'children'",
+-      "children": [
+-        {
+-          "name": "VERSION",
+-          "access": "RO",
+-          "numberOfElements": 1,
+-          "bytesPerElement": 4,
+-          "address": {
+-            "channel": 0,
+-            "offset": 4
+-          },
+-          "representation": {
+-            "type": "fixedPoint",
+-            "width": 32,
+-            "fractionalBits": 0,
+-            "isSigned": false
+-          },
+-          "constant": "0x01080300",
+-          "_comment": "Defining 'constant' value allows to identify/verify firmware version (an type with BSP.PRJ_ID)"
+-        },
+-        {
+-          "name": "SOME_INFO",
+-          "access": "RO",
+-          "numberOfElements": 1,
+-          "bytesPerElement": 40,
+-          "address": {
+-            "channel": 0,
+-            "offset": 8
+-          },
+-          "representation": {
+-            "type": "string"
+-          },
+-          "constant": "0x01080300",
+-          "_comment": "Defining 'constant' value allows to identify/verify firmware version (an type with BSP.PRJ_ID)"
+-        },
+-        {
+-          "name": "VOID_INTERRUPT_0",
+-          "triggeredByInterrupt": [
+-            0
+-          ],
+-          "representation": {
+-            "type": "void"
+-          }
+-        },
+-        {
+-          "name": "VOID_INTERRUPT_3_0_1",
+-          "triggeredByInterrupt": [
+-            3,
+-            0,
+-            1
+-          ],
+-          "representation": {
+-            "type": "void"
+-          }
+-        }
+-      ]
+-    },
+-    {
+-      "name": "APP",
+-      "children": [
+-        {
+-          "name": "STATUS",
+-          "description": "application status",
+-          "access": "RO",
+-          "address": {
+-            "type": "I/O",
+-            "channel": 2,
+-            "offset": "0x8000"
+-          },
+-          "bytesPerElement": 4,
+-          "representation": {
+-            "type": "bitField",
+-            "width": 32,
+-            "elements": [
+-              {
+-                "name": "ProbeLimiter",
+-                "bitShift": 0,
+-                "representation": {
+-                  "width": 1
+-                }
+-              },
+-              {
+-                "name": "ExternalInterlock",
+-                "bitShift": 1,
+-                "representation": {
+-                  "width": 1
+-                }
+-              },
+-              {
+-                "name": "ErrorCounter",
+-                "bitShift": 2,
+-                "representation": {
+-                  "type": "fixedPoint",
+-                  "width": 3,
+-                  "fractionalBits": 0,
+-                  "isSigned": false
+-                },
+-                "_comment": "Will be unsupported at first"
+-              }
+-            ]
+-          }
+-        },
+-        {
+-          "name": "SomeTable",
+-          "access": "WO",
+-          "numberOfElements": 16384,
+-          "bytesPerElement": 2,
+-          "address": {
+-            "channel": 0,
+-            "offset": 2048
+-          },
+-          "representation": {
+-            "type": "fixedPoint",
+-            "width": 14,
+-            "fractionalBits": 10,
+-            "isSigned": true
+-          }
+-        },
+-        {
+-          "name": "SomeFloat",
+-          "access": "RW",
+-          "numberOfElements": 1,
+-          "bytesPerElement": 4,
+-          "address": {
+-            "channel": 0,
+-            "offset": 4096
+-          },
+-          "representation": {
+-            "type": "IEEE754",
+-            "width": 32
+-          }
+-        }
+-      ]
+-    },
+-    {
+-      "name": "DAQ",
+-      "children": [
+-        {
+-          "name": "CTRL",
+-          "description": "Controller DAQ",
+-          "triggeredByInterrupt": [
+-            3,
+-            0,
+-            1
+-          ],
+-          "_": "^^^ this implies 'access: RO', do not specify both",
+-          "_comment": "pitch is the number of bytes between two elements in the same channel",
+-          "address": {
+-            "type": "DMA",
+-            "offset": "0x80000000"
+-          },
+-          "doubleBuffering": {
+-            "secondaryBufferAddress": {
+-              "type": "DMA",
+-              "offset": "0x80200000"
+-            },
+-            "enableRegister": "DAQ.DOUBLE_BUF.ENA",
+-            "readBufferRegister": "DAQ.DOUBLE_BUF.INACTIVE_BUF_ID",
+-            "index": 0,
+-            "_": "Index inside control registers"
+-          },
+-          "__": "There is an extra level in 'channels', which is only really useful with multiple DAQ tabs. See example below with a defined 'tabSelectRegister'.",
+-          "channelTabs": [
+-            {
+-              "numberOfElements": 16384,
+-              "pitch": 64,
+-              "channels": [
+-                {
+-                  "name": "errorI",
+-                  "bytesPerElement": 2,
+-                  "offset": 0,
+-                  "description": "Error signal in I",
+-                  "engineeringUnit": "bits",
+-                  "representation": {
+-                    "type": "fixedPoint",
+-                    "width": 16,
+-                    "fractionalBits": -2,
+-                    "isSigned": true
+-                  }
+-                },
+-                {
+-                  "name": "errorQ",
+-                  "bytesPerElement": 2,
+-                  "offset": 2,
+-                  "description": "Error signal in Q",
+-                  "engineeringUnit": "bits",
+-                  "representation": {
+-                    "type": "fixedPoint",
+-                    "width": 16,
+-                    "fractionalBits": -2,
+-                    "isSigned": true
+-                  }
+-                },
+-                {
+-                  "name": "status",
+-                  "bytesPerElement": 4,
+-                  "offset": 4,
+-                  "representation": {
+-                    "type": "bitField",
+-                    "width": 32,
+-                    "elements": [
+-                      {
+-                        "name": "ProbeLimiter",
+-                        "bitShift": 0,
+-                        "representation": {
+-                          "width": 1
+-                        }
+-                      },
+-                      {
+-                        "name": "ExternalInterlock",
+-                        "bitShift": 1,
+-                        "representation": {
+-                          "width": 1
+-                        }
+-                      },
+-                      {
+-                        "name": "ErrorCounter",
+-                        "bitShift": 2,
+-                        "representation": {
+-                          "type": "fixedPoint",
+-                          "width": 3,
+-                          "fractionalBits": 0,
+-                          "isSigned": false
+-                        }
+-                      }
+-                    ]
+-                  }
+-                },
+-                {
+-                  "name": "VectorSum",
+-                  "bytesPerElement": 4,
+-                  "offset": 8,
+-                  "representation": {
+-                    "type": "bitField",
+-                    "width": 32,
+-                    "elements": [
+-                      {
+-                        "name": "I",
+-                        "bitShift": 0,
+-                        "representation": {
+-                          "width": 18
+-                        }
+-                      }
+-                    ]
+-                  }
+-                },
+-                {
+-                  "name": "VectorSum",
+-                  "bytesPerElement": 4,
+-                  "offset": 10,
+-                  "representation": {
+-                    "type": "bitField",
+-                    "width": 32,
+-                    "elements": [
+-                      {
+-                        "name": "Q",
+-                        "bitShift": 2,
+-                        "representation": {
+-                          "width": 18
+-                        }
+-                      }
+-                    ]
+-                  }
+-                }
+-              ]
+-            }
+-          ]
+-        },
+-        {
+-          "name": "FD",
+-          "description": "Field detection DAQ",
+-          "triggeredByInterrupt": [
+-            0
+-          ],
+-          "address": {
+-            "type": "DMA",
+-            "offset": "0x81000000"
+-          },
+-          "doubleBuffering": {
+-            "secondaryBufferAddress": {
+-              "type": "DMA",
+-              "offset": "0x81200000"
+-            },
+-            "enableRegister": "DAQ.DOUBLE_BUF.ENA",
+-            "readBufferRegister": "DAQ.DOUBLE_BUF.INACTIVE_BUF_ID",
+-            "index": 1
+-          },
+-          "tabSelectRegister": "DAQ.MUX_SEL",
+-          "_": "Value of the tabSelectRegister determines the used set of channels (index of muxedChannels array)",
+-          "channelTabs": [
+-            {
+-              "numberOfElements": 16384,
+-              "pitch": 64,
+-              "channels": [
+-                {
+-                  "name": "AmplitudeCh0",
+-                  "bytesPerElement": 2,
+-                  "offset": 0,
+-                  "description": "Amplitude of channel 0",
+-                  "engineeringUnit": "bits",
+-                  "representation": {
+-                    "type": "fixedPoint",
+-                    "width": 16,
+-                    "fractionalBits": -2,
+-                    "isSigned": true
+-                  }
+-                },
+-                {
+-                  "name": "PhaseCh0",
+-                  "bytesPerElement": 2,
+-                  "offset": 2,
+-                  "description": "Phase of channel 0",
+-                  "engineeringUnit": "bits",
+-                  "representation": {
+-                    "type": "fixedPoint",
+-                    "width": 16,
+-                    "fractionalBits": -2,
+-                    "isSigned": true
+-                  }
+-                }
+-              ]
+-            },
+-            {
+-              "numberOfElements": 16384,
+-              "pitch": 64,
+-              "channels": [
+-                {
+-                  "name": "RawCh0",
+-                  "bytesPerElement": 4,
+-                  "offset": 0,
+-                  "description": "Raw signal for channel 0",
+-                  "engineeringUnit": "bits",
+-                  "representation": {
+-                    "type": "fixedPoint",
+-                    "width": 32,
+-                    "fractionalBits": 0,
+-                    "isSigned": true
+-                  }
+-                },
+-                {
+-                  "name": "RawCh1",
+-                  "bytesPerElement": 4,
+-                  "offset": 4,
+-                  "description": "Phase of channel 1",
+-                  "engineeringUnit": "bits",
+-                  "representation": {
+-                    "type": "fixedPoint",
+-                    "width": 32,
+-                    "fractionalBits": 0,
+-                    "isSigned": true
+-                  }
+-                }
+-              ]
+-            }
+-          ]
+-        },
+-        {
+-          "name": "DOUBLE_BUF",
+-          "children": [
+-            {
+-              "name": "ENA",
+-              "bytesPerElement": 4,
+-              "numberOfElements": 3,
+-              "address": {
+-                "channel": 0,
+-                "offset": 1234
+-              },
+-              "representation": {
+-                "width": 1
+-              }
+-            },
+-            {
+-              "name": "INACTIVE_BUF_ID",
+-              "bytesPerElement": 4,
+-              "numberOfElements": 3,
+-              "address": {
+-                "channel": 0,
+-                "offset": 1238
+-              },
+-              "representation": {
+-                "width": 1
+-              }
+-            }
+-          ]
+-        },
+-        {
+-          "name": "MUX_SEL",
+-          "bytesPerElement": 4,
+-          "numberOfElements": 1,
+-          "address": {
+-            "channel": 0,
+-            "offset": 1242
+-          },
+-          "representation": {
+-            "width": 2
+-          }
+-        },
+-        {
+-          "name": "MACRO_PULSE_NUMBER",
+-          "bytesPerElement": 4,
+-          "numberOfElements": 1,
+-          "_": "First element of last channel in DAQ.FD area",
+-          "address": {
+-            "type": "DMA",
+-            "offset": "0x8100003C"
+-          },
+-          "doubleBuffering": {
+-            "secondaryBufferAddress": {
+-              "type": "DMA",
+-              "offset": "0x8120003C"
+-            },
+-            "enableRegister": "DAQ.DOUBLE_BUF.ENA",
+-            "readBufferRegister": "DAQ.DOUBLE_BUF.INACTIVE_BUF_ID",
+-            "index": 1
+-          },
+-          "representation": {
+-            "width": 32
+-          }
+-        }
+-      ]
+-    },
+-    {
+-      "name": "MY_INTC",
+-      "children": [
+-        {
+-          "name": "ISR",
+-          "bytesPerElement": 4,
+-          "numberOfElements": 1,
+-          "address": {
+-            "channel": 4,
+-            "offset": 0
+-          }
+-        },
+-        {
+-          "name": "IER",
+-          "bytesPerElement": 4,
+-          "numberOfElements": 1,
+-          "address": {
+-            "channel": 4,
+-            "offset": 0
+-          }
+-        },
+-        {
+-          "name": "MER",
+-          "bytesPerElement": 4,
+-          "numberOfElements": 1,
+-          "address": {
+-            "channel": 4,
+-            "offset": 0
+-          }
+-        },
+-        {
+-          "name": "SUB0",
+-          "children": [
+-            {
+-              "name": "ISR",
+-              "bytesPerElement": 4,
+-              "numberOfElements": 1,
+-              "address": {
+-                "channel": 4,
+-                "offset": 0
+-              }
+-            },
+-            {
+-              "name": "IER",
+-              "bytesPerElement": 4,
+-              "numberOfElements": 1,
+-              "address": {
+-                "channel": 4,
+-                "offset": 0
+-              }
+-            }
+-          ]
+-        }
+-      ]
+-    }
+-  ]
+-}
