@@ -1,0 +1,40 @@
+From df9f09f3509abb48e1a68ce9549fe3f9505c39c3 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Mon, 7 Jul 2025 14:57:22 +0200
+Subject: [PATCH] Remove unsupported C++20
+
+---
+ Modules/include/UserInputValidator.h | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/Modules/include/UserInputValidator.h b/Modules/include/UserInputValidator.h
+index 2367da6..ca6228c 100644
+--- a/Modules/include/UserInputValidator.h
++++ b/Modules/include/UserInputValidator.h
+@@ -296,7 +296,7 @@ namespace ChimeraTK {
+       throw ChimeraTK::logic_error("UserInputValidator can only be used with push-type inputs.");
+     }
+ 
+-    if constexpr(std::derived_from<Accessor<UserType>, ChimeraTK::ScalarAccessor<UserType>>) {
++    if constexpr(std::is_base_of<ChimeraTK::ScalarAccessor<UserType>, Accessor<UserType>>::value) {
+       fallbackValue.resize(1);
+     }
+     else {
+@@ -312,7 +312,7 @@ namespace ChimeraTK {
+     if(type == RejectionType::downstream && !lastAcceptedValue.empty()) {
+       lastAcceptedValue.pop_back();
+     }
+-    if constexpr(std::derived_from<Accessor<UserType>, ChimeraTK::ScalarAccessor<UserType>>) {
++    if constexpr(std::is_base_of<ChimeraTK::ScalarAccessor<UserType>, Accessor<UserType>>::value) {
+       if(lastAcceptedValue.empty()) {
+         accessor = fallbackValue[0];
+       }
+@@ -337,7 +337,7 @@ namespace ChimeraTK {
+   /*********************************************************************************************************************/
+   template<typename UserType, template<typename> typename Accessor>
+   void UserInputValidator::Variable<UserType, Accessor>::accept() {
+-    if constexpr(std::derived_from<Accessor<UserType>, ChimeraTK::ScalarAccessor<UserType>>) {
++    if constexpr(std::is_base_of<ChimeraTK::ScalarAccessor<UserType>, Accessor<UserType>>::value) {
+       auto savedValue = std::vector<UserType>(1);
+       savedValue[0] = accessor;
+       lastAcceptedValue.push_back(savedValue);

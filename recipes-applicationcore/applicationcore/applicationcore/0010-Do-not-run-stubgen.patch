@@ -1,0 +1,57 @@
+From 5553279b083c16e20158426c173f10b88615f259 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Mon, 7 Jul 2025 14:57:01 +0200
+Subject: [PATCH] Do not run stubgen
+
+---
+ CMakeLists.txt | 23 -----------------------
+ 1 file changed, 23 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5cb7471..bb23c0f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -16,12 +16,6 @@ set(PYBIND11_FINDPYTHON ON)
+ find_package(pybind11 2.10)
+ 
+ if(${pybind11_FOUND})
+-  find_program(STUBGEN stubgen)
+-
+-  if(${STUBGEN} STREQUAL "STUBGEN-NOTFOUND")
+-    message(FATAL_ERROR "Could not find program 'stubgen'. Try installing package 'mypy' or similar.")
+-  endif()
+-
+ else()
+   message(WARNING "pybind11 was not found in an appropriate version, disabling Python support!")
+ endif()
+@@ -105,19 +99,6 @@ if(${pybind11_FOUND})
+   pybind11_add_module(PyApplicationCore ${python_module_sources} ${python_module_headers} ${python_manager_headers})
+   target_link_libraries(PyApplicationCore PRIVATE ${PROJECT_NAME})
+ 
+-  # Python module stub
+-  if((NOT ${CMAKE_BUILD_TYPE} STREQUAL "asan") AND(NOT ${CMAKE_BUILD_TYPE} STREQUAL "tsan"))
+-    configure_file(cmake/runStubgen.sh.in ${CMAKE_CURRENT_BINARY_DIR}/runStubgen.sh)
+-    add_custom_target(PyApplicationCoreInterface ALL
+-      COMMAND ./runStubgen.sh
+-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+-      DEPENDS PyApplicationCore
+-      BYPRODUCTS {CMAKE_CURRENT_BINARY_DIR}/PyApplicationCore.pyi
+-      COMMENT "Use stubgen to create .pyi for statement completion")
+-  else()
+-    # stubgen would fail to run due to missing asan/tsan symbols
+-    message(NOTICE "Note: Python stub will not be generated for asan and tsan builds.")
+-  endif()
+ endif()
+ 
+ # add a target to generate API documentation with Doxygen
+@@ -149,10 +130,6 @@ if(${pybind11_FOUND})
+   endif()
+ 
+   install(TARGETS PyApplicationCore LIBRARY DESTINATION "${python_install_path}/ChimeraTK/ApplicationCore${${PROJECT_NAME}_SOVERSION}")
+-
+-  if((NOT ${CMAKE_BUILD_TYPE} STREQUAL "asan") AND(NOT ${CMAKE_BUILD_TYPE} STREQUAL "tsan"))
+-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PyApplicationCore.pyi DESTINATION ${python_install_path})
+-  endif()
+ endif()
+ 
+ # we need the public dependencies so create_cmake_config_files can find them as implicit dependencies
