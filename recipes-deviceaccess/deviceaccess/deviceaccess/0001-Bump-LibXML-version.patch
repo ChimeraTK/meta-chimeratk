@@ -1,4 +1,4 @@
-From e78d6571551b191226a9849d5e783cbd2e364356 Mon Sep 17 00:00:00 2001
+From def870268f0589402255d6485bc712efb2802007 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 11 Apr 2023 16:35:11 +0200
 Subject: [PATCH] Bump LibXML++ version
@@ -9,11 +9,11 @@ Upstream-Status: Submitted
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 55cd93d3..a46b5dfd 100644
+index 883a199d..ef98373c 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -37,7 +37,7 @@ FIND_PACKAGE(exprtk 01.04 REQUIRED)
- FIND_PACKAGE(nlohmann_json 03.07 REQUIRED)
+@@ -40,7 +40,7 @@ FIND_PACKAGE(nlohmann_json 03.11 REQUIRED)
+ add_compile_definitions(JSON_DIAGNOSTICS=1)
  
  FIND_PACKAGE(PkgConfig REQUIRED)
 -set(LIBXML++_VERSION "libxml++-2.6")

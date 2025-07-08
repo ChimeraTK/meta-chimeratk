@@ -1,0 +1,28 @@
+From c5424f733e0d6d185242d7bc48efb50fccf9c90b Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Tue, 8 Jul 2025 13:25:44 +0200
+Subject: [PATCH] Do not create pkgconfig file
+
+Upstream-Status: Inappropriate [embedded specific]
+---
+ cmake/create_cmake_config_files.cmake | 7 -------
+ 1 file changed, 7 deletions(-)
+
+diff --git a/cmake/create_cmake_config_files.cmake b/cmake/create_cmake_config_files.cmake
+index 7bdedd64..69129002 100644
+--- a/cmake/create_cmake_config_files.cmake
++++ b/cmake/create_cmake_config_files.cmake
+@@ -301,13 +301,6 @@ endif()
+ configure_file(cmake/PROJECT_NAMEConfigVersion.cmake.in.in "${PROJECT_BINARY_DIR}/cmake/${PROJECT_NAME}ConfigVersion.cmake.in" @ONLY)
+ configure_file(${PROJECT_BINARY_DIR}/cmake/${PROJECT_NAME}ConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake" @ONLY)
+ 
+-# create the pkgconfig file
+-configure_file(cmake/PROJECT_NAME.pc.in.in "${PROJECT_BINARY_DIR}/cmake/${PROJECT_NAME}.pc.in" @ONLY)
+-configure_file(${PROJECT_BINARY_DIR}/cmake/${PROJECT_NAME}.pc.in "${PROJECT_BINARY_DIR}/${PROJECT_NAME}.pc" @ONLY)
+-
+-# install configuration file for pkgconfig
+-install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}.pc" DESTINATION share/pkgconfig COMPONENT dev)
+-
+ if(${PROVIDES_EXPORTED_TARGETS})
+     # imported targets should be namespaced, so define namespaced alias
+     add_library(ChimeraTK::${PROJECT_NAME} ALIAS ${PROJECT_NAME})

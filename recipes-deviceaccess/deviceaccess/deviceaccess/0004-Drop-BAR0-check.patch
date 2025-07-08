@@ -1,19 +1,18 @@
-From 59a1fd65586bcaf89439c2ad6773664330d36d3e Mon Sep 17 00:00:00 2001
+From 7d1f9d6a8e184bce0711fb728c52302efcacc929 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Wed, 5 Jun 2024 14:25:27 +0200
 Subject: [PATCH] Drop BAR0 check
 
 Upstream-Status: Denied
-
 ---
  backends/uio/src/UioAccess.cc | 8 --------
  1 file changed, 8 deletions(-)
 
 diff --git a/backends/uio/src/UioAccess.cc b/backends/uio/src/UioAccess.cc
-index 59dde846..103d4c0e 100644
+index dbc9fcc9..ba148305 100644
 --- a/backends/uio/src/UioAccess.cc
 +++ b/backends/uio/src/UioAccess.cc
-@@ -47,10 +47,6 @@ namespace ChimeraTK {
+@@ -49,10 +49,6 @@ namespace ChimeraTK {
    }
  
    void UioAccess::read(uint64_t map, uint64_t address, int32_t* __restrict__ data, size_t sizeInBytes) {
@@ -24,7 +23,7 @@ index 59dde846..103d4c0e 100644
      // This is a temporary work around, because register nodes of current map use absolute bus addresses.
      address = address % reinterpret_cast<uint64_t>(_deviceKernelBase);
  
-@@ -66,10 +62,6 @@ namespace ChimeraTK {
+@@ -68,10 +64,6 @@ namespace ChimeraTK {
    }
  
    void UioAccess::write(uint64_t map, uint64_t address, int32_t const* data, size_t sizeInBytes) {
