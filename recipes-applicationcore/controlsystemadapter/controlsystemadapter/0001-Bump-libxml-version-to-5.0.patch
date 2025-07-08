@@ -1,4 +1,4 @@
-From 20259e489138a82ea7867d3e433a9b2e8f3c8ac7 Mon Sep 17 00:00:00 2001
+From 62b19f35e044b64043f142da4ea28166ba2ea240 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Wed, 12 Apr 2023 14:02:41 +0200
 Subject: [PATCH] Bump libxml++ version to 5.0
