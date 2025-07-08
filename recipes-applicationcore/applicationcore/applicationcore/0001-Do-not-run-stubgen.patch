@@ -1,35 +1,40 @@
-From 00dd934ca4f4d70f6ebd825ddae48d5bc4b9df97 Mon Sep 17 00:00:00 2001
+From 88749e0bf8ee6a5a6d15fc9399650e1f4afd5ddf Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
-Date: Tue, 29 Apr 2025 16:28:15 +0000
+Date: Tue, 8 Jul 2025 13:53:33 +0200
 Subject: [PATCH] Do not run stubgen
 
-Upstream-Status: Denied
-
+Upstream-Status: Inappropriate [embedded specific]
 ---
- CMakeLists.txt | 23 -----------------------
- 1 file changed, 23 deletions(-)
+ CMakeLists.txt | 28 ----------------------------
+ 1 file changed, 28 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index a759f6e..9463f26 100644
+index f80efb3..aead857 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -14,12 +14,6 @@ set(PYBIND11_FINDPYTHON ON)
+@@ -13,17 +13,6 @@ option(BUILD_TESTS "Build tests." ON)
+ set(PYBIND11_FINDPYTHON ON)
  find_package(pybind11 2.10)
  
- if(${pybind11_FOUND})
+-if(${pybind11_FOUND})
 -  find_program(STUBGEN stubgen)
 -
 -  if(${STUBGEN} STREQUAL "STUBGEN-NOTFOUND")
 -    message(FATAL_ERROR "Could not find program 'stubgen'. Try installing package 'mypy' or similar.")
 -  endif()
 -
- else()
-   message(WARNING "pybind11 was not found in an appropriate version, disabling Python support!")
- endif()
-@@ -103,19 +97,6 @@ if(${pybind11_FOUND})
+-else()
+-  message(WARNING "pybind11 was not found in an appropriate version, disabling Python support!")
+-endif()
+-
+ # Find the ControlSystemAdapter
+ FIND_PACKAGE(ChimeraTK-ControlSystemAdapter 02.11 REQUIRED)
+ 
+@@ -102,20 +91,6 @@ if(${pybind11_FOUND})
+   # Python module
    pybind11_add_module(PyApplicationCore ${python_module_sources} ${python_module_headers} ${python_manager_headers})
    target_link_libraries(PyApplicationCore PRIVATE ${PROJECT_NAME})
- 
+-
 -  # Python module stub
 -  if((NOT ${CMAKE_BUILD_TYPE} STREQUAL "asan") AND(NOT ${CMAKE_BUILD_TYPE} STREQUAL "tsan"))
 -    configure_file(cmake/runStubgen.sh.in ${CMAKE_CURRENT_BINARY_DIR}/runStubgen.sh)
@@ -37,7 +42,7 @@ index a759f6e..9463f26 100644
 -      COMMAND ./runStubgen.sh
 -      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 -      DEPENDS PyApplicationCore
--      BYPRODUCTS {CMAKE_CURRENT_BINARY_DIR}/PyApplicationCore.pyi
+-      BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/PyApplicationCore.pyi
 -      COMMENT "Use stubgen to create .pyi for statement completion")
 -  else()
 -    # stubgen would fail to run due to missing asan/tsan symbols
@@ -46,11 +51,10 @@ index a759f6e..9463f26 100644
  endif()
  
  # add a target to generate API documentation with Doxygen
-@@ -147,10 +128,6 @@ if(${pybind11_FOUND})
-   endif()
+@@ -144,9 +119,6 @@ if(${pybind11_FOUND})
  
    install(TARGETS PyApplicationCore LIBRARY DESTINATION "${python_install_path}/ChimeraTK/ApplicationCore${${PROJECT_NAME}_SOVERSION}")
--
+ 
 -  if((NOT ${CMAKE_BUILD_TYPE} STREQUAL "asan") AND(NOT ${CMAKE_BUILD_TYPE} STREQUAL "tsan"))
 -    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PyApplicationCore.pyi DESTINATION ${python_install_path})
 -  endif()
