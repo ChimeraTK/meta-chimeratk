@@ -26,7 +26,7 @@ DEPENDS = "boost controlsystemadapter deviceaccess python3 python3-pybind11"
 RDEPENDS_${PN} += "python3-core"
 FILES_${PN} += "${libdir}/${PYTHON_DIR}/site-packages"
 
-inherit cmake pkgconfig python3targetconfig python3-dir distutils-common-base
+inherit cmake pkgconfig python3native python3-dir distutils-common-base
 
 # Specify any options you want to pass to cmake using EXTRA_OECMAKE:
 EXTRA_OECMAKE = "-DBUILD_TESTS=Off"
