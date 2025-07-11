@@ -1,7 +1,9 @@
 LICENSE = "LGPL-3.0-or-later"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=e6a600fd5e1d9cbde2d983680233ad02"
 
-SRC_URI = "git://github.com/ChimeraTK/QtHardMon;protocol=https;branch=master"
+SRC_URI = "git://github.com/ChimeraTK/QtHardMon;protocol=https;branch=master \
+           file://0001-Look-for-libfmt.patch \
+           "
 
 # Modify these as desired
 PV = "01.08.00"
