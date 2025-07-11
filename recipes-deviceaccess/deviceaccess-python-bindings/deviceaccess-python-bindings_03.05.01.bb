@@ -15,7 +15,7 @@ SRCREV = "b9b6bae01a26cfe64ffa8f6c3003b236d75f18b5"
 S = "${WORKDIR}/git"
 
 DEPENDS = "boost python3 python3-numpy deviceaccess"
-RDEPENDS:${PN} = "python3-numpy python3-typing"
+RDEPENDS:${PN} = "python3-numpy"
 
 # We are using setuptools3-base here to get the proper FILES defines for python
 inherit cmake pkgconfig python3-dir setuptools3-base
