@@ -32,6 +32,7 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=e6a600fd5e1d9cbde2d983680233ad02"
 SRC_URI = "git://github.com/ChimeraTK/ControlSystemAdapter-OPC-UA-Adapter;protocol=https;branch=master \
            file://0001-csa-opc-ua-Remove-RPATH-handling.patch \
            file://0001-Disable-mapfile-generator.patch \
+           file://0001-look-for-fmt.patch \
            "
 
 # Modify these as desired
