@@ -18,9 +18,11 @@ S = "${WORKDIR}/git"
 # NOTE: unable to map the following CMake package dependencies: Doxygen GccAtomic
 DEPENDS = "boost"
 RDEPENDS_${PN} = "boost-system boost-thread"
+RDEPENDS:${PN}-dev = ""
 
 inherit pkgconfig cmake
 
 # Specify any options you want to pass to cmake using EXTRA_OECMAKE:
 EXTRA_OECMAKE = ""
+BBCLASSEXTEND = "native nativesdk"
 
