@@ -21,7 +21,7 @@ Recommends
 
   URI: https://github.com/voltumna-linux/meta-tango/
   branch: dunfell
-  revision: HEAD
+  revision: dac424d95bc9901da30348f5fdfd4588509fd418
 
   More specifially, it just needs meta-oe for libxml++ and meta-qt5 only of
   you intend to build QtHardMon.
