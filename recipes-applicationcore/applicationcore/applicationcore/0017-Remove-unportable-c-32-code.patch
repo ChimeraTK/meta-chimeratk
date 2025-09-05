@@ -1,4 +1,4 @@
-From 834b4d206ecab275493dc557d69aa1765fdfe84f Mon Sep 17 00:00:00 2001
+From bb2c141b80394deaf0523d08443e8fff500ee1ce Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Thu, 26 Jun 2025 19:07:34 +0200
 Subject: [PATCH] Remove unportable c++32 code
@@ -6,15 +6,15 @@ Subject: [PATCH] Remove unportable c++32 code
 ---
  Python/bindings/src/PythonBindings.cc        |   4 +-
  src/ConnectionMaker.cc                       |   6 +-
- tests/executables_src/testReverseRecovery.cc | 466 -------------------
- 3 files changed, 7 insertions(+), 469 deletions(-)
+ tests/executables_src/testReverseRecovery.cc | 738 -------------------
+ 3 files changed, 7 insertions(+), 741 deletions(-)
  delete mode 100644 tests/executables_src/testReverseRecovery.cc
 
 diff --git a/Python/bindings/src/PythonBindings.cc b/Python/bindings/src/PythonBindings.cc
-index 9e89aa0..e0df630 100644
+index f79250b..6ebadbe 100644
 --- a/Python/bindings/src/PythonBindings.cc
 +++ b/Python/bindings/src/PythonBindings.cc
-@@ -34,6 +34,8 @@
+@@ -35,6 +35,8 @@
  #include <string>
  #include <variant>
  
@@ -23,7 +23,7 @@ index 9e89aa0..e0df630 100644
  namespace py = pybind11;
  using namespace py::literals;
  
-@@ -145,7 +147,7 @@ namespace ChimeraTK {
+@@ -146,7 +148,7 @@ namespace ChimeraTK {
          .def("__bool__", [](Boolean& v) { return bool(v); })
          .def("__repr__", [](Boolean& v) { return "Boolean(" + std::to_string(bool(v)) + ")"; })
          .def("__int__", [](Boolean& v) { return int(bool(v)); })
@@ -33,7 +33,7 @@ index 9e89aa0..e0df630 100644
      /**
       * TransferElementID
 diff --git a/src/ConnectionMaker.cc b/src/ConnectionMaker.cc
-index a17c963..ec5b7e4 100644
+index a354017..7f67750 100644
 --- a/src/ConnectionMaker.cc
 +++ b/src/ConnectionMaker.cc
 @@ -20,6 +20,8 @@
@@ -45,7 +45,7 @@ index a17c963..ec5b7e4 100644
  namespace ChimeraTK {
  
    /*********************************************************************************************************************/
-@@ -902,7 +904,7 @@ namespace ChimeraTK {
+@@ -909,7 +911,7 @@ namespace ChimeraTK {
        }
      }
      else if(net.consumers.size() > 1) {
@@ -54,7 +54,7 @@ index a17c963..ec5b7e4 100644
            net.feeder.getDirection().withReturn));
        callForType(*net.valueType, [&](auto t) {
          using UserType = decltype(t);
-@@ -985,7 +987,7 @@ namespace ChimeraTK {
+@@ -992,7 +994,7 @@ namespace ChimeraTK {
            // We need to promote the accessor with the reverse recovery tag to the network feeder
            // to prevent writing down the constant value into the device and propagating the
            // recovery value to the other consumers instead.
@@ -65,10 +65,10 @@ index a17c963..ec5b7e4 100644
            });
 diff --git a/tests/executables_src/testReverseRecovery.cc b/tests/executables_src/testReverseRecovery.cc
 deleted file mode 100644
-index 7953b10..0000000
+index b37357c..0000000
 --- a/tests/executables_src/testReverseRecovery.cc
 +++ /dev/null
-@@ -1,466 +0,0 @@
+@@ -1,738 +0,0 @@
 -// SPDX-FileCopyrightText: Deutsches Elektronen-Synchrotron DESY, MSK, ChimeraTK Project <chimeratk-support@desy.de>
 -// SPDX-License-Identifier: LGPL-3.0-or-later
 -#include "ScalarAccessor.h"
@@ -100,17 +100,18 @@ index 7953b10..0000000
 -
 -namespace ctk = ChimeraTK;
 -
+-struct ExternalMainLoopModule : public ctk::ApplicationModule {
+-  using ctk::ApplicationModule::ApplicationModule;
+-
+-  std::function<void()> doMainLoop;
+-
+-  void mainLoop() final { doMainLoop(); }
+-};
 -struct TestApplication : ctk::Application {
 -  TestApplication() : ctk::Application("tagTestApplication") { debugMakeConnections(); }
 -  ~TestApplication() override { shutdown(); }
 -
--  struct : public ctk::ApplicationModule {
--    using ctk::ApplicationModule::ApplicationModule;
--
--    std::function<void()> doMainLoop;
--
--    void mainLoop() final { doMainLoop(); }
--  } mod{this, "Module", ""};
+-  ExternalMainLoopModule mod{this, "Module", ""};
 -};
 -
 -/********************************************************************************************************************/
@@ -401,6 +402,57 @@ index 7953b10..0000000
 -  app.shutdown();
 -}
 -
+-// Have an application module that has an explicit accessor requesting reverse recovery
+-BOOST_AUTO_TEST_CASE(testFanOutWithExplicitAccessor03) {
+-  std::cout << "testFanOutWithExplicitAccessor03" << std::endl;
+-  ctk::BackendFactory::getInstance().setDMapFilePath("testTagged.dmap");
+-
+-  ctk::Device dev;
+-  dev.open("baseDevice");
+-
+-  // Initialize the device with some values
+-  dev.write<int32_t>("/readWrite", 4);
+-
+-  TestApplication app;
+-  ctk::DeviceModule devModule{&app, "taggedDevice", "/trigger"};
+-
+-  std::atomic<bool> up{false};
+-
+-  ctk::ScalarPushInput<int32_t> deviceInput{&app.mod, "/taggedReadWrite", "", ""};
+-
+-  app.mod.doMainLoop = [&]() {
+-    up = true;
+-    up.notify_one();
+-  };
+-
+-  ctk::TestFacility test(app, false);
+-
+-  app.optimiseUnmappedVariables({"/taggedReadWrite"});
+-  test.runApplication();
+-  up.wait(false);
+-
+-  CHECK_EQUAL_TIMEOUT((int32_t(deviceInput)), 4, 1000);
+-  CHECK_EQUAL_TIMEOUT(dev.read<int32_t>("/readWrite"), 4, 1000);
+-
+-  // Check that we can still write down to the device properly
+-  deviceInput.setAndWrite(44);
+-  CHECK_EQUAL_TIMEOUT(dev.read<int32_t>("/readWrite"), 44, 1000);
+-
+-  // Manipulate the device so we can check that the value is propagated
+-  // from the device to the application, as expected, after the device recovers
+-  dev.write<int32_t>("/readWrite", 111);
+-
+-  devModule.reportException("Trigger device recovery");
+-
+-  // Wait for ApplicationCore to recover
+-  CHECK_EQUAL_TIMEOUT(test.readScalar<int32_t>("/Devices/taggedDevice/status"), 1, 1000);
+-  CHECK_EQUAL_TIMEOUT(test.readScalar<int32_t>("/Devices/taggedDevice/status"), 0, 1000);
+-
+-  deviceInput.read();
+-  CHECK_EQUAL_TIMEOUT(int32_t(deviceInput), 111, 1000);
+-  app.shutdown();
+-}
+-
 -/********************************************************************************************************************/
 -
 -// Request that we do the reverse recovery from an untagged device register by using the ReverseRecovery accessor
@@ -416,6 +468,7 @@ index 7953b10..0000000
 -  dev.write<int32_t>("/secondReadWrite", 815);
 -
 -  TestApplication app;
+-
 -  ctk::DeviceModule devModule{&app, "taggedDevice", "/trigger"};
 -
 -  std::atomic<bool> up{false};
@@ -458,7 +511,7 @@ index 7953b10..0000000
 -/********************************************************************************************************************/
 -
 -BOOST_AUTO_TEST_CASE(testRecoveryFromAppDirect) {
--  std::cout << "testReverseRecoveryFromApp" << std::endl;
+-  std::cout << "testReverseRecoveryFromAppDirect" << std::endl;
 -
 -  ctk::BackendFactory::getInstance().setDMapFilePath("testTagged.dmap");
 -
@@ -535,3 +588,222 @@ index 7953b10..0000000
 -
 -  app.shutdown();
 -}
+-
+-/**********************************************************************************************************************/
+-
+-BOOST_AUTO_TEST_CASE(testReverseRecoveryWithAdditionalInput) {
+-  std::cout << "testReverseRecoveryWithAdditionalInput" << std::endl;
+-
+-  ctk::BackendFactory::getInstance().setDMapFilePath("testTagged.dmap");
+-
+-  TestApplication app;
+-  ExternalMainLoopModule mod2{&app, "Module2", ""};
+-
+-  // One module with an ouptut that has reverse recovery, and another module that takes this as
+-  // input
+-  ctk::ScalarOutputReverseRecovery<uint32_t> out{&app.mod, "/Out/a", "", ""};
+-  ctk::ScalarPushInput<uint32_t> in{&mod2, "/Out/a", "", ""};
+-
+-  std::atomic<bool> up{false};
+-  std::atomic<bool> up2{false};
+-
+-  app.mod.doMainLoop = [&]() {
+-    up = true;
+-    up.notify_one();
+-  };
+-
+-  mod2.doMainLoop = [&]() {
+-    up2 = true;
+-    up2.notify_one();
+-  };
+-
+-  ctk::TestFacility test(app, false);
+-  test.setScalarDefault<uint32_t>("/Out/a", 32);
+-
+-  test.runApplication();
+-  up.wait(false);
+-  up2.wait(false);
+-
+-  CHECK_EQUAL_TIMEOUT(out, 32, 2000);
+-  CHECK_EQUAL_TIMEOUT(in, 32, 2000);
+-
+-  app.shutdown();
+-}
+-
+-/**********************************************************************************************************************/
+-
+-BOOST_AUTO_TEST_CASE(testReverseRecoveryPromotingDeviceWoToFeeder) {
+-  std::cout << "testReverseRecoveryPromotingDeviceWoToFeeder" << std::endl;
+-
+-  // This test just checks that we can connect this network successfully
+-  ctk::BackendFactory::getInstance().setDMapFilePath("testTagged.dmap");
+-
+-  TestApplication app;
+-
+-  ctk::DeviceModule devModule{&app, "taggedDevice", "/trigger"};
+-
+-  ctk::Device dev;
+-  dev.open("baseDevice");
+-  dev.write<int32_t>("/writeOnlyRB.DUMMY_WRITEABLE", 8);
+-
+-  // Nothing to do
+-  app.mod.doMainLoop = [&]() {};
+-
+-  ctk::TestFacility test(app, false);
+-  app.optimiseUnmappedVariables({"/taggedWriteOnly"});
+-
+-  test.runApplication();
+-
+-  std::this_thread::sleep_for(std::chrono::seconds(1));
+-
+-  BOOST_TEST(dev.read<int32_t>("/writeOnlyRB") == 8);
+-  app.shutdown();
+-}
+-
+-/**********************************************************************************************************************/
+-
+-BOOST_AUTO_TEST_CASE(testReverseRecoveryNetworkWoOptimized) {
+-  std::cout << "testReverseRecoveryNetworkWoOptimized" << std::endl;
+-
+-  // This test just checks that we can connect this network successfully
+-  ctk::BackendFactory::getInstance().setDMapFilePath("testTagged.dmap");
+-
+-  TestApplication app;
+-
+-  std::atomic<bool> up{false};
+-
+-  ctk::DeviceModule devModule{&app, "taggedDevice", "/trigger"};
+-  ctk::ScalarPushInput<int32_t> modIn{&app.mod, "/taggedWriteOnly", "", ""};
+-
+-  ctk::Device dev;
+-  dev.open("baseDevice");
+-  dev.write<int32_t>("/writeOnlyRB.DUMMY_WRITEABLE", 8);
+-
+-  // Nothing to do
+-  app.mod.doMainLoop = [&]() {
+-    up = true;
+-    up.notify_one();
+-  };
+-
+-  ctk::TestFacility test(app, false);
+-  test.setScalarDefault<int32_t>("/taggedWriteOnly", 12);
+-  app.optimiseUnmappedVariables({"/taggedWriteOnly"});
+-
+-  test.runApplication();
+-  up.wait(false);
+-
+-  // Gets value from constant feeder
+-  CHECK_EQUAL_TIMEOUT(int(modIn), 0, 2000);
+-
+-  CHECK_EQUAL_TIMEOUT(dev.read<int32_t>("/writeOnlyRB"), 8, 2000);
+-  app.shutdown();
+-}
+-
+-/**********************************************************************************************************************/
+-
+-BOOST_AUTO_TEST_CASE(testReverseRecoveryBitAccessorFanOut) {
+-  std::cout << "testReverseRecoveryBitAccessorFanOut" << std::endl;
+-
+-  // This test just checks that we can connect this network successfully
+-  ctk::BackendFactory::getInstance().setDMapFilePath("testTagged.dmap");
+-
+-  TestApplication app;
+-
+-  ctk::DeviceModule devModule{&app, "bitMappedDevice", "/trigger"};
+-
+-  ctk::Device dev;
+-  dev.open("baseDevice");
+-  dev.write<int32_t>("/readWrite", 0x7fff);
+-
+-  // Nothing to do
+-  app.mod.doMainLoop = [&]() {};
+-
+-  ctk::TestFacility test(app, false);
+-  test.setScalarDefault<ctk::Boolean>("/bit3", false);
+-  test.runApplication();
+-
+-  std::this_thread::sleep_for(std::chrono::seconds(1));
+-
+-  BOOST_TEST(dev.read<int32_t>("/readWrite") == 0x7FFF);
+-  app.shutdown();
+-}
+-
+-/**********************************************************************************************************************/
+-
+-BOOST_AUTO_TEST_CASE(testReverseRecoveryBitAccessorDirect) {
+-  std::cout << "testReverseRecoveryBitAccessorFanOut" << std::endl;
+-
+-  // This test just checks that we can connect this network successfully
+-  ctk::BackendFactory::getInstance().setDMapFilePath("testTagged.dmap");
+-
+-  TestApplication app;
+-
+-  ctk::DeviceModule devModule{&app, "bitMappedDevice", "/trigger"};
+-
+-  ctk::Device dev;
+-  dev.open("baseDevice");
+-  dev.write<int32_t>("/readWrite", 0x7fff);
+-
+-  // Nothing to do
+-  app.mod.doMainLoop = [&]() {
+-
+-  };
+-
+-  ctk::TestFacility test(app, false);
+-  test.setScalarDefault<ctk::Boolean>("/bit3", false);
+-  app.optimiseUnmappedVariables({"/bit3"});
+-  test.runApplication();
+-
+-  std::this_thread::sleep_for(std::chrono::seconds(1));
+-
+-  BOOST_TEST(dev.read<int32_t>("/readWrite") == 0x7FFF);
+-  app.shutdown();
+-}
+-
+-/**********************************************************************************************************************/
+-
+-BOOST_AUTO_TEST_CASE(testReverseRecoveryBitAccessorMultipleInModule) {
+-  std::cout << "testReverseRecoveryBitAccessorMultipleInModule" << std::endl;
+-
+-  // Regression test whether this setup deadlocks itself
+-  ctk::BackendFactory::getInstance().setDMapFilePath("testTagged.dmap");
+-
+-  TestApplication app;
+-
+-  ctk::DeviceModule devModule{&app, "bitMappedDevice", "/trigger"};
+-  ctk::ScalarPollInput<ctk::Boolean> bit0{&app.mod, "/bit0", "", ""};
+-  ctk::ScalarOutput<ctk::Boolean> bit1{&app.mod, "/bit1", "", ""};
+-  ctk::ScalarOutput<ctk::Boolean> bit2{&app.mod, "/bit2", "", ""};
+-  ctk::ScalarPollInput<ctk::Boolean> bit3{&app.mod, "/bit3", "", ""};
+-  ctk::ScalarOutput<ctk::Boolean> bit4{&app.mod, "/bit4", "", ""};
+-  ctk::ScalarOutput<ctk::Boolean> bit5{&app.mod, "/bit5", "", ""};
+-  ctk::ScalarPollInput<ctk::Boolean> bit6{&app.mod, "/bit6", "", ""};
+-  ctk::ScalarOutput<ctk::Boolean> bit7{&app.mod, "/bit7", "", ""};
+-  ctk::ScalarOutput<ctk::Boolean> bit8{&app.mod, "/bit8", "", ""};
+-
+-  ctk::Device dev;
+-  dev.open("baseDevice");
+-  dev.write<int32_t>("/readWrite", 0x7fff);
+-
+-  std::atomic<bool> up{false};
+-
+-  // Nothing to do
+-  app.mod.doMainLoop = [&]() {
+-    up = true;
+-    up.notify_all();
+-  };
+-
+-  ctk::TestFacility test(app, false);
+-  test.runApplication();
+-
+-  test.getVoid("/trigger").write();
+-
+-  up.wait(false);
+-
+-  // sanity check if the reverse recovery for the output bits still holds
+-  BOOST_TEST(dev.read<int32_t>("/readWrite") == 0x7FFF);
+-
+-  app.shutdown();
+-}
+-
+-/**********************************************************************************************************************/

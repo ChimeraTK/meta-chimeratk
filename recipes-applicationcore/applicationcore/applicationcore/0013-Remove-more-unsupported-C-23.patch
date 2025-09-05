@@ -1,0 +1,73 @@
+From 322144d3a75b130021e8beb086f1e4aadd3c7393 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Fri, 5 Sep 2025 11:06:05 +0200
+Subject: [PATCH] Remove more unsupported C++23
+
+---
+ Python/bindings/src/PyConfigReader.cc | 9 +++++----
+ src/ConnectionMaker.cc                | 7 +++----
+ 2 files changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/Python/bindings/src/PyConfigReader.cc b/Python/bindings/src/PyConfigReader.cc
+index 9062a46..f379311 100644
+--- a/Python/bindings/src/PyConfigReader.cc
++++ b/Python/bindings/src/PyConfigReader.cc
+@@ -8,7 +8,7 @@
+ #include "PyConfigReader.h"
+ #include <pybind11/stl.h>
+ 
+-#include <ChimeraTK/cppext/ranges.hpp>
++#include <iterator>
+ 
+ namespace py = pybind11;
+ 
+@@ -45,10 +45,11 @@ namespace ChimeraTK {
+       using UserType = decltype(t);
+ 
+       if(defaultValue) {
+-        std::vector<UserType> valAsUserType = std::visit(
++        std::vector<UserType> valAsUserType;
++        std::visit(
+             [&](auto value) {
+-              return value | std::views::transform([](auto& v) { return ChimeraTK::userTypeToUserType<UserType>(v); }) |
+-                  cppext::ranges::to<std::vector>();
++              std::transform(value.begin(), value.end(), std::back_inserter(valAsUserType),
++                  [](auto& v) { return ChimeraTK::userTypeToUserType<UserType>(v); });
+             },
+             defaultValue.value());
+         rv.emplace(_reader.get().get<std::vector<UserType>>(path, valAsUserType));
+diff --git a/src/ConnectionMaker.cc b/src/ConnectionMaker.cc
+index 7f67750..6123ee3 100644
+--- a/src/ConnectionMaker.cc
++++ b/src/ConnectionMaker.cc
+@@ -14,14 +14,13 @@
+ #include "TestableMode.h"
+ #include "ThreadedFanOut.h"
+ #include "TriggerFanOut.h"
++#include <fmt/format.h>
+ 
+ #include <ChimeraTK/NDRegisterAccessor.h>
+ #include <ChimeraTK/SystemTags.h>
+ 
+ #include <algorithm>
+ 
+-#include <fmt/format.h>
+-
+ namespace ChimeraTK {
+ 
+   /*********************************************************************************************************************/
+@@ -999,12 +998,12 @@ namespace ChimeraTK {
+                 consumer.getTags().contains(ChimeraTK::SystemTags::reverseRecovery);
+           });
+           if(reverseConsumer->isReadable()) {
+-            debug(std::format("  Promoting reverse consumer {} to feeder", reverseConsumer->getName()));
++            debug(fmt::format("  Promoting reverse consumer {} to feeder", reverseConsumer->getName()));
+             network.feeder = *reverseConsumer;
+             network.consumers.remove(*reverseConsumer);
+           }
+           else {
+-            debug(std::format(
++            debug(fmt::format(
+                 "  Reverse consumer {} is not readable, adding constant feeder instead", reverseConsumer->getName()));
+             network.feeder = VariableNetworkNode(network.valueType, true, network.valueLength);
+           }

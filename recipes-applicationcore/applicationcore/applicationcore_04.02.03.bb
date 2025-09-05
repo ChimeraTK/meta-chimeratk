@@ -15,10 +15,11 @@ SRC_URI = "git://github.com/ChimeraTK/ApplicationCore.git;protocol=https;branch=
            file://0010-Do-not-run-stubgen.patch \
            file://0011-Do-not-leak-build-path-into-python-install.patch \
            file://0012-Remove-unsupported-C-20.patch \
+           file://0013-Remove-more-unsupported-C-23.patch \
            "
 
-PV = "04.02.02"
-SRCREV = "6098f6f1af7d252b2bc946f446e9350574ad510c"
+PV = "04.02.03"
+SRCREV = "795450e66673e522c37ccfd842602f37790058f9"
 
 S = "${WORKDIR}/git"
 
