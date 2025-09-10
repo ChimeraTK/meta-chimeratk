@@ -1,0 +1,23 @@
+From 24218a37a65bacd086daf3265fa56d61ccc3f7d0 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Wed, 10 Sep 2025 16:03:45 +0200
+Subject: [PATCH] Backport to python 3.7
+
+Upstream-Status: Inappropriate [embedded specific]
+---
+ Python/bindings/src/PyApplicationModule.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Python/bindings/src/PyApplicationModule.cc b/Python/bindings/src/PyApplicationModule.cc
+index 4b894be..5480ed7 100644
+--- a/Python/bindings/src/PyApplicationModule.cc
++++ b/Python/bindings/src/PyApplicationModule.cc
+@@ -34,7 +34,7 @@ namespace ChimeraTK {
+               pass
+             except Exception as e:
+               print("Exception in module "+self.getName()+":")
+-              traceback.print_exception(e)
++              traceback.print_exception(*sys.exc_info())
+           theModule.mainLoopWrapper2 = mainLoopWrapper2.__get__(theModule)
+         )",
+           py::globals(), locals);

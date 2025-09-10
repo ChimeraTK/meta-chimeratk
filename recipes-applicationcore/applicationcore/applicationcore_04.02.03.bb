@@ -16,6 +16,7 @@ SRC_URI = "git://github.com/ChimeraTK/ApplicationCore.git;protocol=https;branch=
            file://0011-Do-not-leak-build-path-into-python-install.patch \
            file://0012-Remove-unsupported-C-20.patch \
            file://0013-Remove-more-unsupported-C-23.patch \
+           file://0001-Backport-to-python-3.7.patch \
            "
 
 PV = "04.02.03"
