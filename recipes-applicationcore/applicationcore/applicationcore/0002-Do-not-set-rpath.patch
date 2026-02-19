@@ -1,4 +1,4 @@
-From 9e44e3e8c3418f35e3a5d5b8304eba707f5f7775 Mon Sep 17 00:00:00 2001
+From 5206b62b161475257e5ab1c8ddfca8dad18dbd13 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 29 Apr 2025 16:01:53 +0000
 Subject: [PATCH] Do not set rpath
@@ -9,7 +9,7 @@ Upstream-Status: Denied
  1 file changed, 3 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index f03e272..e72e363 100644
+index ce881f6..6e1e443 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -96,9 +96,6 @@ endif()

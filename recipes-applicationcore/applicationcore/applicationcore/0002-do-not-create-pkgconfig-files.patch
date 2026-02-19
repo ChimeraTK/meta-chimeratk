@@ -1,4 +1,4 @@
-From da590007fcf2299c9083fb089eba0914df2fc6f3 Mon Sep 17 00:00:00 2001
+From 9ff142cb63b482ce6e3b0f6f1ab95c54add64799 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 8 Jul 2025 13:53:51 +0200
 Subject: [PATCH] do not create pkgconfig files

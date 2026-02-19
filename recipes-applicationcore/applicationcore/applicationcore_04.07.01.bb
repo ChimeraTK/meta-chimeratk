@@ -11,8 +11,8 @@ SRC_URI = "git://github.com/ChimeraTK/ApplicationCore.git;protocol=https;branch=
            file://0002-do-not-create-pkgconfig-files.patch \
            "
 
-PV = "04.03.01"
-SRCREV = "2304797fe10b55c0f8f02f59515fa5fbf4ecc4ed"
+PV = "04.07.01"
+SRCREV = "39b1103d794cd8790a4dc5d7cef55a9ff1d81eea"
 
 S = "${WORKDIR}/git"
 

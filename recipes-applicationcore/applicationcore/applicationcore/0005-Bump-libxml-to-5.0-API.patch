@@ -1,4 +1,4 @@
-From 55da76416b59be37aadcd379e0f015c3a2a8c06d Mon Sep 17 00:00:00 2001
+From 2761401f127c46f0ccc9e2b8cc60ddeb773c95c9 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Fri, 2 May 2025 06:53:19 +0000
 Subject: [PATCH] Bump libxml++ to 5.0 API
@@ -11,7 +11,7 @@ Upstream-Status: Submitted
  3 files changed, 17 insertions(+), 17 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 2f7fbef..f80efb3 100644
+index 6b91720..5da927f 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -32,7 +32,7 @@ FIND_PACKAGE(ChimeraTK-DeviceAccess 03.18 REQUIRED)
@@ -24,10 +24,10 @@ index 2f7fbef..f80efb3 100644
  
  # Find BOOST filesystem
 diff --git a/src/XMLGeneratorVisitor.cc b/src/XMLGeneratorVisitor.cc
-index 5ced3ea..6f3ac75 100644
+index 6f7098a..b87e8a0 100644
 --- a/src/XMLGeneratorVisitor.cc
 +++ b/src/XMLGeneratorVisitor.cc
-@@ -161,7 +161,7 @@ namespace ChimeraTK {
+@@ -141,7 +141,7 @@ namespace ChimeraTK {
        std::string xpath = std::string("ac:directory[@name='") + pathComponent + std::string("']");
        auto list = current->find(xpath, nsMap);
        if(list.empty()) { // not found: create it
@@ -36,7 +36,7 @@ index 5ced3ea..6f3ac75 100644
          newChild->set_attribute("name", pathComponent);
          current = newChild;
        }
-@@ -173,7 +173,7 @@ namespace ChimeraTK {
+@@ -153,7 +153,7 @@ namespace ChimeraTK {
      }
  
      // now add the variable to the directory
@@ -45,7 +45,7 @@ index 5ced3ea..6f3ac75 100644
      ChimeraTK::RegisterPath pathName(node.getPublicName());
      auto pathComponents = pathName.getComponents();
  
-@@ -182,8 +182,8 @@ namespace ChimeraTK {
+@@ -162,8 +162,8 @@ namespace ChimeraTK {
  
      auto dataTypeName = mapTypeToName(net.valueType);
  
@@ -56,7 +56,7 @@ index 5ced3ea..6f3ac75 100644
  
      // add sub-element containing the data flow direction
      std::string dataFlowName{"application_to_control_system"};
-@@ -196,23 +196,23 @@ namespace ChimeraTK {
+@@ -176,23 +176,23 @@ namespace ChimeraTK {
          dataFlowName = "control_system_to_application_with_return";
        }
      }
@@ -89,7 +89,7 @@ index 5ced3ea..6f3ac75 100644
      std::list nodeList(net.consumers.begin(), net.consumers.end());
      nodeList.push_back(net.feeder);
  
-@@ -228,7 +228,7 @@ namespace ChimeraTK {
+@@ -208,7 +208,7 @@ namespace ChimeraTK {
          continue;
        }
        bool feeding = peerNode == nodeList.back();
