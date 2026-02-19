@@ -4,8 +4,8 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=e6a600fd5e1d9cbde2d983680233ad02"
 SRC_URI = "git://github.com/ChimeraTK/QtHardMon;protocol=https;branch=master"
 
 # Modify these as desired
-PV = "01.08.01"
-SRCREV = "95fb7f8cc506ea7bcbca92bcd0ea177ac560dc96"
+PV = "01.08.03"
+SRCREV = "b19345d0044805bf491f84d0c38ddf2d00c7dcfc"
 
 S = "${WORKDIR}/git"
 
