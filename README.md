@@ -6,11 +6,11 @@ Dependencies
 ============
 
   URI: git://github.com/openembedded/oe-core.git
-  branch: walnascar
+  branch: scarthgap
   revision: HEAD
 
   URI: git://github.com/openembedded/meta-openembedded.git
-  branch: walnascar
+  branch: scarthgap
   revision: HEAD
 
 Recommends
@@ -20,20 +20,16 @@ Recommends
   revision: HEAD
 
   URI: https://github.com/voltumna-linux/meta-tango/
-  branch: master
-  revision: 504ceac53460c9263ac3381c9130e3a0f66f693a
+  branch: scarthgap
+  revision: 5ec3b645296ed9c98d9757ee79562204ba845dbf
 
   More specifially, it just needs meta-oe for libxml++, meta-python for pybind11
   and meta-qt6 only of you intend to build QtHardMon.
 
-  IF you intend to use the meta-tango layer, you MUST also include meta-tango-compat from
-  inside this folder as well. meta-tango only supports LTS versions and meta-tango-compat
-  adds an override for that.
-
-  It is recommended to use TANGO version 10. This can be achieved by setting the following
+  It is recommended to use TANGO version 10.3. This can be achieved by setting the following
   variables in your local.conf:
 
-  * `PREFERRED_VERSION_cpptango = "10.%"`
+  * `PREFERRED_VERSION_cpptango = "10.3%"`
   * `PREFERRED_VERSION_tango-idl = "6.0%"`.
 
 
