@@ -6,10 +6,10 @@ SRC_URI = "git://github.com/ChimeraTK/cppext.git;branch=master;protocol=https \
            "
 
 # Modify these as desired
-PV = "01.06.00"
+PV = "01.07.01"
 
 # Tag 01.05.00
-SRCREV = "2c78abb0c8e0412eeefde1dee8d31d2c69615983"
+SRCREV = "84b5f4822e57a970b8671ef2ebd9cff2309b7d17"
 
 S = "${WORKDIR}/git"
 
