@@ -7,8 +7,8 @@ SRC_URI = "git://github.com/ChimeraTK/ControlSystemAdapter-TangoAdapter;protocol
            "
 
 # Modify these as desired
-PV = "02.00.00"
-SRCREV = "69aacc1f59ec6d984f61f9f8ffef2d6d5cad3542"
+PV = "02.00.02"
+SRCREV = "c32dbddb36587f7719b41c446f895755d3b6ed78"
 
 S = "${WORKDIR}/git"
 

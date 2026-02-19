@@ -1,4 +1,4 @@
-From 984fd16befd82ec7d55ce85dcd858a881da6cf6c Mon Sep 17 00:00:00 2001
+From 9bc228314b0136eee25414dd079d0af5c31a135a Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Fri, 2 May 2025 09:06:18 +0200
 Subject: [PATCH] Bump libxml++ API to 5.0
@@ -9,7 +9,7 @@ Upstream-Status: Submitted
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index aab41c6..13bd241 100644
+index 7011987..87a0db7 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -19,7 +19,7 @@ find_package(PkgConfig)
