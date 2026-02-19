@@ -1,4 +1,4 @@
-From d42d546bf54df578d7428bb5262f3057fa665a35 Mon Sep 17 00:00:00 2001
+From 41bda436cabb38a6782913f54cb80b3ffafb4774 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Mon, 28 Apr 2025 07:38:02 +0000
 Subject: [PATCH] Disable mapfile generator
@@ -12,7 +12,7 @@ process natively nor on-target at any point in time
  1 file changed, 21 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index de45813..1b680d5 100644
+index c338eb0..bea4ec5 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -229,27 +229,6 @@ if(INSTALL_SAMPLE_ADAPTER)
