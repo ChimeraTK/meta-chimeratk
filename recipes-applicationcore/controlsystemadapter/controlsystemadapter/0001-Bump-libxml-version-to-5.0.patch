@@ -1,4 +1,4 @@
-From 62b19f35e044b64043f142da4ea28166ba2ea240 Mon Sep 17 00:00:00 2001
+From d315037a1232c789a6221bc221722be16e3e6e11 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Wed, 12 Apr 2023 14:02:41 +0200
 Subject: [PATCH] Bump libxml++ version to 5.0
@@ -10,7 +10,7 @@ Upstream-Status: Submitted
  2 files changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index c33ad80..7706221 100644
+index 0bbc984..92b750c 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -48,7 +48,7 @@ FIND_PACKAGE(ChimeraTK-DeviceAccess 03.18 REQUIRED)
@@ -23,10 +23,10 @@ index c33ad80..7706221 100644
  
  file(GLOB_RECURSE library_headers ${CMAKE_SOURCE_DIR}/include/ChimeraTK/*.h
 diff --git a/src/PersistentDataStorage.cc b/src/PersistentDataStorage.cc
-index a260f5f..fdf8405 100644
+index 29bf198..53e2ab1 100644
 --- a/src/PersistentDataStorage.cc
 +++ b/src/PersistentDataStorage.cc
-@@ -67,7 +67,7 @@ namespace ChimeraTK {
+@@ -68,7 +68,7 @@ namespace ChimeraTK {
          }
  
          // create XML element for the variable and set name attribute
@@ -35,7 +35,7 @@ index a260f5f..fdf8405 100644
          variable->set_attribute("name", static_cast<std::string>(_variableNames[i]));
  
          // generate value XML tags and set type name as a string
-@@ -107,7 +107,7 @@ namespace ChimeraTK {
+@@ -108,7 +108,7 @@ namespace ChimeraTK {
      }
      // add one child element per element of the value
      for(size_t idx = 0; idx < pValue->size(); ++idx) {

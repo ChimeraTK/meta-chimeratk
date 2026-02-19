@@ -1,10 +1,9 @@
-From 148435527737718c34e703635af3f5527205f13e Mon Sep 17 00:00:00 2001
+From 26aafc9d2ca29ec91f4bc3a83953e9c9d064f48d Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 8 Jul 2025 13:29:09 +0200
 Subject: [PATCH] Do not create pkgconfig file
 
 Upstream-Status: Inappropriate [embedded specific]
-
 ---
  cmake/create_cmake_config_files.cmake | 7 -------
  1 file changed, 7 deletions(-)

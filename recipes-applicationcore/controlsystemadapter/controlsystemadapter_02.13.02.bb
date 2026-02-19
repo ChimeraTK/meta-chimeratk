@@ -14,8 +14,8 @@ SRC_URI = "git://github.com/ChimeraTK/ControlSystemAdapter.git;protocol=https;br
            "
 
 # Modify these as desired
-PV = "02.12.01"
-SRCREV = "d73d0c8e29c0ac00cc29edec7c32da9f3e1a260e"
+PV = "02.13.02"
+SRCREV = "390d7c66ccc64a630f1d42d1da088174fdc7f040"
 
 S = "${WORKDIR}/git"
 
