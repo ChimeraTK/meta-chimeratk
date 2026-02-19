@@ -1,4 +1,4 @@
-From 1b64b1abfc8470d54869078fc1bdcf518b945f4b Mon Sep 17 00:00:00 2001
+From 3ab3f577f444684642a5b831700c1a6fc64e8f17 Mon Sep 17 00:00:00 2001
 From: OpenEmbedded <oe.patch@oe>
 Date: Fri, 25 Nov 2022 16:27:30 +0000
 Subject: [PATCH] %% original patch: drop-cmake-version.patch
@@ -6,21 +6,21 @@ Subject: [PATCH] %% original patch: drop-cmake-version.patch
 Upstream-Status: Inappropriate [embedded specific]
 
 This is somehow different on Yocto then it is anywhere else
-
 ---
- cmake/create_cmake_config_files.cmake | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ cmake/create_cmake_config_files.cmake | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/cmake/create_cmake_config_files.cmake b/cmake/create_cmake_config_files.cmake
-index 9be96d8..868a55f 100644
+index 7bdedd6..2d39c95 100644
 --- a/cmake/create_cmake_config_files.cmake
 +++ b/cmake/create_cmake_config_files.cmake
-@@ -312,7 +312,7 @@ else()
+@@ -335,7 +335,8 @@ else()
      # install same cmake configuration file another time into the Modules cmake subdirectory for compatibility reasons
-     # We do this only if we did not move yet to exported target, since it does not harmonize 
+     # We do this only if we did not move yet to exported target, since it does not harmonize
      install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
--      DESTINATION share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules RENAME Find${PROJECT_NAME}.cmake COMPONENT dev)
+-        DESTINATION share/cmake-${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}/Modules RENAME Find${PROJECT_NAME}.cmake COMPONENT dev)
 +  DESTINATION share/cmake/Modules RENAME Find${PROJECT_NAME}.cmake COMPONENT dev)
- 
++
  endif()
  
+ # install cmake find_package configuration file

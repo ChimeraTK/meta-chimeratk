@@ -1,0 +1,19 @@
+From 8c84824239934e96833b6084d23846b10af0fc7e Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Tue, 17 Feb 2026 12:55:27 +0100
+Subject: [PATCH] Do not install matlab hack on Yocto
+
+Upstream-Status: Inappropriate [embedded specific]
+---
+ CMakeLists.txt | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d074fa2..5e71dfe 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -99,4 +99,3 @@ set (matlab_helper_path "share/ChimeraTK-DeviceAccess-PythonBindings-${${PROJECT
+ 
+ install( FILES ${PROJECT_SOURCE_DIR}/mtca4u.py DESTINATION ${install_path} )
+ install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${install_path} )
+-install(FILES ${PROJECT_SOURCE_DIR}/pybind11_builtins.py DESTINATION ${matlab_helper_path})
