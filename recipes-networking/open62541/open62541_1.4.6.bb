@@ -1,3 +1,4 @@
+SUMMARY = "Open source implementation of OPC UA (OPC Unified Architecture) aka IEC 62541"
 LICENSE = "MPL-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=815ca599c9df247a0c7f619bab123dad \
                     file://LICENSE-CC0;md5=6888abe69dbc6330301f0467e21c0317"

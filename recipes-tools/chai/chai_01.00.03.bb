@@ -1,7 +1,4 @@
-# Recipe created by recipetool
-# This is the basis of a recipe and may need further editing in order to be fully functional.
-# (Feel free to remove these comments when editing.)
-
+SUMMARY = "ChimeraTK Console Hardware Interface"
 LICENSE = "LGPL-3.0-or-later"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=e6a600fd5e1d9cbde2d983680233ad02"
 
@@ -15,7 +12,6 @@ S = "${WORKDIR}/git"
 
 RDEPENDS:${PN} = "deviceaccess-python-bindings python3-platformdirs python3-rich python3-typing-extensions python3-pygments python3-textual"
 
-# NOTE: unable to map the following CMake package dependencies: Python
 inherit cmake python3-dir setuptools3-base
 
 # Specify any options you want to pass to cmake using EXTRA_OECMAKE:
