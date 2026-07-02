@@ -1,4 +1,4 @@
-From d315037a1232c789a6221bc221722be16e3e6e11 Mon Sep 17 00:00:00 2001
+From dcf577309eee5e241f2605633da189e306730e3a Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Wed, 12 Apr 2023 14:02:41 +0200
 Subject: [PATCH] Bump libxml++ version to 5.0
@@ -10,7 +10,7 @@ Upstream-Status: Submitted
  2 files changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 0bbc984..92b750c 100644
+index 741c78d..2c2d4a8 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -48,7 +48,7 @@ FIND_PACKAGE(ChimeraTK-DeviceAccess 03.18 REQUIRED)
