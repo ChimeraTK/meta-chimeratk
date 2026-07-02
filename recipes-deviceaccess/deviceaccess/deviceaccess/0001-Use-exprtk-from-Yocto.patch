@@ -1,4 +1,4 @@
-From bce8a98c5af0e51962ca2e4ac62203d7a05c9cea Mon Sep 17 00:00:00 2001
+From d0606b3a623b5b1f9e1672cd3084e831bdbfdb1b Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 8 Jul 2025 11:57:58 +0200
 Subject: [PATCH] Use exprtk from Yocto
@@ -9,7 +9,7 @@ Upstream-Status: Inappropriate [embedded specific]
  1 file changed, 1 insertion(+), 2 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index c7b0da27..e605b788 100644
+index da2d3271..c9d62025 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -34,7 +34,6 @@ endif(SUPPRESS_AUTO_DOC_BUILD)
