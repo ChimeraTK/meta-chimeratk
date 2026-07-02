@@ -1,4 +1,4 @@
-From a8e0aa796b8cb127419ae36cdea4b211b5400075 Mon Sep 17 00:00:00 2001
+From 3a6f32481bafb890369ac87fab0568a595418cbf Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 11 Apr 2023 16:35:11 +0200
 Subject: [PATCH] Bump LibXML++ version
@@ -9,7 +9,7 @@ Upstream-Status: Submitted
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index c15a7f5f..c7b0da27 100644
+index 62cb14c5..da2d3271 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -40,7 +40,7 @@ FIND_PACKAGE(nlohmann_json 03.11 REQUIRED)

@@ -1,4 +1,4 @@
-From 0f889bc4f97e1b959fbadc82231dff5e392a4a7d Mon Sep 17 00:00:00 2001
+From e7c6cc29a26641997c21715f2298692cbfe58279 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 8 Jul 2025 13:25:44 +0200
 Subject: [PATCH] Do not create pkgconfig file
@@ -9,7 +9,7 @@ Upstream-Status: Inappropriate [embedded specific]
  1 file changed, 7 deletions(-)
 
 diff --git a/cmake/create_cmake_config_files.cmake b/cmake/create_cmake_config_files.cmake
-index 7bdedd64..69129002 100644
+index 8143f8fa..8386c37a 100644
 --- a/cmake/create_cmake_config_files.cmake
 +++ b/cmake/create_cmake_config_files.cmake
 @@ -301,13 +301,6 @@ endif()
@@ -24,5 +24,5 @@ index 7bdedd64..69129002 100644
 -install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}.pc" DESTINATION share/pkgconfig COMPONENT dev)
 -
  if(${PROVIDES_EXPORTED_TARGETS})
-     # imported targets should be namespaced, so define namespaced alias
-     add_library(ChimeraTK::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+     # generate and install export file
+     install(EXPORT ${PROJECT_NAME}Targets

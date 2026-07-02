@@ -1,4 +1,4 @@
-From fdb887159463fd5f7a5d34f09d041b1b96b9e720 Mon Sep 17 00:00:00 2001
+From e91259aeb4453b821769c2b7dd3d9f37bcfc9201 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Wed, 5 Jun 2024 14:25:27 +0200
 Subject: [PATCH] Drop BAR0 check

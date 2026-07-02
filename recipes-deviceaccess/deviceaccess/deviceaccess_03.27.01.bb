@@ -11,8 +11,8 @@ SRC_URI = "git://github.com/ChimeraTK/DeviceAccess.git;protocol=https;branch=mas
            "
 
 # Modify these as desired
-PV = "03.26.00"
-SRCREV = "b117e4cf4ebc5b34377aeea102a6c791582996c2"
+PV = "03.27.01"
+SRCREV = "7abc17920312bb636df03331ce88968749756518"
 
 S = "${WORKDIR}/git"
 
@@ -22,4 +22,8 @@ RDEPENDS_${PN}-dev += "cppext-dev"
 inherit cmake pkgconfig
 
 # Specify any options you want to pass to cmake using EXTRA_OECMAKE:
-EXTRA_OECMAKE = ""
+EXTRA_OECMAKE = "-DBUILD_TESTS=Off"
+
+# 32bit builds will cause issues otherwise
+TARGET_CXXFLAGS += "-Wno-psabi"
+
