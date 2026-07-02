@@ -1,0 +1,43 @@
+diff --git a/include/open62541/config.h.in b/include/open62541/config.h.in
+index c5917005d..87a412770 100644
+--- a/include/open62541/config.h.in
++++ b/include/open62541/config.h.in
+@@ -251,9 +251,10 @@
+ #  ifdef __cplusplus
+ #    include <atomic>
+ #    define _Atomic(T) std::atomic<T>
+-#    define atomic_uintptr_t std::atomic_uintptr_t
++#    define atomic_uintptr_opcua_t std::atomic_uintptr_t
+ #  else
+ #    include <stdatomic.h>
++#    define atomic_uintptr_opcua_t atomic_uintptr_t
+ #  endif
+ # elif !defined(HAVE_GCC_SYNC_BUILTINS)
+ #  error Atomic operations not implemented
+@@ -266,7 +266,7 @@ UA_atomic_xchg(void **addr, void *newptr) {
+ # if defined(_WIN32) /* Visual Studio */
+     return InterlockedExchangePointer((void * volatile *)(uintptr_t)addr, newptr);
+ # elif defined(UA_HAVE_C11_ATOMICS)
+-    return (void *)atomic_exchange((volatile atomic_uintptr_t *)addr,
++    return (void *)atomic_exchange((volatile atomic_uintptr_opcua_t *)addr,
+                                    (uintptr_t)newptr);
+ # else /* HAVE_GCC_SYNC_BUILTINS */
+     return __sync_lock_test_and_set(addr, newptr);
+@@ -285,7 +285,7 @@ UA_atomic_cmpxchg(void **addr, void *expected, void *newptr) {
+     return InterlockedCompareExchangePointer((void *volatile *)(uintptr_t)addr,
+                                              newptr, expected);
+ # elif defined(UA_HAVE_C11_ATOMICS)
+-    atomic_compare_exchange_strong((volatile atomic_uintptr_t *)addr,
++    atomic_compare_exchange_strong((volatile atomic_uintptr_opcua_t *)addr,
+                                    (uintptr_t *)&expected, (uintptr_t)newptr);
+     return expected;
+ # else /* HAVE_GCC_SYNC_BUILTINS */
+@@ -308,7 +308,7 @@ UA_atomic_load(void **addr) {
+      * memory operations and all externally visible events." */
+     return *addr;
+ # elif defined(UA_HAVE_C11_ATOMICS)
+-    return (void*)atomic_load((volatile atomic_uintptr_t *)addr);
++    return (void*)atomic_load((volatile atomic_uintptr_opcua_t *)addr);
+ # else /* HAVE_GCC_SYNC_BUILTINS */
+     return __sync_fetch_and_or(addr, (void*)0);
+ # endif
