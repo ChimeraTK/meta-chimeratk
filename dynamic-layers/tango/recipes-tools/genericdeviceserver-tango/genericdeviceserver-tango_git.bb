@@ -5,7 +5,7 @@
 require recipes-tools/genericdeviceserver/genericdeviceserver.inc
 
 SUMMARY = "ApplicationCore based server which directly connects devices to the control system. TANGO variant"
-DEPENDS:append = " controlsystemadapter-tango-adapter"
+DEPENDS:append = " controlsystemadapter-tango-adapter deviceaccess-tangobackend"
 
 # Specify any options you want to pass to cmake using EXTRA_OECMAKE:
 EXTRA_OECMAKE = "-DADAPTER=TANGO"

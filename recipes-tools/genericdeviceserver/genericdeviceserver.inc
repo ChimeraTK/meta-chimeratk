@@ -12,12 +12,11 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/genericdeviceserver:"
 SRC_URI = "git://github.com/ChimeraTK/GenericDeviceServer;protocol=https;branch=master \
            file://0001-Drop-RPATH-handling.patch \
            file://0003-Make-internal-library-static.patch \
-           file://0001-Install-XML-Generator.patch \
            "
 
 # Modify these as desired
-PV = "02.02.00"
-SRCREV = "fc84a340aaab14bdb816fd24bcb282b071e762eb"
+PV = "02.03.00"
+SRCREV = "0a3ae763b2e5cb36e069d07e2bb239d80a4e476d"
 
 S = "${WORKDIR}/git"
 
