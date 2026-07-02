@@ -1,0 +1,23 @@
+From d090c7fa8672bd8d02cc22a14f115ec5b254c88f Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Thu, 2 Jul 2026 09:43:11 +0000
+Subject: [PATCH] Drop RPATH handling
+
+---
+ CMakeLists.txt | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e89a7a6..7134d73 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -35,9 +35,6 @@ target_link_libraries(${PROJECT_NAME}
+ # --no-as-needed: force linking against this library. This is required for proper registering.
+ target_link_options(${PROJECT_NAME} PUBLIC "-Wl,--no-as-needed")
+ 
+-# do not remove runtime paths of the library when installing (helps for unusually located implicit dependencies)
+-set_property(TARGET ${PROJECT_NAME} PROPERTY INSTALL_RPATH_USE_LINK_PATH TRUE)
+-
+ option(BUILD_TESTS "Build unit tests" ON)
+ 
+ if(BUILD_TESTS AND Boost_UNIT_TEST_FRAMEWORK_FOUND)

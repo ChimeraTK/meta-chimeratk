@@ -1,0 +1,200 @@
+From 57d25ec7f05a5b6497f2df6a493a6758efc741f9 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Thu, 2 Jul 2026 09:42:57 +0000
+Subject: [PATCH] Bump libxml++ to 5.0
+
+---
+ CMakeLists.txt        |  2 +-
+ src/CatalogueCache.cc | 62 +++++++++++++++++++++----------------------
+ src/MapFile.cc        |  2 +-
+ src/XmlTools.cc       |  6 ++---
+ 4 files changed, 36 insertions(+), 36 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6f959b3..e89a7a6 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -12,7 +12,7 @@ find_package(Boost COMPONENTS unit_test_framework)
+ find_package(ChimeraTK-DeviceAccess 03.14 REQUIRED)
+ find_package(open62541 01.05 REQUIRED)
+ FIND_PACKAGE(PkgConfig REQUIRED)
+-set(LIBXML++_VERSION "libxml++-2.6")
++set(LIBXML++_VERSION "libxml++-5.0")
+ PKG_CHECK_MODULES(LibXML++ REQUIRED IMPORTED_TARGET ${LIBXML++_VERSION})
+ 
+ 
+diff --git a/src/CatalogueCache.cc b/src/CatalogueCache.cc
+index 929f74c..13c714d 100644
+--- a/src/CatalogueCache.cc
++++ b/src/CatalogueCache.cc
+@@ -22,7 +22,7 @@
+ namespace ChimeraTK::Cache {
+   static void parseRegister(
+       xmlpp::Element const* registerNode, OpcUaBackendRegisterCatalogue& catalogue, const std::string& serverAddress);
+-  static void addRegInfoXmlNode(const OpcUABackendRegisterInfo& r, xmlpp::Node* rootNode);
++  static void addRegInfoXmlNode(const OpcUABackendRegisterInfo& r, xmlpp::Element* rootNode);
+ 
+   OpcUaBackendRegisterCatalogue readCatalogue(const std::string& xmlfile) {
+     OpcUaBackendRegisterCatalogue catalogue;
+@@ -44,7 +44,7 @@ namespace ChimeraTK::Cache {
+           std::string nodeName = e->get_name();
+ 
+           if(nodeName == "serverAddress") {
+-            serverAddress = e->get_child_text()->get_content();
++            serverAddress = e->get_first_child_text()->get_content();
+           }
+         }
+       }
+@@ -77,14 +77,14 @@ namespace ChimeraTK::Cache {
+     auto* rootNode = doc.create_root_node("catalogue", "https://github.com/ChimeraTK/DeviceAccess-OpcUaBackend", "ctk");
+     rootNode->set_attribute("version", "1.0");
+ 
+-    auto* commonTag = rootNode->add_child("general");
++    auto* commonTag = rootNode->add_child_element("general");
+ 
+-    auto* serverAddressTag = commonTag->add_child("serverAddress");
++    auto* serverAddressTag = commonTag->add_child_element("serverAddress");
+ 
+     bool addressSet = false;
+     for(const auto& regInfo : c) {
+       if(!addressSet) {
+-        serverAddressTag->set_child_text(static_cast<std::string>(regInfo.serverAddress));
++        serverAddressTag->set_first_child_text(static_cast<std::string>(regInfo.serverAddress));
+         addressSet = true;
+       }
+       addRegInfoXmlNode(regInfo, rootNode);
+@@ -140,10 +140,10 @@ namespace ChimeraTK::Cache {
+       std::string nodeName = e->get_name();
+ 
+       if(nodeName == "name") {
+-        name = e->get_child_text()->get_content();
++        name = e->get_first_child_text()->get_content();
+       }
+       else if(nodeName == "nodeId") {
+-        nodeId = e->get_child_text()->get_content();
++        nodeId = e->get_first_child_text()->get_content();
+       }
+       else if(nodeName == "length") {
+         length = parseLength(e);
+@@ -153,7 +153,7 @@ namespace ChimeraTK::Cache {
+       }
+       else if(nodeName == "description") {
+         if(e->has_child_text()) {
+-          description = e->get_child_text()->get_content();
++          description = e->get_first_child_text()->get_content();
+         }
+       }
+       else if(nodeName == "readOnly") {
+@@ -170,7 +170,7 @@ namespace ChimeraTK::Cache {
+       }
+       else if(nodeName == "indexRange") {
+         if(e->has_child_text()) {
+-          indexRange = e->get_child_text()->get_content();
++          indexRange = e->get_first_child_text()->get_content();
+         }
+       }
+     }
+@@ -186,10 +186,10 @@ namespace ChimeraTK::Cache {
+ 
+   /********************************************************************************************************************/
+ 
+-  void addRegInfoXmlNode(const OpcUABackendRegisterInfo& r, xmlpp::Node* rootNode) {
+-    auto* registerTag = rootNode->add_child("register");
++  void addRegInfoXmlNode(const OpcUABackendRegisterInfo& r, xmlpp::Element* rootNode) {
++    auto* registerTag = rootNode->add_child_element("register");
+ 
+-    auto* nodeIdTag = registerTag->add_child("nodeId");
++    auto* nodeIdTag = registerTag->add_child_element("nodeId");
+     std::string name;
+     if(r.isNumeric) {
+       name = std::to_string(r.id.identifier.numeric);
+@@ -197,33 +197,33 @@ namespace ChimeraTK::Cache {
+     else {
+       name = std::string((char*)r.id.identifier.string.data, r.id.identifier.string.length);
+     }
+-    nodeIdTag->set_child_text(name);
++    nodeIdTag->set_first_child_text(name);
+ 
+-    auto* nameTag = registerTag->add_child("name");
+-    nameTag->set_child_text((std::string)r.getRegisterName());
++    auto* nameTag = registerTag->add_child_element("name");
++    nameTag->set_first_child_text((std::string)r.getRegisterName());
+ 
+-    auto* descriptionTag = registerTag->add_child("description");
+-    descriptionTag->set_child_text(static_cast<std::string>(r.description));
++    auto* descriptionTag = registerTag->add_child_element("description");
++    descriptionTag->set_first_child_text(static_cast<std::string>(r.description));
+ 
+-    auto* lengthTag = registerTag->add_child("length");
+-    lengthTag->set_child_text(std::to_string(r.getNumberOfElements()));
++    auto* lengthTag = registerTag->add_child_element("length");
++    lengthTag->set_first_child_text(std::to_string(r.getNumberOfElements()));
+ 
+-    auto* accessMode = registerTag->add_child("access_mode");
+-    accessMode->set_child_text(r.accessModes.serialize());
++    auto* accessMode = registerTag->add_child_element("access_mode");
++    accessMode->set_first_child_text(r.accessModes.serialize());
+ 
+-    auto* readOnlyTag = registerTag->add_child("readOnly");
+-    readOnlyTag->set_child_text(std::to_string(r.isReadonly));
++    auto* readOnlyTag = registerTag->add_child_element("readOnly");
++    readOnlyTag->set_first_child_text(std::to_string(r.isReadonly));
+ 
+-    auto* typeTag = registerTag->add_child("typeId");
+-    typeTag->set_child_text(std::to_string(r.dataType));
++    auto* typeTag = registerTag->add_child_element("typeId");
++    typeTag->set_first_child_text(std::to_string(r.dataType));
+ 
+-    auto* nsTag = registerTag->add_child("nameSpace");
+-    nsTag->set_child_text(std::to_string(r.namespaceIndex));
++    auto* nsTag = registerTag->add_child_element("nameSpace");
++    nsTag->set_first_child_text(std::to_string(r.namespaceIndex));
+ 
+-    auto* nodeTypeTag = registerTag->add_child("isNumeric");
+-    nodeTypeTag->set_child_text(std::to_string(r.isNumeric));
++    auto* nodeTypeTag = registerTag->add_child_element("isNumeric");
++    nodeTypeTag->set_first_child_text(std::to_string(r.isNumeric));
+ 
+-    auto* indexRangeTag = registerTag->add_child("indexRange");
+-    indexRangeTag->set_child_text(static_cast<std::string>(r.indexRange));
++    auto* indexRangeTag = registerTag->add_child_element("indexRange");
++    indexRangeTag->set_first_child_text(static_cast<std::string>(r.indexRange));
+   }
+ } // namespace ChimeraTK::Cache
+diff --git a/src/MapFile.cc b/src/MapFile.cc
+index d1d8d07..86b660a 100644
+--- a/src/MapFile.cc
++++ b/src/MapFile.cc
+@@ -37,7 +37,7 @@ namespace ChimeraTK {
+         continue;
+       }
+       if(reg->get_name() == "pv") {
+-        node = reg->get_child_text()->get_content();
++        node = reg->get_first_child_text()->get_content();
+         auto* nsAttribute = reg->get_attribute("ns");
+         if(nsAttribute) {
+           nsString = nsAttribute->get_value();
+diff --git a/src/XmlTools.cc b/src/XmlTools.cc
+index 643bf27..b2eec17 100644
+--- a/src/XmlTools.cc
++++ b/src/XmlTools.cc
+@@ -12,16 +12,16 @@
+ #include <ChimeraTK/Exception.h>
+ 
+ unsigned int parseLength(xmlpp::Element const* c) {
+-  return convertToUint(c->get_child_text()->get_content(), c->get_line());
++  return convertToUint(c->get_first_child_text()->get_content(), c->get_line());
+ }
+ 
+ int parseTypeId(xmlpp::Element const* c) {
+-  return convertToInt(c->get_child_text()->get_content(), c->get_line());
++  return convertToInt(c->get_first_child_text()->get_content(), c->get_line());
+ }
+ 
+ ChimeraTK::AccessModeFlags parseAccessMode(xmlpp::Element const* c) {
+   std::string accessMode{};
+-  const auto* t = c->get_child_text();
++  const auto* t = c->get_first_child_text();
+   if(t != nullptr) {
+     accessMode = t->get_content();
+   }
