@@ -1,4 +1,4 @@
-From f432bfddd2d4f10ccba2c209dc05bc803aba95ee Mon Sep 17 00:00:00 2001
+From 7410d7c13a4545da75b93d1eaf6f81e11bbb6eff Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 25 Jul 2023 15:52:29 +0200
 Subject: [PATCH] Drop glib2 dependency
@@ -9,7 +9,7 @@ Upstream-Status: Submitted
  1 file changed, 1 insertion(+), 2 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 8c4d5a2..ce881f6 100644
+index c4617be..c066aea 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -34,7 +34,6 @@ FIND_PACKAGE(ChimeraTK-DeviceAccess 03.18 REQUIRED)
