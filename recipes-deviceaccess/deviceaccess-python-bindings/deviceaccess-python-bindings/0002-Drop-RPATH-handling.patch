@@ -1,4 +1,4 @@
-From ac2ac1a468649af17e6b4927693c270ff5032aad Mon Sep 17 00:00:00 2001
+From 538c305bee2e2d8ccfa08e7b8c24efa0ba1cf541 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Wed, 5 Jun 2024 16:14:23 +0200
 Subject: [PATCH] Drop RPATH handling
@@ -11,7 +11,7 @@ Upstream wants to keep RPATH handling
  1 file changed, 1 deletion(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index e7bf05f..b6f0a4d 100644
+index 259e168..248782b 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -41,7 +41,6 @@ pybind11_add_module( ${PROJECT_NAME} ${headers} ${sources} )
