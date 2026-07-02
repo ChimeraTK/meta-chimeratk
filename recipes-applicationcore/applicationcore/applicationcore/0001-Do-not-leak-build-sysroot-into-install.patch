@@ -1,4 +1,4 @@
-From be0836a2bef72f1536e44f210226aaa5e8f53e8b Mon Sep 17 00:00:00 2001
+From 24937de63d86579f7e073514daf2465f4d588707 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 29 Apr 2025 17:34:06 +0000
 Subject: [PATCH] Do not leak build-sysroot into install
@@ -9,7 +9,7 @@ Upstream-Status: Denied
  1 file changed, 4 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 6e1e443..6b91720 100644
+index e9b5a36..0f92c7a 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -140,11 +140,7 @@ install(DIRECTORY ${${PROJECT_NAME}_INCLUDE_DIRS} DESTINATION include/ChimeraTK/

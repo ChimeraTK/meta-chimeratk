@@ -1,4 +1,4 @@
-From 0119434c4639c60e12a07f0fdc86c154f5404ce7 Mon Sep 17 00:00:00 2001
+From 7a7476ca28dac2591cd8aea1007176b364e92ab6 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 8 Jul 2025 13:53:33 +0200
 Subject: [PATCH] Do not run stubgen
@@ -9,7 +9,7 @@ Upstream-Status: Inappropriate [embedded specific]
  1 file changed, 28 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 5da927f..384dea0 100644
+index 1a2be2b..aaf7d69 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -13,17 +13,6 @@ option(BUILD_TESTS "Build tests." ON)
