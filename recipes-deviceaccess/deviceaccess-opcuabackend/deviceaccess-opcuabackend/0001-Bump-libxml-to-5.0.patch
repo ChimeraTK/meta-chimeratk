@@ -3,6 +3,9 @@ From: Jens Georg <jens.georg@desy.de>
 Date: Thu, 2 Jul 2026 09:42:57 +0000
 Subject: [PATCH] Bump libxml++ to 5.0
 
+Upstream-Status: Submitted
+
+
 ---
  CMakeLists.txt        |  2 +-
  src/CatalogueCache.cc | 62 +++++++++++++++++++++----------------------

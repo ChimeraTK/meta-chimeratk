@@ -1,4 +1,4 @@
-From 69206379d08d92bcef5bba7b2aec547ebe592306 Mon Sep 17 00:00:00 2001
+From 998736f08ceb812aa1673a3be2dcc7a509a42c40 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 6 May 2025 11:14:16 +0200
 Subject: [PATCH] Remove old configuration files
@@ -9,7 +9,7 @@ Upstream-Status: Submitted [https://github.com/ChimeraTK/project-template]
  1 file changed, 7 deletions(-)
 
 diff --git a/cmake/create_cmake_config_files.cmake b/cmake/create_cmake_config_files.cmake
-index 7bdedd6..6912900 100644
+index 8143f8f..8386c37 100644
 --- a/cmake/create_cmake_config_files.cmake
 +++ b/cmake/create_cmake_config_files.cmake
 @@ -301,13 +301,6 @@ endif()
@@ -24,5 +24,5 @@ index 7bdedd6..6912900 100644
 -install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}.pc" DESTINATION share/pkgconfig COMPONENT dev)
 -
  if(${PROVIDES_EXPORTED_TARGETS})
-     # imported targets should be namespaced, so define namespaced alias
-     add_library(ChimeraTK::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+     # generate and install export file
+     install(EXPORT ${PROJECT_NAME}Targets

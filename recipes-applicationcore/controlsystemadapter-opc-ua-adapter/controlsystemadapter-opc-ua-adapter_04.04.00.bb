@@ -9,8 +9,8 @@ SRC_URI = "git://github.com/ChimeraTK/ControlSystemAdapter-OPC-UA-Adapter;protoc
            "
 
 # Modify these as desired
-PV = "04.00.05"
-SRCREV = "8def9e19e3492d59ac7912e73de1ea9849a8d549"
+PV = "04.04.00"
+SRCREV = "32cddf9cbd7fed82dd5f6472c7ed7f9c338f38d6"
 
 S = "${WORKDIR}/git"
 

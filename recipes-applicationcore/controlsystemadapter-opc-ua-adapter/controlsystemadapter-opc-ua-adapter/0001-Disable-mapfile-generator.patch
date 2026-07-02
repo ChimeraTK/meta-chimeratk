@@ -1,4 +1,4 @@
-From 41bda436cabb38a6782913f54cb80b3ffafb4774 Mon Sep 17 00:00:00 2001
+From 649919d7f365a64640af56ebf32ab3e8e3a027f2 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Mon, 28 Apr 2025 07:38:02 +0000
 Subject: [PATCH] Disable mapfile generator
@@ -12,10 +12,10 @@ process natively nor on-target at any point in time
  1 file changed, 21 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index c338eb0..bea4ec5 100644
+index b97f9ea..60d8055 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -229,27 +229,6 @@ if(INSTALL_SAMPLE_ADAPTER)
+@@ -230,27 +230,6 @@ if(INSTALL_SAMPLE_ADAPTER)
    file(COPY ${PROJECT_SOURCE_DIR}/opcuaAdapter_mapping.xml DESTINATION ${CMAKE_BINARY_DIR}/)  
  endif(INSTALL_SAMPLE_ADAPTER)
  

@@ -3,6 +3,10 @@ From: Jens Georg <jens.georg@desy.de>
 Date: Thu, 2 Jul 2026 09:43:11 +0000
 Subject: [PATCH] Drop RPATH handling
 
+Upstream-Status: Denied
+
+Upstream wants RPATH this way
+
 ---
  CMakeLists.txt | 3 ---
  1 file changed, 3 deletions(-)

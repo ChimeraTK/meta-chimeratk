@@ -1,4 +1,4 @@
-From 8fe04e5b9e19f35a3c213774a00abb55e44fd230 Mon Sep 17 00:00:00 2001
+From 781f04e8d463790cb05636dc6aac842437943f16 Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 28 Nov 2023 15:22:40 +0100
 Subject: [PATCH] csa-opc-ua: Remove RPATH handling
@@ -9,7 +9,7 @@ Upstream-Status: Inappropriate [embedded specific]
  1 file changed, 4 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index b5d517b..c338eb0 100644
+index 03a920d..b97f9ea 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -37,7 +37,6 @@ if(CMAKE_COMPILER_IS_GNUCC OR "x${CMAKE_C_COMPILER_ID}" STREQUAL "xClang")
@@ -20,7 +20,7 @@ index b5d517b..c338eb0 100644
      add_definitions(-DNDEBUG)
      add_definitions(-fPIC)
      add_definitions(-Wextra)
-@@ -173,8 +172,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
+@@ -174,8 +173,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
          ${Boost_CHRONO_LIBRARY}
          )
  
@@ -29,7 +29,7 @@ index b5d517b..c338eb0 100644
  ##########################################################################################################
  ## Install all Libraries
  ##########################################################################################################
-@@ -184,7 +181,6 @@ include(GNUInstallDirs)
+@@ -185,7 +182,6 @@ include(GNUInstallDirs)
  install( TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets
      RUNTIME DESTINATION bin
      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
