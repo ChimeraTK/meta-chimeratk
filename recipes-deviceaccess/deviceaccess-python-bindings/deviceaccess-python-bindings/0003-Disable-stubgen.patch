@@ -1,4 +1,4 @@
-From aecc7c18655deff20340da4a064cda36061500d0 Mon Sep 17 00:00:00 2001
+From fda13d0f89a2a1b9a443940eaac17400759038da Mon Sep 17 00:00:00 2001
 From: Jens Georg <jens.georg@desy.de>
 Date: Tue, 17 Feb 2026 12:39:49 +0100
 Subject: [PATCH] Disable stubgen
@@ -9,7 +9,7 @@ Upstream-Status: Inappropriate [embedded specific]
  1 file changed, 25 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index b6f0a4d..d074fa2 100644
+index 248782b..9e725bc 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -23,12 +23,6 @@ find_package(ChimeraTK-DeviceAccess 03.23 REQUIRED)
@@ -25,7 +25,7 @@ index b6f0a4d..d074fa2 100644
  # ==============================================================================#
  
  # Define library for the C++ part
-@@ -48,21 +42,6 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES PREFIX "" OUTPUT_NAME "devicea
+@@ -51,21 +45,6 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
  # Copy Python part to build directory (required for tests to run)
  file( COPY mtca4u.py DESTINATION ${PROJECT_BINARY_DIR} )
  
@@ -47,7 +47,7 @@ index b6f0a4d..d074fa2 100644
  # ==============================================================================#
  ENABLE_TESTING()
  
-@@ -118,10 +97,6 @@ else()
+@@ -125,10 +104,6 @@ else()
  endif()
  set (matlab_helper_path "share/ChimeraTK-DeviceAccess-PythonBindings-${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME}_MINOR_VERSION}")
  

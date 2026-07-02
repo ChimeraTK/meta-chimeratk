@@ -9,8 +9,8 @@ SRC_URI = "git://github.com/ChimeraTK/DeviceAccess-PythonBindings.git;protocol=h
            file://0004-Do-not-install-matlab-hack-on-Yocto.patch \
            "
 
-PV = "04.01.01"
-SRCREV = "4da3ba96e524938591620881a593977e2c97e439"
+PV = "04.02.01"
+SRCREV = "b40a6ae8d249e1339817e453e99b34ed5064b10c"
 
 S = "${WORKDIR}/git"
 

@@ -1,4 +1,4 @@
-From 3ab3f577f444684642a5b831700c1a6fc64e8f17 Mon Sep 17 00:00:00 2001
+From 8372799ff35d53a384393592dab733549bb9d970 Mon Sep 17 00:00:00 2001
 From: OpenEmbedded <oe.patch@oe>
 Date: Fri, 25 Nov 2022 16:27:30 +0000
 Subject: [PATCH] %% original patch: drop-cmake-version.patch
@@ -11,10 +11,10 @@ This is somehow different on Yocto then it is anywhere else
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/cmake/create_cmake_config_files.cmake b/cmake/create_cmake_config_files.cmake
-index 7bdedd6..2d39c95 100644
+index 8143f8f..4288c6a 100644
 --- a/cmake/create_cmake_config_files.cmake
 +++ b/cmake/create_cmake_config_files.cmake
-@@ -335,7 +335,8 @@ else()
+@@ -332,7 +332,8 @@ else()
      # install same cmake configuration file another time into the Modules cmake subdirectory for compatibility reasons
      # We do this only if we did not move yet to exported target, since it does not harmonize
      install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
