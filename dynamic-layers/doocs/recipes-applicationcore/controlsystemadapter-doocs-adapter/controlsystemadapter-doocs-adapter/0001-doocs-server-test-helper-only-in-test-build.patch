@@ -1,0 +1,30 @@
+From 0260a86dad1e61b0d0dfad54b3651575c9ee8276 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Fri, 3 Jul 2026 10:15:38 +0000
+Subject: [PATCH] doocs-server-test-helper only in test build
+
+Upstream-Status: Submitted
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f0fb052..9555ff8 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -19,7 +19,6 @@ include(cmake/add_linter_target.cmake)
+ 
+ FIND_PACKAGE(ChimeraTK-ControlSystemAdapter 02.13 REQUIRED)
+ 
+-FIND_PACKAGE(doocs-server-test-helper 01.07 REQUIRED)
+ 
+ FIND_PACKAGE(DOOCS 24.03 COMPONENTS server REQUIRED)
+ 
+@@ -37,6 +36,7 @@ PKG_CHECK_MODULES(LibXML++ REQUIRED IMPORTED_TARGET ${LIBXML++_VERSION})
+ option(BUILD_TESTS "Build test programs" ON)
+ 
+ IF(BUILD_TESTS)
++  FIND_PACKAGE(doocs-server-test-helper 01.07 REQUIRED)
+   FIND_PACKAGE(Boost COMPONENTS unit_test_framework REQUIRED)
+   ENABLE_TESTING()
+ ENDIF()

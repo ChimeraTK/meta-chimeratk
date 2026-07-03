@@ -1,0 +1,30 @@
+From 2110ee51b9e9123c2c3a0bcd965d6af50bde974a Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Fri, 3 Jul 2026 09:54:30 +0000
+Subject: [PATCH] Only depend on doocs-server-test-helper on tests
+
+Upstream-Status: Submitted
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c6292f8..c22e446 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -16,7 +16,6 @@ FIND_PACKAGE(ChimeraTK-DeviceAccess 03.20 REQUIRED)
+ 
+ # we need the zmq client which is part of server component
+ FIND_PACKAGE(DOOCS 25.10 REQUIRED COMPONENTS server)
+-FIND_PACKAGE(doocs-server-test-helper 01.07 REQUIRED)
+ FIND_PACKAGE(Boost REQUIRED COMPONENTS thread system filesystem unit_test_framework)
+ 
+ include_directories(${CMAKE_SOURCE_DIR}/include)
+@@ -44,6 +43,7 @@ target_link_options(${PROJECT_NAME} PUBLIC "-Wl,--no-as-needed")
+ option(BUILD_TESTS "Build test programs" ON)
+ 
+ if(BUILD_TESTS)
++  FIND_PACKAGE(doocs-server-test-helper 01.07 REQUIRED)
+   # Create the executables for automated unit testing.
+   # Currently we assume that they are all tests contained in one file, so
+   # each file gives a new executable. This section has to be adapted if this should change.

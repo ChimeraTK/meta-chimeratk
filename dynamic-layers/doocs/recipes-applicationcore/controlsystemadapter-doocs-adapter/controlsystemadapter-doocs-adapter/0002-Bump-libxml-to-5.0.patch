@@ -1,0 +1,23 @@
+From 871b52f19dba6d66a44b3aed2582d8f6e6600b39 Mon Sep 17 00:00:00 2001
+From: Jens Georg <jens.georg@desy.de>
+Date: Fri, 3 Jul 2026 10:17:15 +0000
+Subject: [PATCH] Bump libxml++ to 5.0
+
+Upstream-Status: Submitted
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9555ff8..2ee5e2f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -28,7 +28,7 @@ FIND_PACKAGE(PkgConfig REQUIRED)
+ 
+ # note, libxml++ is already used in ControlSystemAdapter but set as PRIVATE.
+ # It makes sinse to keep versions in sync.
+-set(LIBXML++_VERSION "libxml++-2.6")
++set(LIBXML++_VERSION "libxml++-5.0")
+ PKG_CHECK_MODULES(LibXML++ REQUIRED IMPORTED_TARGET ${LIBXML++_VERSION})
+ 
+ # For some reason the system library has to be mentioned explicitly to the linker.
