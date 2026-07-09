@@ -18,7 +18,7 @@ SRCREV = "a8f33d15ebc1191163eca948ffacea6f0f4fe750"
 S = "${WORKDIR}/git"
 
 DEPENDS = "boost cppext exprtk libxml++-5.0 exprtk nlohmann-json fmt"
-RDEPENDS_${PN}-dev += "cppext-dev"
+RDEPENDS:${PN}-dev += "cppext-dev"
 
 inherit cmake pkgconfig
 
