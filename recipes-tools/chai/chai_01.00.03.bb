@@ -2,9 +2,7 @@ SUMMARY = "ChimeraTK Console Hardware Interface"
 LICENSE = "LGPL-3.0-or-later"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=e6a600fd5e1d9cbde2d983680233ad02"
 
-SRC_URI = "git://github.com/ChimeraTK/Chai/;protocol=https;branch=main \
-           file://0001-chore-project-template-increase-Doxygen-DOT_GRAPH_MA.patch \
-           "
+SRC_URI = "git://github.com/ChimeraTK/Chai/;protocol=https;branch=main"
 
 # Modify these as desired
 PV = "01.00.03"
