@@ -21,5 +21,7 @@ RDEPENDS:${PN} = "python3-numpy python3-core"
 inherit cmake pkgconfig python3-dir setuptools3-base
 
 # Specify any options you want to pass to cmake using EXTRA_OECMAKE:
-EXTRA_OECMAKE = "-DNUMPY_INCLUDE_DIRS:PATH=${STAGING_DIR_HOST}/${PYTHON_SITEPACKAGES_DIR}/numpy/core/include"
-
+EXTRA_OECMAKE = " \
+    -DNUMPY_INCLUDE_DIRS:PATH=${STAGING_DIR_HOST}${PYTHON_SITEPACKAGES_DIR}/numpy/core/include \
+    -Dpybind11_DIR:PATH=${STAGING_DIR_HOST}${PYTHON_SITEPACKAGES_DIR}/pybind11/share/cmake/pybind11 \
+"
