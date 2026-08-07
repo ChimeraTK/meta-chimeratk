@@ -21,7 +21,7 @@ Recommends
 
   URI: https://github.com/voltumna-linux/meta-tango/
   branch: scarthgap
-  revision: 5ec3b645296ed9c98d9757ee79562204ba845dbf
+  revision: f48af0f336a08bcc5a0b39304f7c3cef5ec0edfe
 
   More specifially, it just needs meta-oe for libxml++, meta-python for pybind11
   and meta-qt6 only of you intend to build QtHardMon.
